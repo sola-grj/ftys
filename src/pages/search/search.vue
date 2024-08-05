@@ -1,9 +1,6 @@
 <script setup lang="ts">
 // 获取屏幕边界到安全区域的距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
-const goToSearch = () => {
-  uni.navigateTo({ url: '/pages/search/search' })
-}
 </script>
 
 <template>
@@ -13,9 +10,11 @@ const goToSearch = () => {
       <image class="logo-image" src="@/static/images/logo.png"></image>
       <text class="logo-text">新鲜 · 亲民 · 快捷</text>
     </view> -->
+    <view class="back icon icon-left"></view>
     <!-- 搜索条 -->
     <view class="search">
-      <text @tap="goToSearch" class="icon-search">搜索商品666</text>
+      <input class="uni-input" confirm-type="search" placeholder="键盘右下角按钮显示为搜索" />
+      <button class="search-btn" hover-class="button-hover">搜索</button>
     </view>
   </view>
   <view class="history">
@@ -24,9 +23,22 @@ const goToSearch = () => {
       <view class="icon icon-delete"></view>
     </view>
     <view class="content">
-      <!-- <view class="item" v-for="item in 10">
-        <text>苹果香蕉</text>
-      </view> -->
+      <view class="item" :key="item" v-for="item in 10"> 苹果香蕉{{ item }} </view>
+    </view>
+  </view>
+  <view class="history">
+    <view class="title">
+      <view class="text">搜索发现</view>
+      <view class="icon icon-left"></view>
+    </view>
+    <view class="content">
+      <view class="item" :key="item" v-for="item in 10"> 苹果香蕉{{ item }} </view>
+    </view>
+  </view>
+  <view class="search-list">
+    <view class="order">
+      <view>默认</view>
+      <view>单价</view>
     </view>
   </view>
 </template>
@@ -38,9 +50,14 @@ const goToSearch = () => {
   background-size: cover;
   position: relative;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   padding-top: 20px;
-
+  width: 100%;
+  .back {
+    color: #fff;
+    width: 60rpx;
+    text-align: center;
+  }
   .logo {
     display: flex;
     align-items: center;
@@ -65,6 +82,7 @@ const goToSearch = () => {
   }
 
   .search {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -75,6 +93,16 @@ const goToSearch = () => {
     font-size: 28rpx;
     border-radius: 32rpx;
     background-color: rgba(255, 255, 255, 0.5);
+    .search-btn {
+      color: #fff;
+      border-radius: 30rpx;
+      height: 54rpx;
+      line-height: 54rpx;
+      background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
+      font-size: 26rpx;
+      font-weight: 400;
+      margin: 0;
+    }
   }
 
   .icon-search {
@@ -118,8 +146,15 @@ const goToSearch = () => {
 
   .content {
     .item {
+      font-size: 26rpx;
+      color: rgba(50, 50, 51, 1);
+      font-weight: 400;
+      margin-top: 20rpx;
+      margin-right: 20rpx;
+      display: inline-block;
       height: 60rpx;
-      width: 120rpx;
+      line-height: 40rpx;
+      padding: 10rpx;
       border-radius: 4px;
       background: rgba(242, 244, 247, 1);
     }
