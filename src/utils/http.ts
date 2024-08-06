@@ -12,7 +12,8 @@
 
 import { useMemberStore } from '@/stores'
 
-const baseURL = 'https://pcapi-xiaotuxian-front-devtest.itheima.net'
+// const baseURL = 'https://pcapi-xiaotuxian-front-devtest.itheima.net'
+const baseURL = 'http://47.95.197.8/api/'
 
 // 添加拦截器
 const httpInterceptor = {
@@ -58,7 +59,8 @@ uni.addInterceptor('uploadFile', httpInterceptor)
 interface Data<T> {
   code: string
   msg: string
-  data: T
+  time: string
+  result: T
 }
 // 2.2 添加类型，支持泛型
 export const http = <T>(options: UniApp.RequestOptions) => {

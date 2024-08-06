@@ -1,49 +1,140 @@
 <script setup lang="ts">
+import { useGuessList } from '@/composables'
+import { getSearchListAPI } from '@/services/search'
+import type { PageParams } from '@/types/global'
+import type { SearchGoodsItem } from '@/types/search'
+import { ref } from 'vue'
+
+// 分页参数
+const pageParams: Required<PageParams> = {
+  page: 1,
+  pageSize: 10,
+}
+// 已经结束的标记
+const finish = ref(false)
 // 获取屏幕边界到安全区域的距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
+// 搜索关键词
+const keyword = ref('')
+const onChangeKeyword = (event: any) => {
+  keyword.value = event.target.value
+}
+// 重置数据方法
+const resetData = () => {
+  pageParams.page = 1
+  searchList.value = []
+  finish.value = false
+}
+
+// 搜索列表
+const searchList = ref<SearchGoodsItem[]>([])
+const getSearchListData = async (action: string = '') => {
+  if (action === 'tap') {
+    resetData()
+  }
+  // 退出判断
+  if (finish.value === true) {
+    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
+  }
+  const res = await getSearchListAPI({ keyword: keyword.value, ...pageParams })
+  // 分页数据增加
+  searchList.value.push(...res.result)
+  if (pageParams.page < res.result.length) {
+    // 页码累加
+    pageParams.page++
+  } else {
+    finish.value = true
+  }
+}
+
+// 触底加载
+const onScrollToLower = () => {
+  console.log(123)
+}
+
+// 回到首页
+
+const goToHome = () => {
+  uni.switchTab({ url: '/pages/index/index' })
+}
 </script>
 
 <template>
-  <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
-    <!-- logo文字 -->
-    <!-- <view class="logo">
-      <image class="logo-image" src="@/static/images/logo.png"></image>
-      <text class="logo-text">新鲜 · 亲民 · 快捷</text>
+  <scroll-view class="viewport" scroll-y @scrolltolower="getSearchListData">
+    <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + '0' + 'px' }">
+      <view @tap="goToHome" class="back icon icon-left"></view>
+      <!-- 搜索条 -->
+      <view class="search">
+        <input
+          @input="onChangeKeyword"
+          class="uni-input"
+          confirm-type="search"
+          placeholder="搜索"
+        />
+        <button
+          @tap="($event) => getSearchListData('tap')"
+          class="search-btn"
+          hover-class="button-hover"
+        >
+          搜索
+        </button>
+      </view>
+    </view>
+    <view v-if="searchList.length === 0" class="history">
+      <view class="title">
+        <view class="text">历史搜索</view>
+        <view class="icon icon-delete"></view>
+      </view>
+      <view class="content">
+        <view class="item" :key="item" v-for="item in 10"> 苹果香蕉{{ item }} </view>
+      </view>
+    </view>
+    <view v-if="searchList.length === 0" class="history">
+      <view class="title">
+        <view class="text">搜索发现</view>
+        <view class="icon icon-left"></view>
+      </view>
+      <view class="content">
+        <view class="item" :key="item" v-for="item in 10"> 苹果香蕉{{ item }} </view>
+      </view>
+    </view>
+    <view class="search-list" v-else>
+      <view class="order">
+        <view>默认</view>
+        <view>单价</view>
+      </view>
+      <view class="list-container">
+        <view class="item" v-for="item in searchList" :key="item.goodsId">
+          <image :src="item.image" />
+          <view class="info">
+            <view class="title">{{ item.name }}</view>
+            <view class="price">￥{{ item.price }}</view>
+          </view>
+          <view class="right">
+            <view class="shoucang icon icon-search"></view>
+            <view class="jiagou icon icon-search"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <!-- 猜你喜欢 -->
+    <!-- <view class="guess">
+      <SolaShopGuess ref="guessRef" />
     </view> -->
-    <view class="back icon icon-left"></view>
-    <!-- 搜索条 -->
-    <view class="search">
-      <input class="uni-input" confirm-type="search" placeholder="键盘右下角按钮显示为搜索" />
-      <button class="search-btn" hover-class="button-hover">搜索</button>
-    </view>
-  </view>
-  <view class="history">
-    <view class="title">
-      <view class="text">历史搜索</view>
-      <view class="icon icon-delete"></view>
-    </view>
-    <view class="content">
-      <view class="item" :key="item" v-for="item in 10"> 苹果香蕉{{ item }} </view>
-    </view>
-  </view>
-  <view class="history">
-    <view class="title">
-      <view class="text">搜索发现</view>
-      <view class="icon icon-left"></view>
-    </view>
-    <view class="content">
-      <view class="item" :key="item" v-for="item in 10"> 苹果香蕉{{ item }} </view>
-    </view>
-  </view>
-  <view class="search-list">
-    <view class="order">
-      <view>默认</view>
-      <view>单价</view>
-    </view>
-  </view>
+  </scroll-view>
 </template>
 
 <style lang="scss">
+page {
+  height: 100%;
+  overflow: hidden;
+  background-color: #f7f7f8;
+}
+
+.viewport {
+  height: 100%;
+}
+
 /* 自定义导航条 */
 .navbar {
   background-color: #ff6840;
@@ -51,7 +142,7 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
   position: relative;
   display: flex;
   align-items: center;
-  padding-top: 20px;
+  padding-top: 120px;
   width: 100%;
   .back {
     color: #fff;
@@ -157,6 +248,43 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
       padding: 10rpx;
       border-radius: 4px;
       background: rgba(242, 244, 247, 1);
+    }
+  }
+}
+.search-list {
+  margin: 20rpx 20rpx 0;
+  .order {
+    display: flex;
+  }
+  .list-container {
+    .item {
+      display: flex;
+      justify-content: space-around;
+      border-bottom: 1px solid #eee2e2;
+      margin-top: 30rpx;
+      image {
+        height: 200rpx;
+        width: 200rpx;
+      }
+      .info {
+        display: flex;
+        flex-direction: column;
+        .title {
+        }
+        .price {
+          margin-top: 50rpx;
+        }
+      }
+      .right {
+        display: flex;
+        flex-direction: column;
+        .shoucang {
+          height: 50%;
+        }
+        .jiagou {
+          flex: 1;
+        }
+      }
     }
   }
 }
