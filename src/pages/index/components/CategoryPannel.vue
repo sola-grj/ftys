@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { CategoryItem } from '@/types/home'
+import type { BasicCategoryItem } from '@/types/home'
 import { defineProps } from 'vue'
 
 defineProps<{
-  list: CategoryItem[]
+  list: BasicCategoryItem[]
 }>()
 
-const onTap = (item: CategoryItem) => {
+const onTap = (item: BasicCategoryItem) => {
   console.log('====000', `/pages/category/category?type=${item.id}`)
   uni.switchTab({ url: `/pages/category/category?type=${item.id}` })
 }
@@ -21,7 +21,7 @@ const onTap = (item: CategoryItem) => {
       :key="item.id"
       @tap="($event) => onTap(item)"
     >
-      <image class="icon" :src="item.icon"></image>
+      <image class="icon" :src="item.image"></image>
       <text class="text">{{ item.name }}</text>
     </navigator>
   </view>

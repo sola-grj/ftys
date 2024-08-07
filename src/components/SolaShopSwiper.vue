@@ -16,9 +16,9 @@ defineProps<{
 <template>
   <view class="carousel">
     <swiper @change="onChange" :circular="true" :autoplay="false" :interval="3000">
-      <swiper-item v-for="item in list" :key="item.id">
+      <swiper-item v-for="item in list" :key="item.title">
         <navigator url="/pages/index/index" hover-class="none" class="navigator">
-          <image mode="aspectFill" class="image" :src="item.imgUrl"></image>
+          <image mode="aspectFill" class="image" :src="item.image"></image>
         </navigator>
       </swiper-item>
     </swiper>
@@ -26,7 +26,7 @@ defineProps<{
     <view class="indicator">
       <text
         v-for="(item, index) in list"
-        :key="item.id"
+        :key="item.title"
         class="dot"
         :class="{ active: index === activeIndex }"
       ></text>

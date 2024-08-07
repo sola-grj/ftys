@@ -38,8 +38,8 @@ const getSearchListData = async (action: string = '') => {
   }
   const res = await getSearchListAPI({ keyword: keyword.value, ...pageParams })
   // 分页数据增加
-  searchList.value.push(...res.result)
-  if (pageParams.page < res.result.length) {
+  searchList.value.push(...res.result.list)
+  if (pageParams.page < res.result.list.length) {
     // 页码累加
     pageParams.page++
   } else {
@@ -117,10 +117,6 @@ const goToHome = () => {
         </view>
       </view>
     </view>
-    <!-- 猜你喜欢 -->
-    <!-- <view class="guess">
-      <SolaShopGuess ref="guessRef" />
-    </view> -->
   </scroll-view>
 </template>
 

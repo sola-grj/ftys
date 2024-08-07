@@ -1,5 +1,13 @@
 import type { PageParams, PageResult } from '@/types/global'
-import type { BannerItem, CategoryItem, GuessItem, HotItem } from '@/types/home'
+import type {
+  BannerItem,
+  CategoryItem,
+  CategoryResult,
+  GuessItem,
+  HotItem,
+  MustBuyItem,
+  TopItem,
+} from '@/types/home'
 import { http } from '@/utils/http'
 
 /**
@@ -47,5 +55,45 @@ export const getHomeGoodsGuessLikeAPI = (data?: PageParams) => {
     method: 'GET',
     url: '/home/goods/guessLike',
     data,
+  })
+}
+//******************************************************* */
+/**
+ * 首页置顶产品
+ */
+export const getHomeTopListAPI = () => {
+  return http<TopItem[]>({
+    method: 'POST',
+    url: '/goods/getTopGoods',
+  })
+}
+
+/**
+ * 首页分类
+ */
+export const getCategoryAPI = () => {
+  return http<CategoryResult>({
+    method: 'POST',
+    url: '/goods_category/getCategory',
+  })
+}
+
+/**
+ * 首页轮播图
+ */
+export const getBannerListAPI = () => {
+  return http<BannerItem[]>({
+    method: 'POST',
+    url: '/banner/getBannerList',
+  })
+}
+
+/**
+ * 首页 今日必买
+ */
+export const getMustBuyGoodsAPI = () => {
+  return http<MustBuyItem[]>({
+    method: 'POST',
+    url: '/goods/getMustBuyGoods',
   })
 }

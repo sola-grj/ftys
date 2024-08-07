@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import type { BannerItem, HotItem } from '@/types/home'
+import type { BannerItem, HotItem, MustBuyItem } from '@/types/home'
 import { defineProps } from 'vue'
 
 // 接收数据
 const query = defineProps<{
-  list: HotItem[]
+  mustlist: MustBuyItem[]
   bannerList: BannerItem[]
 }>()
-console.log('list----', query.list)
 </script>
 
 <template>
@@ -22,21 +21,21 @@ console.log('list----', query.list)
         <view class="two">
           <view class="item">
             <image src="https://img.js.design/assets/img/62b5663edd87d2d6d6bd3297.png" />
-            <view class="price">￥12.00</view>
+            <view class="price">￥{{ mustlist[0].price }}</view>
           </view>
           <view class="item">
             <image src="https://img.js.design/assets/img/62b5663edd87d2d6d6bd3297.png" />
-            <view class="price">￥12.00</view>
+            <view class="price">￥{{ mustlist[1].price }}</view>
           </view>
         </view>
         <view class="two">
           <view class="item">
             <image src="https://img.js.design/assets/img/62b5663edd87d2d6d6bd3297.png" />
-            <view class="price">￥12.00</view>
+            <view class="price">￥{{ mustlist[2].price }}</view>
           </view>
           <view class="item">
             <image src="https://img.js.design/assets/img/62b5663edd87d2d6d6bd3297.png" />
-            <view class="price">￥12.00</view>
+            <view class="price">￥{{ mustlist[3].price }}</view>
           </view>
         </view>
       </view>

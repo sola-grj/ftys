@@ -1,4 +1,4 @@
-import type { SearchGoodsItem } from '@/types/search'
+import type { SearchGoodsResult } from '@/types/search'
 import type { PageParams, PageResult } from '@/types/global'
 import { http } from '@/utils/http'
 
@@ -7,7 +7,7 @@ import { http } from '@/utils/http'
  * @param data keyword 关键词
  */
 export const getSearchListAPI = (data: { keyword: string; page: number; pageSize: number }) => {
-  return http<SearchGoodsItem[]>({
+  return http<SearchGoodsResult>({
     method: 'GET',
     url: '/goods/searchGoods',
     data,

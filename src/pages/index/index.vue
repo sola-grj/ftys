@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { getHomeBannerAPI, getHomeCategoryAPI, getHomeHotAPI } from '@/services/home'
+import {
+  getBannerListAPI,
+  getCategoryAPI,
+  getHomeBannerAPI,
+  getHomeCategoryAPI,
+  getHomeHotAPI,
+  getHomeTopListAPI,
+  getMustBuyGoodsAPI,
+} from '@/services/home'
 import Customnavbar from './components/Customnavbar.vue'
 import CategoryPannel from './components/CategoryPannel.vue'
 import HotPannel from './components/HotPannel.vue'
@@ -7,22 +15,45 @@ import PageSkeleton from './components/PageSkeleton.vue'
 import TodayHasToBuy from './components/TodayHasToBuy.vue'
 import GuessLike from './components/GuessLike.vue'
 import { onLoad } from '@dcloudio/uni-app'
-import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
+import type {
+  BannerItem,
+  BasicCategoryItem,
+  CategoryItem,
+  HotItem,
+  MustBuyItem,
+  TopItem,
+} from '@/types/home'
 import { ref } from 'vue'
 import { useGuessList } from '@/composables'
+
+// 获取顶部推荐数据
+const topList = ref<TopItem[]>([])
+const getTopListData = async () => {
+  const res = await getHomeTopListAPI()
+  topList.value = res.result
+}
+
+// 获取商品分类数据
+const top1List = ref<BasicCategoryItem[]>([])
+const top2List = ref<BasicCategoryItem[]>([])
+const getTypeListData = async () => {
+  const res = await getCategoryAPI()
+  top1List.value = res.result.top1
+  top2List.value = res.result.top2
+}
 
 // 获取轮播图数据
 const bannerList = ref<BannerItem[]>([])
 const getHomeBannerData = async () => {
-  const res = await getHomeBannerAPI()
+  const res = await getBannerListAPI()
   bannerList.value = res.result
 }
 
-// 获取前台分类数据
-const categoryList = ref<CategoryItem[]>([])
-const getHomeCategoryData = async () => {
-  const res = await getHomeCategoryAPI()
-  categoryList.value = res.result
+// 获取今日必买
+const mustBuyList = ref<MustBuyItem[]>([])
+const getMustBuyData = async () => {
+  const res = await getMustBuyGoodsAPI()
+  mustBuyList.value = res.result
 }
 
 // 获取热门推荐数据
@@ -38,7 +69,7 @@ const isLoading = ref(false)
 // uniapp 生命周期
 onLoad(async () => {
   isLoading.value = true
-  await Promise.all([getHomeBannerData(), getHomeCategoryData(), getHomeHotData()])
+  await Promise.all([getTopListData(), getTypeListData(), getHomeBannerData(), getMustBuyData()])
   isLoading.value = false
 })
 
@@ -58,7 +89,7 @@ const onRefresherrefresh = async () => {
   guessRef.value?.resetData()
   await Promise.all([
     getHomeBannerData(),
-    getHomeCategoryData(),
+    // getHomeCategoryData(),
     getHomeHotData(),
     guessRef.value?.getMore(),
   ])
@@ -69,7 +100,7 @@ const onRefresherrefresh = async () => {
 
 <template>
   <!-- 自定义导航栏 -->
-  <Customnavbar />
+  <Customnavbar :topList="topList" />
   <scroll-view
     :refresher-triggered="isTriggered"
     refresher-enabled
@@ -81,11 +112,11 @@ const onRefresherrefresh = async () => {
     <PageSkeleton v-if="isLoading" />
     <template v-else>
       <!-- 分类面板 -->
-      <CategoryPannel :list="categoryList" />
+      <CategoryPannel :list="[...top1List, ...top2List]" />
       <!-- 自定义轮播图 -->
       <!-- <SolaShopSwiper :list="bannerList" /> -->
       <!-- 今日必买 -->
-      <TodayHasToBuy :bannerList="bannerList" :list="hotList" />
+      <TodayHasToBuy :bannerList="bannerList" :mustlist="mustBuyList" />
 
       <!-- 热门推荐 -->
       <!-- <HotPannel :list="hotList" /> -->

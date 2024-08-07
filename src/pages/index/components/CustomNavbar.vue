@@ -1,9 +1,14 @@
 <script setup lang="ts">
+import type { TopItem } from '@/types/home'
+
 // 获取屏幕边界到安全区域的距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const goToSearch = () => {
   uni.navigateTo({ url: '/pages/search/search' })
 }
+const query = defineProps<{
+  topList: TopItem[]
+}>()
 </script>
 
 <template>
@@ -17,9 +22,11 @@ const goToSearch = () => {
     <view class="search">
       <text @tap="goToSearch" class="icon-search">搜索商品</text>
     </view>
-    <!-- <view class="recommand-list">
-      <view class="recommand-item" v-for="item in 6">苹果</view>
-    </view> -->
+    <view class="recommand-list">
+      <view class="recommand-item" v-for="item in query.topList" :key="item.goodsId">{{
+        item.name
+      }}</view>
+    </view>
   </view>
 </template>
 
@@ -81,18 +88,22 @@ const goToSearch = () => {
   }
 
   .recommand-list {
-    display: flex;
-    justify-content: space-around;
+    width: 100%;
+    overflow: scroll;
     margin-bottom: 12rpx;
+    white-space: nowrap;
 
     .recommand-item {
-      width: 100rpx;
+      display: inline-block;
       height: 50rpx;
-      line-height: 50rpx;
+      line-height: 30rpx;
       text-align: center;
       border-radius: 26rpx;
       background: rgba(255, 255, 255, 0.15);
       color: #fff;
+      font-size: 24rpx;
+      padding: 10rpx;
+      margin: 0 10rpx;
     }
   }
 }

@@ -6,3 +6,9 @@ export type SearchGoodsItem = {
   price: string
   image: string
 }
+
+export type SearchGoodsResult = {
+  total: number
+  page: number
+  list: SearchGoodsItem[]
+}

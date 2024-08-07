@@ -1,17 +1,5 @@
 import type { GoodsItem } from './global'
 
-/** 首页-广告区域数据类型 */
-export type BannerItem = {
-  /** 跳转链接 */
-  hrefUrl: string
-  /** id */
-  id: string
-  /** 图片链接 */
-  imgUrl: string
-  /** 跳转类型 */
-  type: number
-}
-
 /** 首页-前台类目数据类型 */
 export type CategoryItem = {
   /** 图标路径 */
@@ -40,3 +28,39 @@ export type HotItem = {
 
 /** 猜你喜欢-商品类型 */
 export type GuessItem = GoodsItem
+
+/********************************************************* */
+/** 首页-置顶商品 */
+export type TopItem = {
+  name: string
+  goodsId: string
+  source: string
+}
+
+/** 首页-分类商品 */
+export type BasicCategoryItem = {
+  id: string
+  name: string
+  image: string
+  source: string
+}
+
+export type CategoryResult = {
+  top1: BasicCategoryItem[]
+  top2: BasicCategoryItem[]
+  fruitCategory: []
+  dryCargoCategory: []
+}
+
+/** 首页-轮播图 */
+export type BannerItem = {
+  image: string
+  title: string
+  sort: string
+  path: string
+}
+
+/** 首页-今日必买 */
+export type MustBuyItem = TopItem & {
+  price: string
+}
