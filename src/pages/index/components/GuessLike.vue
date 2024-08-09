@@ -1,5 +1,15 @@
 <script setup lang="ts">
+import type { PageParams } from '@/types/global'
+import type { RecommendItem } from '@/types/home'
 import { ref } from 'vue'
+// 分页参数
+const pageParams: Required<PageParams> = {
+  page: 1,
+  pageSize: 10,
+}
+defineProps<{
+  recommendList: RecommendItem[]
+}>()
 
 // 选中Index
 const activeIndex = ref(0)
@@ -32,6 +42,16 @@ const onActiveChange = (index: number) => {
         src="https://img.js.design/assets/img/647f508ef4cf090efd244f0d.png#abcd9de40757a3e271102c0dfedec16e"
       />
       <view>领优惠券</view>
+    </view>
+  </view>
+  <view class="list-container">
+    <view class="item" v-for="item in recommendList" :key="item.goodsId">
+      <image :src="item.image" />
+      <view>{{ item.name }}</view>
+      <view class="info">
+        <view class="price">￥{{ item.price }}</view>
+        <view class="jiagou icon icon-search"></view>
+      </view>
     </view>
   </view>
 </template>
@@ -90,6 +110,25 @@ const onActiveChange = (index: number) => {
     image {
       width: 150rpx;
       height: 150rpx;
+    }
+  }
+}
+
+.list-container {
+  margin: 20rpx 20rpx 0;
+
+  .item {
+    image {
+      width: 300rpx;
+      height: 300rpx;
+    }
+
+    width: 50%;
+    display: inline-block;
+
+    .info {
+      display: flex;
+      justify-content: space-around;
     }
   }
 }

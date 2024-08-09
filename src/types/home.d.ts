@@ -64,3 +64,18 @@ export type BannerItem = {
 export type MustBuyItem = TopItem & {
   price: string
 }
+
+/** 首页-推荐购买 */
+export type RecommendItem = {
+  goodsId: string
+  name: string
+  image: string
+  source: string
+  price: string
+}
+
+export type RecommendResult = {
+  list: RecommendItem[]
+  total: string
+  page: string
+}

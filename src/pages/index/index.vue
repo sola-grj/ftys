@@ -7,6 +7,7 @@ import {
   getHomeHotAPI,
   getHomeTopListAPI,
   getMustBuyGoodsAPI,
+  getRecommendGoodsAPI,
 } from '@/services/home'
 import Customnavbar from './components/Customnavbar.vue'
 import CategoryPannel from './components/CategoryPannel.vue'
@@ -21,6 +22,7 @@ import type {
   CategoryItem,
   HotItem,
   MustBuyItem,
+  RecommendItem,
   TopItem,
 } from '@/types/home'
 import { ref } from 'vue'
@@ -56,6 +58,13 @@ const getMustBuyData = async () => {
   mustBuyList.value = res.result
 }
 
+// 获取底部推荐数据
+const recommendList = ref<RecommendItem[]>([])
+const getRecommendData = async () => {
+  const res = await getRecommendGoodsAPI()
+  recommendList.value = res.result.list
+}
+
 // 获取热门推荐数据
 const hotList = ref<HotItem[]>([])
 const getHomeHotData = async () => {
@@ -69,7 +78,13 @@ const isLoading = ref(false)
 // uniapp 生命周期
 onLoad(async () => {
   isLoading.value = true
-  await Promise.all([getTopListData(), getTypeListData(), getHomeBannerData(), getMustBuyData()])
+  await Promise.all([
+    getTopListData(),
+    getTypeListData(),
+    getHomeBannerData(),
+    getMustBuyData(),
+    getRecommendData(),
+  ])
   isLoading.value = false
 })
 
@@ -121,8 +136,8 @@ const onRefresherrefresh = async () => {
       <!-- 热门推荐 -->
       <!-- <HotPannel :list="hotList" /> -->
       <!-- 猜你喜欢 -->
-      <GuessLike />
-      <SolaShopGuess ref="guessRef" />
+      <GuessLike :recommendList="recommendList" />
+      <!-- <SolaShopGuess ref="guessRef" /> -->
     </template>
   </scroll-view>
 </template>

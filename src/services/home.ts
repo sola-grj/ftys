@@ -6,6 +6,7 @@ import type {
   GuessItem,
   HotItem,
   MustBuyItem,
+  RecommendResult,
   TopItem,
 } from '@/types/home'
 import { http } from '@/utils/http'
@@ -95,5 +96,15 @@ export const getMustBuyGoodsAPI = () => {
   return http<MustBuyItem[]>({
     method: 'POST',
     url: '/goods/getMustBuyGoods',
+  })
+}
+
+/**
+ * 首页 推荐购买
+ */
+export const getRecommendGoodsAPI = () => {
+  return http<RecommendResult>({
+    method: 'POST',
+    url: '/goods/getRecommendGoods',
   })
 }
