@@ -29,13 +29,12 @@ const httpInterceptor = {
     options.header = {
       ...options.header,
       'source-client': 'miniapp',
-      token: '8e4577ca-918d-4d93-b2b3-4232d1fc8ab7',
     }
     // 4.添加token请求头标识
     const memberStore = useMemberStore()
-    const token = memberStore.profile?.token
+    const token = memberStore.profile?.userinfo.token
     if (token) {
-      options.header.Authorization = token
+      options.header.token = token
     }
     console.log(options)
   },

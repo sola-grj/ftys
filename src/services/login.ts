@@ -14,6 +14,18 @@ type UserLoginParams = {
   account: string
   password: string
 }
+
+// 短信验证码登录
+type verigyCodeLoginParams = {
+  mobile: string
+  captcha: string
+}
+
+// 短信验证码参数
+type smsParams = {
+  mobile: string
+  event: string // register login
+}
 /**
  * 小程序登录
  * @param data 请求参数
@@ -48,6 +60,30 @@ export const userLoginAPI = (data: UserLoginParams) => {
   return http<LoginResult>({
     method: 'POST',
     url: '/user/login',
+    data,
+  })
+}
+
+/**
+ * 验证码登录
+ * @param data 请求参数
+ */
+export const verifyCodeLoginAPI = (data: verigyCodeLoginParams) => {
+  return http<LoginResult>({
+    method: 'POST',
+    url: '/user/mobilelogin',
+    data,
+  })
+}
+
+/**
+ * 获取短信验证码
+ * @param data 请求参数
+ */
+export const getSmsAPI = (data: smsParams) => {
+  return http({
+    method: 'POST',
+    url: '/sms/send',
     data,
   })
 }

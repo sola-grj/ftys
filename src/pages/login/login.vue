@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { postLoginWxMinAPI, postLoginWxMinSimpleAPI } from '@/services/login'
+import {
+  getSmsAPI,
+  postLoginWxMinAPI,
+  postLoginWxMinSimpleAPI,
+  userLoginAPI,
+  verifyCodeLoginAPI,
+} from '@/services/login'
 import { useMemberStore } from '@/stores'
 import type { LoginResult } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
@@ -9,11 +15,25 @@ const phone = ref('')
 const pwd = ref('')
 const verifyCode = ref('')
 
-const onPhoneChange = (event: any) => {
-  phone.value = event.targe.value
+// 获取验证码按钮的点击状态
+const countDown = ref(60)
+const checked = ref(false)
+
+const onGetSmsTap = async () => {
+  const res = await getSmsAPI({ mobile: phone.value, event: 'login' })
+  console.log('======>>>>>', res)
+
+  checked.value = true
+  setInterval(() => {
+    if (countDown.value === 0) {
+      checked.value = false
+      countDown.value = 60
+    }
+    countDown.value--
+  }, 1000)
 }
 
-const activeIndex = ref(0)
+const activeIndex = ref(0) // 0 是密码登录 1是短信
 const onChangeIndex = (index: number) => {
   activeIndex.value = index
 }
@@ -55,6 +75,29 @@ const loginSuccess = (profile: LoginResult) => {
     uni.navigateBack()
   }, 500)
 }
+
+const goToLogin = async () => {
+  let res
+  if (activeIndex.value === 0) {
+    res = await userLoginAPI({ account: phone.value, password: pwd.value })
+  } else if (activeIndex.value === 1) {
+    res = await verifyCodeLoginAPI({ mobile: phone.value, captcha: verifyCode.value })
+  }
+  // 保存会员信息
+  const memberStore = useMemberStore()
+  memberStore.setProfile(res!.result)
+  uni.showToast({ icon: 'success', title: '登录成功' })
+  setTimeout(() => {
+    // 页面跳转
+    // uni.switchTab({ url: '/pages/my/my' })
+    uni.navigateBack()
+  }, 500)
+}
+const goToRegister = () => {
+  uni.navigateTo({
+    url: '/pages/register/register',
+  })
+}
 </script>
 
 <template>
@@ -85,27 +128,24 @@ const loginSuccess = (profile: LoginResult) => {
     <view class="login">
       <view class="login-item">
         <text class="login-label">手机号码</text>
-        <input
-          type="tel"
-          @change="onPhoneChange"
-          class="input"
-          placeholder="请输入用户名/手机号码"
-        />
+        <input type="tel" v-model="phone" class="input" placeholder="请输入用户名/手机号码" />
       </view>
       <view v-if="activeIndex === 1" class="login-item">
         <text class="login-label">验证码</text>
-        <input class="input" type="text" password placeholder="请输入验证码" />
-        <view class="getcode-btn">获取验证码</view>
+        <input v-model="verifyCode" class="input" type="text" password placeholder="请输入验证码" />
+        <view @tap="onGetSmsTap" class="getcode-btn" :class="checked ? 'checked' : ''">{{
+          checked ? `获取中(${countDown})` : '获取验证码'
+        }}</view>
       </view>
       <view v-if="activeIndex === 0" class="login-item">
         <text class="login-label">密码</text>
-        <input class="input" type="text" password placeholder="请输入密码" />
+        <input v-model="pwd" class="input" type="text" password placeholder="请输入密码" />
       </view>
       <view>
-        <button class="button phone">登录</button>
+        <button @tap="goToLogin" class="button phone">登录</button>
       </view>
       <view class="other">
-        <text>注册账号</text>
+        <text @tap="goToRegister">注册账号</text>
         <text>找回密码</text>
       </view>
 
@@ -206,6 +246,10 @@ page {
       background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
       margin-left: 20rpx;
     }
+    .checked {
+      background: #dcdcdc;
+      color: #666;
+    }
   }
 
   .input {
@@ -213,7 +257,6 @@ page {
     height: 80rpx;
     font-size: 28rpx;
     padding-left: 30rpx;
-    margin-bottom: 20rpx;
     text-align: right;
   }
 
