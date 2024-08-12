@@ -2,10 +2,17 @@
 import type { LoginResult } from '@/types/member'
 import { http } from '@/utils/http'
 
+// 小程序
 type LoginParams = {
   code: string
   encryptedData: string
   iv: string
+}
+
+// 账号密码
+type UserLoginParams = {
+  account: string
+  password: string
 }
 /**
  * 小程序登录
@@ -30,5 +37,17 @@ export const postLoginWxMinSimpleAPI = (phoneNumber: string) => {
     data: {
       phoneNumber,
     },
+  })
+}
+
+/**
+ * 账号密码登录
+ * @param data 请求参数
+ */
+export const userLoginAPI = (data: UserLoginParams) => {
+  return http<LoginResult>({
+    method: 'POST',
+    url: '/user/login',
+    data,
   })
 }

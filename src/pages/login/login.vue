@@ -5,6 +5,14 @@ import type { LoginResult } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
+const phone = ref('')
+const pwd = ref('')
+const verifyCode = ref('')
+
+const onPhoneChange = (event: any) => {
+  phone.value = event.targe.value
+}
+
 const activeIndex = ref(0)
 const onChangeIndex = (index: number) => {
   activeIndex.value = index
@@ -54,37 +62,52 @@ const loginSuccess = (profile: LoginResult) => {
     <view class="logo">
       <image
         src="https://img.js.design/assets/img/6692403947d568b1a5055305.png#f81240010a746c2852f061438722ef64"
-      ></image>
-    </view>
-    <view class="login-type">
-      <view
-        @tap="($event) => onChangeIndex(0)"
-        class="pwd-btn"
-        :class="activeIndex === 0 ? 'checked' : ''"
-        >密码登录</view
       >
-      <view
-        @tap="($event) => onChangeIndex(1)"
-        class="code-btn"
-        :class="activeIndex === 1 ? 'checked' : ''"
-        >验证码登录</view
-      >
+      </image>
     </view>
-    <view class="login">
-      <!-- 网页端表单登录 -->
-      <!-- #ifdef H5 -->
-      <input class="input" type="text" placeholder="请输入用户名/手机号码" />
-      <input class="input" type="text" password placeholder="请输入密码" />
-      <button class="button phone">登录</button>
-      <!-- #endif -->
+    <view class="login-container">
+      <view class="login-type">
+        <view
+          @tap="($event) => onChangeIndex(0)"
+          class="pwd-btn"
+          :class="activeIndex === 0 ? 'checked' : ''"
+          >密码登录
+        </view>
+        <view
+          @tap="($event) => onChangeIndex(1)"
+          class="code-btn"
+          :class="activeIndex === 1 ? 'checked' : ''"
+          >验证码登录
+        </view>
+      </view>
+    </view>
 
-      <!-- 小程序端授权登录 -->
-      <!-- #ifdef MP-WEIXIN -->
-      <button class="button phone" open-type="getPhoneNumber" @getphonenumber="onGetPhoneNumber">
-        <text class="icon icon-phone"></text>
-        手机号快捷登录
-      </button>
-      <!-- #endif -->
+    <view class="login">
+      <view class="login-item">
+        <text class="login-label">手机号码</text>
+        <input
+          type="tel"
+          @change="onPhoneChange"
+          class="input"
+          placeholder="请输入用户名/手机号码"
+        />
+      </view>
+      <view v-if="activeIndex === 1" class="login-item">
+        <text class="login-label">验证码</text>
+        <input class="input" type="text" password placeholder="请输入验证码" />
+        <view class="getcode-btn">获取验证码</view>
+      </view>
+      <view v-if="activeIndex === 0" class="login-item">
+        <text class="login-label">密码</text>
+        <input class="input" type="text" password placeholder="请输入密码" />
+      </view>
+      <view>
+        <button class="button phone">登录</button>
+      </view>
+      <view class="other">
+        <text>注册账号</text>
+        <text>找回密码</text>
+      </view>
 
       <view class="extra">
         <view class="caption">
@@ -92,12 +115,9 @@ const loginSuccess = (profile: LoginResult) => {
         </view>
         <view class="options">
           <!-- 通用模拟登录 -->
-          <button @tap="onGetPhoneNumberSimple">
-            <text class="icon icon-phone">模拟快捷登录</text>
-          </button>
+          <view class="wechat-login" />
         </view>
       </view>
-      <view class="tips">登录/注册即视为你同意《服务条款》和《小兔鲜儿隐私协议》</view>
     </view>
   </view>
 </template>
@@ -115,57 +135,100 @@ page {
 }
 
 .logo {
-  flex: 1;
+  // flex: 1;
   text-align: center;
+
   image {
     width: 220rpx;
     height: 220rpx;
-    margin-top: 15vh;
+    // margin-top: 15vh;
   }
 }
+
+.login-container {
+  position: relative;
+  height: 80rpx;
+  margin-top: 20rpx;
+}
+
 .login-type {
   display: flex;
-  height: 100rpx;
+  height: 80rpx;
   width: 500rpx;
   background: #f2f4f7;
   border-radius: 50rpx;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
   .pwd-btn,
   .code-btn {
     width: 50%;
-    line-height: 100rpx;
+    line-height: 80rpx;
     text-align: center;
     border-radius: 50rpx;
   }
+
   .checked {
     color: #fff;
     background-color: #ff5040;
   }
 }
+
 .login {
   display: flex;
   flex-direction: column;
   height: 60vh;
   padding: 40rpx 20rpx 20rpx;
 
+  .input-placeholder {
+    // margin-top: 10rpx;
+  }
+
+  .login-item {
+    height: 80rpx;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+
+    .login-label {
+      width: 200rpx;
+    }
+
+    .getcode-btn {
+      line-height: 50rpx;
+      text-align: center;
+      color: #fff;
+      width: 300rpx;
+      height: 50rpx;
+      font-size: 25rpx;
+      border-radius: 10rpx;
+      background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
+      margin-left: 20rpx;
+    }
+  }
+
   .input {
     width: 100%;
     height: 80rpx;
     font-size: 28rpx;
-    border-radius: 72rpx;
-    border: 1px solid #ddd;
     padding-left: 30rpx;
     margin-bottom: 20rpx;
+    text-align: right;
   }
 
   .button {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    width: 80%;
     height: 80rpx;
     font-size: 28rpx;
-    border-radius: 72rpx;
+    border-radius: 20rpx;
+    background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
     color: #fff;
+    margin-top: 80rpx;
+
     .icon {
       font-size: 40rpx;
       margin-right: 6rpx;
@@ -180,9 +243,16 @@ page {
     background-color: #06c05f;
   }
 
+  .other {
+    margin-top: 80rpx;
+    display: flex;
+    justify-content: space-evenly;
+  }
+
   .extra {
     flex: 1;
     padding: 70rpx 70rpx 0;
+
     .caption {
       width: 440rpx;
       line-height: 1;
@@ -190,6 +260,7 @@ page {
       font-size: 26rpx;
       color: #999;
       position: relative;
+
       text {
         transform: translate(-40%);
         background-color: #fff;
@@ -204,6 +275,15 @@ page {
       justify-content: center;
       align-items: center;
       margin-top: 70rpx;
+
+      .wechat-login {
+        height: 60rpx;
+        width: 120rpx;
+        background: url(https://img.js.design/assets/img/6692418c4fc21e83fb7c8cd2.png#625b5174155bc79f15742e5827650f9e);
+        background-repeat: no-repeat;
+        background-size: 100%;
+      }
+
       button {
         padding: 0;
         background-color: transparent;
@@ -229,6 +309,7 @@ page {
         border-radius: 50%;
       }
     }
+
     .icon-weixin::before {
       border-color: #06c05f;
       color: #06c05f;

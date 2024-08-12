@@ -39,7 +39,7 @@ defineProps<{
   </view>
   <view v-if="activeIndex === 0" class="list-container">
     <view class="item" v-for="item in recommendList" :key="item.goodsId">
-      <image :src="item.image" />
+      <image :src="item.images[0]" />
       <view>{{ item.name }}</view>
       <view class="info">
         <view class="price">￥{{ item.price }}</view>
@@ -49,7 +49,7 @@ defineProps<{
   </view>
   <view v-if="activeIndex === 1" class="list-container">
     <view class="item" v-for="item in historyList" :key="item.goodsId">
-      <image :src="item.image" />
+      <image :src="item.images[0]" />
       <view>{{ item.name }}</view>
       <view class="info">
         <view class="price">￥{{ item.price }}</view>
@@ -133,6 +133,7 @@ page {
   .item {
     padding: 0 20rpx;
     border: 1px solid;
+
     image {
       width: 300rpx;
       height: 300rpx;

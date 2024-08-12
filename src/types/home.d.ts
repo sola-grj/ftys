@@ -69,7 +69,7 @@ export type MustBuyItem = TopItem & {
 export type RecommendItem = {
   goodsId: string
   name: string
-  image: string
+  images: string[]
   source: string
   price: string
 }

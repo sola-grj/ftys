@@ -11,11 +11,24 @@ type BaseProfile = {
 }
 
 /** 小程序登录 登录用户信息 */
-export type LoginResult = BaseProfile & {
-  /** 手机号 */
-  mobile: string
-  /** 登录凭证 */
-  token: string
+export type LoginResult = {
+  userinfo: {
+    type_id: string // 1:业务员 2:司机 3:生鲜 4:干货 5:生鲜&干货
+    user_role: string // 1:主账号 2:子账号
+    sub_account_name: string // 子账号名称
+    sub_account_level: string
+    username: string
+    mobile: string
+    receive_way: string // 	收货方式:deliver:送货上门,pick_up:用户自提
+    pay_way: string // 支付方式:credit:赊账,online:在线支付
+    avatar: string
+    money: string // 账户余额
+    credit_money: string // 欠款余额
+    token: string // 唯一标识
+    account_status: string // 权限判断（未知位置权限）
+    goods_price: string // 权限判断（商品价格，不用处理）
+    credit_price: string // 权限判断（是否显示欠款情况）
+  }
 }
 
 /** 个人信息 用户详情信息 */
