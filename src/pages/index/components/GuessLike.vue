@@ -2,20 +2,13 @@
 import type { PageParams } from '@/types/global'
 import type { RecommendItem } from '@/types/home'
 import { ref } from 'vue'
-// 分页参数
-const pageParams: Required<PageParams> = {
-  page: 1,
-  pageSize: 10,
-}
-defineProps<{
-  recommendList: RecommendItem[]
-}>()
 
-// 选中Index
-const activeIndex = ref(0)
-const onActiveChange = (index: number) => {
-  activeIndex.value = index
-}
+defineProps<{
+  historyList: RecommendItem[]
+  recommendList: RecommendItem[]
+  activeIndex: number
+  onActiveChange: (activeIndex: number) => void
+}>()
 </script>
 
 <template>
@@ -44,8 +37,18 @@ const onActiveChange = (index: number) => {
       <view>领优惠券</view>
     </view>
   </view>
-  <view class="list-container">
+  <view v-if="activeIndex === 0" class="list-container">
     <view class="item" v-for="item in recommendList" :key="item.goodsId">
+      <image :src="item.image" />
+      <view>{{ item.name }}</view>
+      <view class="info">
+        <view class="price">￥{{ item.price }}</view>
+        <view class="jiagou icon icon-search"></view>
+      </view>
+    </view>
+  </view>
+  <view v-if="activeIndex === 1" class="list-container">
+    <view class="item" v-for="item in historyList" :key="item.goodsId">
       <image :src="item.image" />
       <view>{{ item.name }}</view>
       <view class="info">
@@ -57,6 +60,16 @@ const onActiveChange = (index: number) => {
 </template>
 
 <style lang="scss">
+page {
+  height: 100%;
+  overflow: hidden;
+  background-color: #f7f7f8;
+}
+
+.viewport {
+  height: 100%;
+}
+
 .btns {
   margin: 20rpx 20rpx 0;
   display: flex;
@@ -118,6 +131,8 @@ const onActiveChange = (index: number) => {
   margin: 20rpx 20rpx 0;
 
   .item {
+    padding: 0 20rpx;
+    border: 1px solid;
     image {
       width: 300rpx;
       height: 300rpx;
@@ -128,7 +143,7 @@ const onActiveChange = (index: number) => {
 
     .info {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
     }
   }
 }

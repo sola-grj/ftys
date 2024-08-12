@@ -3,7 +3,12 @@ import { postLoginWxMinAPI, postLoginWxMinSimpleAPI } from '@/services/login'
 import { useMemberStore } from '@/stores'
 import type { LoginResult } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
+import { ref } from 'vue'
 
+const activeIndex = ref(0)
+const onChangeIndex = (index: number) => {
+  activeIndex.value = index
+}
 // #ifdef MP-WEIXIN
 // 获取code 登录凭证
 let code = ''
@@ -48,8 +53,22 @@ const loginSuccess = (profile: LoginResult) => {
   <view class="viewport">
     <view class="logo">
       <image
-        src="https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/images/logo_icon.png"
+        src="https://img.js.design/assets/img/6692403947d568b1a5055305.png#f81240010a746c2852f061438722ef64"
       ></image>
+    </view>
+    <view class="login-type">
+      <view
+        @tap="($event) => onChangeIndex(0)"
+        class="pwd-btn"
+        :class="activeIndex === 0 ? 'checked' : ''"
+        >密码登录</view
+      >
+      <view
+        @tap="($event) => onChangeIndex(1)"
+        class="code-btn"
+        :class="activeIndex === 1 ? 'checked' : ''"
+        >验证码登录</view
+      >
     </view>
     <view class="login">
       <!-- 网页端表单登录 -->
@@ -104,7 +123,24 @@ page {
     margin-top: 15vh;
   }
 }
-
+.login-type {
+  display: flex;
+  height: 100rpx;
+  width: 500rpx;
+  background: #f2f4f7;
+  border-radius: 50rpx;
+  .pwd-btn,
+  .code-btn {
+    width: 50%;
+    line-height: 100rpx;
+    text-align: center;
+    border-radius: 50rpx;
+  }
+  .checked {
+    color: #fff;
+    background-color: #ff5040;
+  }
+}
 .login {
   display: flex;
   flex-direction: column;

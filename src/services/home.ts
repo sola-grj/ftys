@@ -102,9 +102,19 @@ export const getMustBuyGoodsAPI = () => {
 /**
  * 首页 推荐购买
  */
-export const getRecommendGoodsAPI = () => {
+export const getRecommendGoodsAPI = (data: { page: number; pageSize: number }) => {
   return http<RecommendResult>({
     method: 'POST',
     url: '/goods/getRecommendGoods',
+  })
+}
+
+/**
+ * 首页 浏览历史
+ */
+export const getFootPrintGoodsAPI = (data: { page: number; pageSize: number }) => {
+  return http<RecommendResult>({
+    method: 'POST',
+    url: '/goods/getFootPrintGoods',
   })
 }

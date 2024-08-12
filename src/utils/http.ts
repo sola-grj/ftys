@@ -29,7 +29,7 @@ const httpInterceptor = {
     options.header = {
       ...options.header,
       'source-client': 'miniapp',
-      token: '076aeff8-34af-4684-a03c-bfe384204a6f',
+      token: '8e4577ca-918d-4d93-b2b3-4232d1fc8ab7',
     }
     // 4.添加token请求头标识
     const memberStore = useMemberStore()

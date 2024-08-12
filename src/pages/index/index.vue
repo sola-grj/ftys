@@ -2,6 +2,7 @@
 import {
   getBannerListAPI,
   getCategoryAPI,
+  getFootPrintGoodsAPI,
   getHomeBannerAPI,
   getHomeCategoryAPI,
   getHomeHotAPI,
@@ -27,6 +28,33 @@ import type {
 } from '@/types/home'
 import { ref } from 'vue'
 import { useGuessList } from '@/composables'
+import type { PageParams } from '@/types/global'
+// 选中Index
+const activeIndex = ref(0)
+const onActiveChange = (index: number) => {
+  activeIndex.value = index
+}
+// 推荐分页参数
+const recommendPageParams: Required<PageParams> = {
+  page: 1,
+  pageSize: 10,
+}
+// 历史分页参数
+const historyPageParams: Required<PageParams> = {
+  page: 1,
+  pageSize: 10,
+}
+// 推荐已经结束的标记
+const recommendFinish = ref(false)
+// 历史已经结束的标记
+const historyFinish = ref(false)
+
+// 重置数据方法
+// const resetData = () => {
+//   pageParams.page = 1
+//   searchList.value = []
+//   finish.value = false
+// }
 
 // 获取顶部推荐数据
 const topList = ref<TopItem[]>([])
@@ -61,15 +89,37 @@ const getMustBuyData = async () => {
 // 获取底部推荐数据
 const recommendList = ref<RecommendItem[]>([])
 const getRecommendData = async () => {
-  const res = await getRecommendGoodsAPI()
-  recommendList.value = res.result.list
+  // 退出判断
+  if (recommendFinish.value === true) {
+    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
+  }
+  const res = await getRecommendGoodsAPI({ ...recommendPageParams })
+  // 分页数据增加
+  recommendList.value.push(...res.result.list)
+  if (recommendPageParams.page < res.result.list.length) {
+    // 页码累加
+    recommendPageParams.page++
+  } else {
+    recommendFinish.value = true
+  }
 }
 
-// 获取热门推荐数据
-const hotList = ref<HotItem[]>([])
-const getHomeHotData = async () => {
-  const res = await getHomeHotAPI()
-  hotList.value = res.result
+// 获取底部历史数据
+const historyList = ref<RecommendItem[]>([])
+const getHistoryData = async () => {
+  // 退出判断
+  if (historyFinish.value === true) {
+    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
+  }
+  const res = await getFootPrintGoodsAPI({ ...historyPageParams })
+  // 分页数据增加
+  historyList.value.push(...res.result.list)
+  if (historyPageParams.page < res.result.list.length) {
+    // 页码累加
+    historyPageParams.page++
+  } else {
+    historyFinish.value = true
+  }
 }
 
 // 是否加载中
@@ -84,11 +134,19 @@ onLoad(async () => {
     getHomeBannerData(),
     getMustBuyData(),
     getRecommendData(),
+    getHistoryData(),
   ])
   isLoading.value = false
 })
 
-const { guessRef, onScrollToLower } = useGuessList()
+const onScrollToLower = async () => {
+  if (activeIndex.value === 0) {
+    await getRecommendData()
+  } else {
+    await getHistoryData()
+  }
+}
+// const { guessRef, onScrollToLower } = useGuessList()
 
 // 当前下拉刷新状态
 const isTriggered = ref(false)
@@ -101,13 +159,13 @@ const onRefresherrefresh = async () => {
   // await getHomeCategoryData()
   // await getHomeHotData()
   // 重置猜你喜欢的数据，然后再调用
-  guessRef.value?.resetData()
-  await Promise.all([
-    getHomeBannerData(),
-    // getHomeCategoryData(),
-    getHomeHotData(),
-    guessRef.value?.getMore(),
-  ])
+  // guessRef.value?.resetData()
+  // await Promise.all([
+  //   getHomeBannerData(),
+  //   // getHomeCategoryData(),
+  //   getHomeHotData(),
+  //   guessRef.value?.getMore(),
+  // ])
   // 关闭动画
   isTriggered.value = false
 }
@@ -136,7 +194,12 @@ const onRefresherrefresh = async () => {
       <!-- 热门推荐 -->
       <!-- <HotPannel :list="hotList" /> -->
       <!-- 猜你喜欢 -->
-      <GuessLike :recommendList="recommendList" />
+      <GuessLike
+        :activeIndex="activeIndex"
+        :onActiveChange="onActiveChange"
+        :recommendList="recommendList"
+        :historyList="historyList"
+      />
       <!-- <SolaShopGuess ref="guessRef" /> -->
     </template>
   </scroll-view>
