@@ -32,7 +32,7 @@ const httpInterceptor = {
     }
     // 4.添加token请求头标识
     const memberStore = useMemberStore()
-    const token = memberStore.profile?.userinfo.token
+    const token = memberStore.profile ? memberStore.profile.userinfo.token : null
     if (token) {
       options.header.token = token
     }

@@ -19,6 +19,30 @@ const buyType = ref('sx') // sx生鲜 gh干货
 const showPassword = ref(false)
 
 const changePassword = () => (showPassword.value = !showPassword.value)
+type Location = {
+  address: string
+  name: string
+  latitude: number
+  longitude: number
+}
+//第二页数据
+const contactPerson = ref('')
+const company = ref('')
+const companyLocation = ref<Location>({
+  address: '',
+  name: '',
+  latitude: 0,
+  longitude: 0,
+})
+const deliverLocation = ref<Location>({
+  address: '',
+  name: '',
+  latitude: 0,
+  longitude: 0,
+})
+const detailLocation = ref('')
+const inviteCode = ref('')
+const imageList = ref([])
 
 // 获取验证码按钮的点击状态
 const countDown = ref(60)
@@ -51,31 +75,20 @@ const memberStore = useMemberStore()
 // 修改头像
 const onAvatarChange = () => {
   // 调用拍照
-  uni.chooseMedia({
-    // 文件个数
-    count: 1,
-    // 文件类型
-    mediaType: ['image'],
-    success: (res) => {
-      console.log(res)
-      // 本地路径
-      const { tempFilePath } = res.tempFiles[0]
-      // 文件上传
+  uni.chooseImage({
+    success: (chooseImageRes) => {
+      const tempFilePaths = chooseImageRes.tempFilePaths
       uni.uploadFile({
-        url: '/member/profile/avatar',
+        url: 'common/upload', //仅为示例，非真实的接口地址
+        filePath: tempFilePaths[0],
         name: 'file',
-        filePath: tempFilePath,
-        success: (res) => {
-          if (res.statusCode === 200) {
-            const avatar = JSON.parse(res.data).result.avatar
-            // 非空断言 个人信息数据更新
-            profile.value!.avatar = avatar
-            // store头像更新
-            memberStore.profile!.avatar = avatar
-            uni.showToast({ icon: 'success', title: '更新成功' })
-          } else {
-            uni.showToast({ icon: 'error', title: '更新失败' })
-          }
+        formData: {
+          user: 'test',
+        },
+        success: (uploadFileRes) => {
+          let { data } = uploadFileRes
+          data = JSON.parse(data)
+          console.log(uploadFileRes.data)
         },
       })
     },
@@ -104,23 +117,61 @@ const onFullLocationChange: UniHelper.RegionPickerOnChange = (ev) => {
   fullLocationCode = ev.detail.code!
 }
 
-// 点击保存
-const onSubmit = async () => {
-  const res = await putMemberProfileAPI({
-    nickname: profile.value?.nickname,
-    gender: profile.value?.gender,
-    birthday: profile.value?.birthday,
-    provinceCode: fullLocationCode[0],
-    cityCode: fullLocationCode[1],
-    countyCode: fullLocationCode[2],
-    profession: profile.value?.profession,
+// 选择位置
+const chooseAddress = (type: string) => {
+  uni.chooseLocation({
+    success: function (res) {
+      console.log('位置名称：' + res.name)
+      console.log('详细地址：' + res.address)
+      console.log('纬度：' + res.latitude)
+      console.log('经度：' + res.longitude)
+      if (type === 'company') {
+        companyLocation.value = {
+          address: res.address,
+          name: res.name,
+          latitude: res.latitude,
+          longitude: res.longitude,
+        }
+      }
+      if (type === 'deliver') {
+        deliverLocation.value = {
+          address: res.address,
+          name: res.name,
+          latitude: res.latitude,
+          longitude: res.longitude,
+        }
+      }
+    },
   })
-  // 更新store中的昵称
-  memberStore.profile!.nickname = res.result.nickname
-  uni.showToast({ icon: 'success', title: '保存成功' })
-  setTimeout(() => {
-    uni.navigateBack()
-  }, 300)
+}
+
+const onSelect = (event: any) => {
+  uni.uploadFile({
+    url: 'common/upload', //仅为示例，非真实的接口地址
+    filePath: event.tempFilePaths[0],
+    name: 'file',
+    success: (res) => {
+      let { data } = res
+      data = JSON.parse(data)
+      // @ts-ignore
+      imageList.value.push({
+        // @ts-ignore
+        url: data!.result.url,
+        uuid: event.tempFiles[0].uuid,
+      })
+      console.log('event', event, data)
+    },
+  })
+}
+
+const onSubmit = () => {
+  console.log(imageList.value)
+}
+
+const onDelete = (event: any) => {
+  console.log(event)
+  // @ts-ignore
+  imageList.value = [...imageList.value.filter((item) => item.uuid !== event.tempFile.uuid)]
 }
 </script>
 
@@ -183,37 +234,51 @@ const onSubmit = async () => {
       <view v-if="page === 1" class="form-content">
         <view class="form-item">
           <text class="label">联系人</text>
-          <text class="account">{{ profile?.account }}</text>
+          <input type="text" v-model="contactPerson" class="input" placeholder="请输入联系人" />
         </view>
         <view class="form-item">
           <text class="label">公司名称</text>
-          <text class="account">{{ profile?.account }}</text>
+          <input type="tel" v-model="company" class="input" placeholder="请输入公司名称" />
         </view>
-        <view class="form-item">
+        <view class="form-item" @tap="($event) => chooseAddress('company')">
           <text class="label">地址定位</text>
-          <text class="account">{{ profile?.account }}</text>
+          <text class="content">{{
+            companyLocation!.address ? companyLocation!.address : '请点击右边图标选择定位'
+          }}</text>
         </view>
-        <view class="form-item">
+        <view class="form-item" @tap="($event) => chooseAddress('deliver')">
           <text class="label">送货地址</text>
-          <text class="account">{{ profile?.account }}</text>
+          <text class="content">{{
+            deliverLocation!.address ? deliverLocation!.address : '请点击右边图标选择定位'
+          }}</text>
         </view>
         <view class="form-item">
           <text class="label">详细地址</text>
-          <text class="account">{{ profile?.account }}</text>
+          <input type="text" v-model="detailLocation" class="input" placeholder="请输入详细地址" />
         </view>
         <view class="form-item">
           <text class="label">邀请码</text>
-          <text class="account">{{ profile?.account }}</text>
+          <input type="text" v-model="inviteCode" class="input" placeholder="请输入邀请码" />
         </view>
         <view class="form-item">
-          <text class="label">营业执照或门头照</text>
-          <text class="account">{{ profile?.account }}</text>
+          {{ imageList }}
+          <!-- <text class="label">营业执照或门头照</text> -->
+          <!-- <view @tap="onAvatarChange" class="choose-img"></view> -->
+          <uni-file-picker
+            @delete="onDelete"
+            @select="onSelect"
+            class="choose-img"
+            limit="3"
+            title="营业执照或门头照"
+          ></uni-file-picker>
         </view>
       </view>
       <!-- 注册按钮 -->
-      <view v-if="page === 1">
+      <view class="bottom-btns" v-if="page === 1">
         <button @tap="page--" class="form-button">上一步</button>
-        <button @tap="page++" class="form-button">提交</button>
+        <button @tap="onSubmit" class="form-button">提交</button>
+        <!-- <u-button type="primary" text="确定"></u-button>
+        <u-button type="primary" :plain="true" text="镂空"></u-button> -->
       </view>
     </view>
   </view>
@@ -233,6 +298,13 @@ page {
   background-repeat: no-repeat;
 }
 
+.choose-img {
+  height: 180rpx;
+  width: 180rpx;
+  border-radius: 5px;
+  background: rgba(229, 229, 229, 1);
+  margin-top: 20rpx;
+}
 // 导航栏
 .navbar {
   position: relative;
@@ -312,19 +384,25 @@ input {
 
   &-item {
     display: flex;
-    height: 96rpx;
+    min-height: 96rpx;
     line-height: 46rpx;
     padding: 25rpx 10rpx;
     background-color: #fff;
     font-size: 28rpx;
     border-bottom: 1rpx solid #ddd;
 
+    .content {
+      flex: 1;
+      text-align: right;
+      color: #666666;
+    }
+
     &:last-child {
-      border: none;
+      border: none !important;
     }
 
     .label {
-      width: 180rpx;
+      min-width: 180rpx;
       color: #333;
     }
 
@@ -360,5 +438,12 @@ input {
     font-size: 30rpx;
     background-color: #27ba9b;
   }
+}
+.form-item:last-child {
+  border: none !important;
+  flex-direction: column;
+}
+.bottom-btns {
+  display: flex;
 }
 </style>
