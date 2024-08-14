@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getSmsAPI } from '@/services/login'
+import { getSmsAPI, userRegisterAPI } from '@/services/login'
 import { getMemberProfileAPI, putMemberProfileAPI } from '@/services/profile'
 import { useMemberStore } from '@/stores'
 import type { Gender, ProfileDetail } from '@/types/member'
@@ -15,7 +15,7 @@ const phone = ref('')
 const imgCode = ref('')
 const smsCode = ref('')
 const pwd = ref('')
-const buyType = ref('sx') // sx生鲜 gh干货
+const buyType = ref('3') // sx生鲜 gh干货
 const showPassword = ref(false)
 
 const changePassword = () => (showPassword.value = !showPassword.value)
@@ -43,6 +43,60 @@ const deliverLocation = ref<Location>({
 const detailLocation = ref('')
 const inviteCode = ref('')
 const imageList = ref([])
+
+// 表单数据
+const form = ref({
+  phone,
+  imgCode,
+  smsCode,
+  pwd,
+  contactPerson,
+  company,
+  companyLocationStr: '',
+  deliverLocationStr: '',
+  detailLocation,
+  inviteCode,
+  images: '',
+})
+// 定义校验规则
+const rules: UniHelper.UniFormsRules = {
+  phone: {
+    rules: [
+      { required: true, errorMessage: '请输入手机号码' },
+      { pattern: /^1[3-9]\d{9}$/, errorMessage: '手机号格式不正确' },
+    ],
+  },
+  imgCode: {
+    rules: [{ required: true, errorMessage: '请输入图形验证码' }],
+  },
+  smsCode: {
+    rules: [{ required: true, errorMessage: '请输入短信验证码' }],
+  },
+  pwd: {
+    rules: [{ required: true, errorMessage: '请输入密码' }],
+  },
+  contactPerson: {
+    rules: [{ required: true, errorMessage: '请输入联系人' }],
+  },
+  company: {
+    rules: [{ required: true, errorMessage: '请输入公司' }],
+  },
+  companyLocationStr: {
+    rules: [{ required: true, errorMessage: '请选择公司地址' }],
+  },
+  deliverLocationStr: {
+    rules: [{ required: true, errorMessage: '请选择发货地址' }],
+  },
+  detailLocation: {
+    rules: [{ required: true, errorMessage: '请填写详细地址' }],
+  },
+  inviteCode: {
+    rules: [{ required: true, errorMessage: '请填写邀请码' }],
+  },
+  images: {
+    rules: [{ required: true, errorMessage: '请至少上传一张图片' }],
+  },
+}
 
 // 获取验证码按钮的点击状态
 const countDown = ref(60)
@@ -96,12 +150,12 @@ const onAvatarChange = () => {
 }
 
 onLoad(() => {
-  getMemberProfileData()
+  // getMemberProfileData()
 })
 
-// 修改性别
-const onGenderChange: UniHelper.RadioGroupOnChange = (ev) => {
-  profile.value.gender = ev.detail.value as Gender
+// 修改类型
+const onTypeChange: UniHelper.RadioGroupOnChange = (ev) => {
+  buyType.value = ev.detail.value
 }
 
 // 修改生日
@@ -132,6 +186,7 @@ const chooseAddress = (type: string) => {
           latitude: res.latitude,
           longitude: res.longitude,
         }
+        form.value.companyLocationStr = res.address
       }
       if (type === 'deliver') {
         deliverLocation.value = {
@@ -140,11 +195,12 @@ const chooseAddress = (type: string) => {
           latitude: res.latitude,
           longitude: res.longitude,
         }
+        form.value.deliverLocationStr = res.address
       }
     },
   })
 }
-
+const test = ref({})
 const onSelect = (event: any) => {
   uni.uploadFile({
     url: 'common/upload', //仅为示例，非真实的接口地址
@@ -159,13 +215,69 @@ const onSelect = (event: any) => {
         url: data!.result.url,
         uuid: event.tempFiles[0].uuid,
       })
+      // @ts-ignore
+      test.value = data!.result
+      // @ts-ignore
+      form.value.images = data!.result.url
       console.log('event', event, data)
     },
   })
 }
+// 表单组件实例
+const formRef = ref<UniHelper.UniFormsInstance>()
 
-const onSubmit = () => {
-  console.log(imageList.value)
+const onSubmit = async () => {
+  await formRef.value?.validate?.()
+  console.log('register=====', {
+    username: contactPerson.value,
+    password: pwd.value,
+    mobile: phone.value,
+    code: smsCode.value,
+    type_id: buyType.value,
+    sub_account_level: '1',
+    company_lon: companyLocation.value.longitude.toString(),
+    company_lat: companyLocation.value.latitude.toString(),
+    company_province: companyLocation.value.address,
+    compnay_city: companyLocation.value.address,
+    company_area: companyLocation.value.address,
+    company_addr: companyLocation.value.address,
+    company: company.value,
+    shipping_lon: deliverLocation.value.longitude.toString(),
+    shipping_lat: deliverLocation.value.latitude.toString(),
+    shipping_province: deliverLocation.value.address,
+    shipping_city: deliverLocation.value.address,
+    shipping_area: deliverLocation.value.address,
+    shipping_addr: deliverLocation.value.address,
+    images: imageList.value.join(','),
+    sale_id: inviteCode.value,
+  })
+
+  const res = await userRegisterAPI({
+    username: contactPerson.value,
+    password: pwd.value,
+    mobile: phone.value,
+    code: smsCode.value,
+    type_id: buyType.value,
+    sub_account_level: '1',
+    company_lon: 'companyLocation.value.longitude.toString()',
+    company_lat: 'companyLocation.value.latitude.toString()',
+    company_province: 'companyLocation.value.address',
+    compnay_city: 'companyLocation.value.address',
+    company_area: 'companyLocation.value.address',
+    company_addr: 'companyLocation.value.address',
+    company: company.value,
+    shipping_lon: 'deliverLocation.value.longitude.toString()',
+    shipping_lat: 'deliverLocation.value.latitude.toString()',
+    shipping_province: 'deliverLocation.value.address',
+    shipping_city: 'deliverLocation.value.address',
+    shipping_area: 'deliverLocation.value.address',
+    shipping_addr: 'deliverLocation.value.address',
+    images: imageList.value.join(','),
+    sale_id: inviteCode.value,
+  })
+  uni.navigateTo({ url: '/pages/login/login' })
+
+  console.log('res======', res)
 }
 
 const onDelete = (event: any) => {
@@ -183,25 +295,25 @@ const onDelete = (event: any) => {
       <view class="title">注册账号</view>
     </view>
     <!-- 表单 -->
-    <view class="form">
+    <uni-forms class="form" ref="formRef" :rules="rules" :modelValue="form">
       <!-- 第一页表单内容 -->
-      <view v-if="page === 0" class="form-content">
-        <view class="form-item">
+      <view v-show="page === 0" class="form-content">
+        <uni-forms-item class="form-item" name="phone">
           <text class="label">手机号码</text>
           <input type="tel" v-model="phone" class="input" placeholder="请输入手机号码" />
-        </view>
-        <view class="form-item">
+        </uni-forms-item>
+        <uni-forms-item class="form-item" name="imgCode">
           <text class="label">图片验证码</text>
-          <input type="tel" v-model="imgCode" class="input" placeholder="请输入图片验证码" />
-        </view>
-        <view class="form-item">
+          <input type="text" v-model="imgCode" class="input" placeholder="请输入图片验证码" />
+        </uni-forms-item>
+        <uni-forms-item class="form-item" name="smsCode">
           <text class="label">手机验证码</text>
           <input type="tel" v-model="smsCode" class="input" placeholder="请输入手机验证码" />
           <view @tap="onGetSmsTap" class="getcode-btn" :class="checked ? 'checked' : ''">{{
             checked ? `获取中(${countDown})` : '获取验证码'
           }}</view>
-        </view>
-        <view class="form-item">
+        </uni-forms-item>
+        <uni-forms-item class="form-item" name="pwd">
           <text class="label">账号密码</text>
           <input
             v-model="pwd"
@@ -213,55 +325,62 @@ const onDelete = (event: any) => {
           <icon type="warn" @tap="changePassword" />
           <!-- <text class="uni-icon" :class="[!showPassword ? 'uni-eye-active' : '']"
 						@click="changePassword">&#xe568;</text> -->
-        </view>
-        <view class="form-item">
+        </uni-forms-item>
+        <uni-forms-item class="form-item">
           <text class="label">采购类型</text>
-          <radio-group @change="onGenderChange">
+          <radio-group class="radio-group" @change="onTypeChange">
             <label class="radio">
-              <radio value="生鲜" color="#27ba9b" :checked="buyType === 'sx'" />
+              <radio value="3" color="#27ba9b" :checked="buyType === '3'" />
               生鲜
             </label>
             <label class="radio">
-              <radio value="干货" color="#27ba9b" :checked="buyType === 'gh'" />
+              <radio value="4" color="#27ba9b" :checked="buyType === '4'" />
               干货
             </label>
           </radio-group>
-        </view>
+        </uni-forms-item>
       </view>
       <!-- 下一步按钮 -->
-      <button v-if="page === 0" @tap="page++" class="form-button">下一步</button>
+      <button v-show="page === 0" @tap="page++" class="form-button">下一步</button>
       <!-- 第二页表单内容 -->
-      <view v-if="page === 1" class="form-content">
-        <view class="form-item">
+      <view v-show="page === 1" class="form-content">
+        <uni-forms-item class="form-item" name="contactPerson">
           <text class="label">联系人</text>
           <input type="text" v-model="contactPerson" class="input" placeholder="请输入联系人" />
-        </view>
-        <view class="form-item">
+        </uni-forms-item>
+        <uni-forms-item class="form-item" name="company">
           <text class="label">公司名称</text>
           <input type="tel" v-model="company" class="input" placeholder="请输入公司名称" />
-        </view>
-        <view class="form-item" @tap="($event) => chooseAddress('company')">
+        </uni-forms-item>
+        <uni-forms-item
+          name="companyLocationStr"
+          class="form-item"
+          @tap="($event) => chooseAddress('company')"
+        >
           <text class="label">地址定位</text>
           <text class="content">{{
             companyLocation!.address ? companyLocation!.address : '请点击右边图标选择定位'
           }}</text>
-        </view>
-        <view class="form-item" @tap="($event) => chooseAddress('deliver')">
+        </uni-forms-item>
+        <uni-forms-item
+          name="deliverLocationStr"
+          class="form-item"
+          @tap="($event) => chooseAddress('deliver')"
+        >
           <text class="label">送货地址</text>
           <text class="content">{{
             deliverLocation!.address ? deliverLocation!.address : '请点击右边图标选择定位'
           }}</text>
-        </view>
-        <view class="form-item">
+        </uni-forms-item>
+        <uni-forms-item class="form-item" name="detailLocation">
           <text class="label">详细地址</text>
           <input type="text" v-model="detailLocation" class="input" placeholder="请输入详细地址" />
-        </view>
-        <view class="form-item">
+        </uni-forms-item>
+        <uni-forms-item class="form-item" name="inviteCode">
           <text class="label">邀请码</text>
           <input type="text" v-model="inviteCode" class="input" placeholder="请输入邀请码" />
-        </view>
-        <view class="form-item">
-          {{ imageList }}
+        </uni-forms-item>
+        <uni-forms-item class="form-item" name="images">
           <!-- <text class="label">营业执照或门头照</text> -->
           <!-- <view @tap="onAvatarChange" class="choose-img"></view> -->
           <uni-file-picker
@@ -269,18 +388,18 @@ const onDelete = (event: any) => {
             @select="onSelect"
             class="choose-img"
             limit="3"
-            title="营业执照或门头照"
+            :title="`营业执照或门头照--${JSON.stringify(test)}`"
           ></uni-file-picker>
-        </view>
+        </uni-forms-item>
       </view>
       <!-- 注册按钮 -->
-      <view class="bottom-btns" v-if="page === 1">
+      <view class="bottom-btns" v-show="page === 1">
         <button @tap="page--" class="form-button">上一步</button>
         <button @tap="onSubmit" class="form-button">提交</button>
         <!-- <u-button type="primary" text="确定"></u-button>
         <u-button type="primary" :plain="true" text="镂空"></u-button> -->
       </view>
-    </view>
+    </uni-forms>
   </view>
 </template>
 
@@ -305,6 +424,7 @@ page {
   background: rgba(229, 229, 229, 1);
   margin-top: 20rpx;
 }
+
 // 导航栏
 .navbar {
   position: relative;
@@ -331,9 +451,11 @@ page {
     align-items: center;
   }
 }
+
 input {
   text-align: right;
 }
+
 .getcode-btn {
   line-height: 50rpx;
   text-align: center;
@@ -345,6 +467,7 @@ input {
   background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
   margin-left: 20rpx;
 }
+
 // 头像
 .avatar {
   text-align: center;
@@ -368,6 +491,71 @@ input {
     line-height: 1;
     font-size: 26rpx;
     color: #fff;
+  }
+}
+
+.form-content {
+  margin: 20rpx 20rpx 0;
+  padding: 0 20rpx;
+  border-radius: 10rpx;
+  background-color: #fff;
+
+  .form-item,
+  .uni-forms-item {
+    display: flex;
+    align-items: center;
+    min-height: 96rpx;
+    padding: 10rpx 10rpx;
+    background-color: #fff;
+    font-size: 28rpx;
+    border-bottom: 1rpx solid #ddd;
+    position: relative;
+    margin-bottom: 0;
+
+    // 调整 uni-forms 样式
+    .uni-forms-item__content {
+      display: flex;
+
+      .content {
+        flex: 1;
+        text-align: right;
+        color: #999999;
+      }
+    }
+
+    .uni-forms-item__error {
+      // margin-left: 200rpx;
+      padding-top: 0;
+    }
+
+    &:last-child {
+      border: none;
+    }
+
+    .label {
+      width: 200rpx;
+      color: #333;
+    }
+
+    .input {
+      flex: 1;
+      display: block;
+      height: 46rpx;
+    }
+
+    .switch {
+      position: absolute;
+      right: -20rpx;
+      transform: scale(0.8);
+    }
+
+    .picker {
+      flex: 1;
+    }
+
+    .placeholder {
+      color: #808080;
+    }
   }
 }
 
@@ -423,6 +611,7 @@ input {
     .picker {
       flex: 1;
     }
+
     .placeholder {
       color: #808080;
     }
@@ -439,11 +628,18 @@ input {
     background-color: #27ba9b;
   }
 }
-.form-item:last-child {
-  border: none !important;
-  flex-direction: column;
+
+.radio-group {
+  flex: 1;
+  text-align: right;
 }
+
 .bottom-btns {
   display: flex;
+  justify-content: center;
+
+  .form-button {
+    width: 300rpx;
+  }
 }
 </style>
