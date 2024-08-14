@@ -9,7 +9,7 @@ import {
 import { useMemberStore } from '@/stores'
 import type { LoginResult } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const phone = ref('')
 const pwd = ref('')
@@ -77,6 +77,10 @@ const loginSuccess = (profile: LoginResult) => {
 }
 
 const goToLogin = async () => {
+  if (phone.value.length !== 11) {
+    uni.showToast({ icon: 'error', title: '手机号有误！' })
+    return
+  }
   let res
   if (activeIndex.value === 0) {
     res = await userLoginAPI({ account: phone.value, password: pwd.value })
@@ -95,9 +99,29 @@ const goToLogin = async () => {
 }
 const goToRegister = () => {
   uni.navigateTo({
-    url: '/pages/register/register',
+    url: '/pages/register/register?type=register',
   })
 }
+const goToFindPwd = () => {
+  uni.navigateTo({
+    url: '/pages/register/register?type=findPwd',
+  })
+}
+const disabled = computed(() => {
+  if (activeIndex.value === 0) {
+    if (phone.value && pwd.value) {
+      return '1'
+    } else {
+      return ''
+    }
+  } else {
+    if (phone.value && verifyCode.value) {
+      return '1'
+    } else {
+      return ''
+    }
+  }
+})
 </script>
 
 <template>
@@ -142,11 +166,18 @@ const goToRegister = () => {
         <input v-model="pwd" class="input" type="text" password placeholder="请输入密码" />
       </view>
       <view>
-        <button @tap="goToLogin" class="button phone">登录</button>
+        <button
+          :disabled="!disabled"
+          @tap="goToLogin"
+          class="button phone"
+          :class="!disabled ? 'disabled' : ''"
+        >
+          登录
+        </button>
       </view>
       <view class="other">
         <text @tap="goToRegister">注册账号</text>
-        <text>找回密码</text>
+        <text @tap="goToFindPwd">找回密码</text>
       </view>
 
       <view class="extra">
@@ -246,6 +277,7 @@ page {
       background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
       margin-left: 20rpx;
     }
+
     .checked {
       background: #dcdcdc;
       color: #666;
@@ -268,7 +300,7 @@ page {
     height: 80rpx;
     font-size: 28rpx;
     border-radius: 20rpx;
-    background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
+    background-color: #ff5f4d;
     color: #fff;
     margin-top: 80rpx;
 
@@ -278,8 +310,8 @@ page {
     }
   }
 
-  .phone {
-    background-color: #28bb9c;
+  .disabled {
+    background-color: #fff;
   }
 
   .wechat {

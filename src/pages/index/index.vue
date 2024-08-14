@@ -70,6 +70,12 @@ const getTypeListData = async () => {
   const res = await getCategoryAPI()
   top1List.value = res.result.top1
   top2List.value = res.result.top2
+  top2List.value.push({
+    id: 'more',
+    name: '更多',
+    image: 'http://47.95.197.8/uploads/20240814/1036867403937a234c7d8565c07f114b.jpeg',
+    source: 'H',
+  })
 }
 
 // 获取轮播图数据
@@ -215,5 +221,6 @@ page {
 
 .sroll-view {
   flex: 1;
+  background-color: #fff;
 }
 </style>

@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { getSmsAPI, userRegisterAPI } from '@/services/login'
+import { getSmsAPI, userRegisterAPI, resetPwdAPI } from '@/services/login'
 import { getMemberProfileAPI, putMemberProfileAPI } from '@/services/profile'
 import { useMemberStore } from '@/stores'
 import type { Gender, ProfileDetail } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
+
+const query = defineProps<{
+  type: string
+}>()
 
 // 第一页
 const page = ref(0)
@@ -44,7 +48,7 @@ const detailLocation = ref('')
 const inviteCode = ref('')
 const imageList = ref([])
 
-// 表单数据
+// 注册表单数据
 const form = ref({
   phone,
   imgCode,
@@ -58,7 +62,14 @@ const form = ref({
   inviteCode,
   images: '',
 })
-// 定义校验规则
+// 找回密码数据
+const findPwdForm = ref({
+  phone,
+  imgCode,
+  smsCode,
+  pwd,
+})
+// 注册定义校验规则
 const rules: UniHelper.UniFormsRules = {
   phone: {
     rules: [
@@ -97,7 +108,24 @@ const rules: UniHelper.UniFormsRules = {
     rules: [{ required: true, errorMessage: '请至少上传一张图片' }],
   },
 }
-
+// 找回密码定义校验规则
+const findPwdrules: UniHelper.UniFormsRules = {
+  phone: {
+    rules: [
+      { required: true, errorMessage: '请输入手机号码' },
+      { pattern: /^1[3-9]\d{9}$/, errorMessage: '手机号格式不正确' },
+    ],
+  },
+  imgCode: {
+    rules: [{ required: true, errorMessage: '请输入图形验证码' }],
+  },
+  smsCode: {
+    rules: [{ required: true, errorMessage: '请输入短信验证码' }],
+  },
+  pwd: {
+    rules: [{ required: true, errorMessage: '请输入密码' }],
+  },
+}
 // 获取验证码按钮的点击状态
 const countDown = ref(60)
 const checked = ref(false)
@@ -119,12 +147,6 @@ const onGetSmsTap = async () => {
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 
-// 获取个人信息接口
-const profile = ref<ProfileDetail>({} as ProfileDetail)
-const getMemberProfileData = async () => {
-  const res = await getMemberProfileAPI()
-  profile.value = res.result
-}
 const memberStore = useMemberStore()
 // 修改头像
 const onAvatarChange = () => {
@@ -156,19 +178,6 @@ onLoad(() => {
 // 修改类型
 const onTypeChange: UniHelper.RadioGroupOnChange = (ev) => {
   buyType.value = ev.detail.value
-}
-
-// 修改生日
-const onBirthdayChange: UniHelper.DatePickerOnChange = (ev) => {
-  profile.value.birthday = ev.detail.value
-}
-
-// 修改城市
-let fullLocationCode: [string, string, string] = ['', '', '']
-const onFullLocationChange: UniHelper.RegionPickerOnChange = (ev) => {
-  profile.value.fullLocation = ev.detail.value.join(' ')
-  // 提交后端更新用的
-  fullLocationCode = ev.detail.code!
 }
 
 // 选择位置
@@ -280,6 +289,25 @@ const onSubmit = async () => {
   console.log('res======', res)
 }
 
+const goToNext = async () => {
+  if (query.type === 'register') {
+    page.value++
+  }
+  if (query.type === 'findPwd') {
+    // 找回密码逻辑
+    await formRef.value?.validate?.()
+    const res = await resetPwdAPI({
+      mobile: phone.value,
+      newpassword: pwd.value,
+      captcha: smsCode.value,
+    })
+    uni.showToast({ icon: 'success', title: '修改成功' })
+    setTimeout(() => {
+      uni.navigateBack()
+    }, 6000)
+  }
+}
+
 const onDelete = (event: any) => {
   console.log(event)
   // @ts-ignore
@@ -292,10 +320,15 @@ const onDelete = (event: any) => {
     <!-- 导航栏 -->
     <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
       <navigator open-type="navigateBack" class="back icon-left" hover-class="none"></navigator>
-      <view class="title">注册账号</view>
+      <view class="title">{{ type === 'register' ? '注册账号' : '找回密码' }}</view>
     </view>
     <!-- 表单 -->
-    <uni-forms class="form" ref="formRef" :rules="rules" :modelValue="form">
+    <uni-forms
+      class="form"
+      ref="formRef"
+      :rules="type === 'register' ? rules : findPwdrules"
+      :modelValue="type === 'register' ? form : findPwdForm"
+    >
       <!-- 第一页表单内容 -->
       <view v-show="page === 0" class="form-content">
         <uni-forms-item class="form-item" name="phone">
@@ -326,7 +359,7 @@ const onDelete = (event: any) => {
           <!-- <text class="uni-icon" :class="[!showPassword ? 'uni-eye-active' : '']"
 						@click="changePassword">&#xe568;</text> -->
         </uni-forms-item>
-        <uni-forms-item class="form-item">
+        <uni-forms-item class="form-item" v-if="type === 'register'">
           <text class="label">采购类型</text>
           <radio-group class="radio-group" @change="onTypeChange">
             <label class="radio">
@@ -341,7 +374,9 @@ const onDelete = (event: any) => {
         </uni-forms-item>
       </view>
       <!-- 下一步按钮 -->
-      <button v-show="page === 0" @tap="page++" class="form-button">下一步</button>
+      <button v-show="page === 0" @tap="goToNext" class="form-button">
+        {{ type === 'register' ? '下一步' : '确定' }}
+      </button>
       <!-- 第二页表单内容 -->
       <view v-show="page === 1" class="form-content">
         <uni-forms-item class="form-item" name="contactPerson">

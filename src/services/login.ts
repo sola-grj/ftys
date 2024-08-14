@@ -51,6 +51,12 @@ type RegisterParams = {
   images: string
   sale_id: string
 }
+
+type ResetPwdParams = {
+  mobile: string
+  newpassword: string
+  captcha: string
+}
 /**
  * 小程序登录
  * @param data 请求参数
@@ -121,6 +127,18 @@ export const userRegisterAPI = (data: RegisterParams) => {
   return http<LoginResult>({
     method: 'POST',
     url: '/user/register',
+    data,
+  })
+}
+
+/**
+ * 找回密码
+ * @param data 请求参数
+ */
+export const resetPwdAPI = (data: ResetPwdParams) => {
+  return http({
+    method: 'POST',
+    url: '/user/resetpwd',
     data,
   })
 }

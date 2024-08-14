@@ -13,7 +13,8 @@
 import { useMemberStore } from '@/stores'
 
 // const baseURL = 'https://pcapi-xiaotuxian-front-devtest.itheima.net'
-const baseURL = 'http://47.95.197.8/api/'
+// const baseURL = 'http://47.95.197.8/api/'
+const baseURL = 'https://ksshop.snooowball.cn/api'
 
 // 添加拦截器
 const httpInterceptor = {
