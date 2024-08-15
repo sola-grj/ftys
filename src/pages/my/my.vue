@@ -13,6 +13,12 @@ const orderTypes = [
   { type: 3, text: '待收货', icon: 'icon-check' },
   { type: 4, text: '待评价', icon: 'icon-comment' },
 ]
+// 优惠券、欠款、余额
+const CouponTypes = [
+  { name: '优惠券', data: '38', desc: '下单立省' },
+  { name: '欠款', data: '2677.00', desc: '当前欠款' },
+  { name: '账户余额', data: '0.00', desc: '在线充值' },
+]
 // 获取会员信息
 const memberStore = useMemberStore()
 
@@ -44,7 +50,8 @@ const { guessRef, onScrollToLower } = useGuessList()
             class="avatar gray"
             mode="aspectFill"
             src="http://yjy-xiaotuxian-dev.oss-cn-beijing.aliyuncs.com/picture/2021-04-06/db628d42-88a7-46e7-abb8-659448c33081.png"
-          ></image>
+          >
+          </image>
         </navigator>
         <view class="meta">
           <navigator url="/pages/login/login" hover-class="none" class="nickname">
@@ -85,9 +92,48 @@ const { guessRef, onScrollToLower } = useGuessList()
         <!-- #endif -->
       </view>
     </view>
-    <!-- 猜你喜欢 -->
-    <view class="guess">
-      <SolaShopGuess ref="guessRef" />
+    <!-- 优惠券、欠款、账户余额 -->
+    <view class="coupons">
+      <view class="coupons-item">
+        <!-- 订单 -->
+        <navigator
+          v-for="item in CouponTypes"
+          :key="item.name"
+          class="navigator"
+          hover-class="none"
+        >
+          <view class="data"
+            >{{ item.data }}{{ item.name === '欠款' || item.name === '账户余额' ? '元' : '' }}</view
+          >
+          <view class="name">{{ item.name }}</view>
+          <view class="desc">{{ item.desc }}</view>
+        </navigator>
+      </view>
+    </view>
+    <view class="orders">
+      <view class="title">
+        我的订单
+        <navigator class="navigator" url="/PagesOrder/list/list?type=0" hover-class="none">
+          查看全部订单<text class="icon-right"></text>
+        </navigator>
+      </view>
+      <view class="section">
+        <!-- 订单 -->
+        <navigator
+          v-for="item in orderTypes"
+          :key="item.type"
+          :class="item.icon"
+          :url="`/PagesOrder/list/list?type=${item.type}`"
+          class="navigator"
+          hover-class="none"
+        >
+          {{ item.text }}
+        </navigator>
+        <!-- 客服 -->
+        <!-- #ifdef MP-WEIXIN -->
+        <button class="contact icon-handset" open-type="contact">售后</button>
+        <!-- #endif -->
+      </view>
     </view>
   </scroll-view>
 </template>
@@ -101,15 +147,13 @@ page {
 
 .viewport {
   height: 100%;
-  background-repeat: no-repeat;
-  background-image: url(https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/images/center_bg.png);
-  background-size: 100% auto;
 }
 
 /* 用户信息 */
 .profile {
   margin-top: 20rpx;
   position: relative;
+  background-color: #cfdcfa;
 
   .overview {
     display: flex;
@@ -203,23 +247,65 @@ page {
     display: flex;
     justify-content: space-between;
     padding: 40rpx 20rpx 10rpx;
+
     .navigator,
     .contact {
       text-align: center;
       font-size: 24rpx;
       color: #333;
+
       &::before {
         display: block;
         font-size: 60rpx;
         color: #ff9545;
       }
     }
+
     .contact {
       padding: 0;
       margin: 0;
       border: 0;
       background-color: transparent;
       line-height: inherit;
+    }
+  }
+}
+
+.coupons {
+  position: relative;
+  z-index: 99;
+  padding: 30rpx;
+  margin: 50rpx 20rpx 0;
+  background-color: #fff;
+  border-radius: 10rpx;
+  box-shadow: 0 4rpx 6rpx rgba(240, 240, 240, 0.6);
+
+  .coupons-item {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 20rpx 20rpx 10rpx;
+
+    .navigator {
+      font-size: 24rpx;
+      float: right;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .data {
+        font-size: 40rpx;
+      }
+
+      .name {
+        font-size: 26rpx;
+        margin-top: 10rpx;
+      }
+
+      .desc {
+        margin-top: 6rpx;
+        color: #939393;
+      }
     }
   }
 }
