@@ -4,11 +4,16 @@ export type SearchGoodsItem = {
   goodsId: string
   source: string
   price: string
-  image: string
+  images: string[]
 }
 
 export type SearchGoodsResult = {
   total: number
   page: number
   list: SearchGoodsItem[]
+}
+
+export type SearchHistoryGoodsResult = {
+  myHistorySearch: string[]
+  searchDiscover: string[]
 }

@@ -39,21 +39,25 @@ defineProps<{
   </view>
   <view v-if="activeIndex === 0" class="list-container">
     <view class="item" v-for="item in recommendList" :key="item.goodsId">
-      <image :src="item.images[0]" />
-      <view>{{ item.name }}</view>
-      <view class="info">
-        <view class="price">￥{{ item.price }}</view>
-        <view class="jiagou icon icon-search"></view>
+      <view class="item-container">
+        <image :src="item.images[0]" />
+        <view class="name">{{ item.name }}</view>
+        <view class="info">
+          <view class="price">￥{{ item.price }}</view>
+          <view class="ftysIcon icon-a-jiagou2x"></view>
+        </view>
       </view>
     </view>
   </view>
   <view v-if="activeIndex === 1" class="list-container">
     <view class="item" v-for="item in historyList" :key="item.goodsId">
-      <image :src="item.images[0]" />
-      <view>{{ item.name }}</view>
-      <view class="info">
-        <view class="price">￥{{ item.price }}</view>
-        <view class="jiagou icon icon-search"></view>
+      <view class="item-container">
+        <image :src="item.images[0]" />
+        <view class="name">{{ item.name }}</view>
+        <view class="info">
+          <view class="price">￥{{ item.price }}</view>
+          <view class="ftysIcon icon-a-jiagou2x"></view>
+        </view>
       </view>
     </view>
   </view>
@@ -131,20 +135,34 @@ page {
   margin: 20rpx 20rpx 0;
 
   .item {
-    padding: 0 20rpx;
-    border: 1px solid;
+    width: 50%;
+    display: inline-block;
+
+    .item-container {
+      background-color: #fff;
+      margin: 10rpx;
+      padding: 10rpx;
+      border-radius: 10rpx;
+      min-height: 400rpx;
+      text-align: center;
+    }
 
     image {
       width: 300rpx;
       height: 300rpx;
     }
 
-    width: 50%;
-    display: inline-block;
+    .name {
+      display: flex;
+    }
 
     .info {
       display: flex;
       justify-content: space-between;
+
+      .price {
+        color: #ff5040;
+      }
     }
   }
 }

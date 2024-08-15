@@ -21,21 +21,21 @@ const query = defineProps<{
         <view class="two">
           <view class="item">
             <image src="https://img.js.design/assets/img/62b5663edd87d2d6d6bd3297.png" />
-            <view class="price">￥{{ mustlist[0].price }}</view>
+            <view class="price">￥{{ mustlist[0] && mustlist[0].price }}</view>
           </view>
           <view class="item">
             <image src="https://img.js.design/assets/img/62b5663edd87d2d6d6bd3297.png" />
-            <view class="price">￥{{ mustlist[1].price }}</view>
+            <view class="price">￥{{ mustlist[1] && mustlist[1].price }}</view>
           </view>
         </view>
         <view class="two">
           <view class="item">
             <image src="https://img.js.design/assets/img/62b5663edd87d2d6d6bd3297.png" />
-            <view class="price">￥{{ mustlist[2].price }}</view>
+            <view class="price">￥{{ mustlist[2] && mustlist[2].price }}</view>
           </view>
           <view class="item">
             <image src="https://img.js.design/assets/img/62b5663edd87d2d6d6bd3297.png" />
-            <view class="price">￥{{ mustlist[3].price }}</view>
+            <view class="price">￥{{ mustlist[3] && mustlist[3].price }}</view>
           </view>
         </view>
       </view>

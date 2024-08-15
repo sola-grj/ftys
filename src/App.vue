@@ -16,6 +16,10 @@ onHide(() => {
 // 字体图标
 @import '@/styles/fonts.scss';
 
+.ftysIcon {
+  font-family: 'iconfont';
+}
+
 view,
 navigator,
 input,

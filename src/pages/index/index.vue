@@ -12,7 +12,6 @@ import {
 } from '@/services/home'
 import Customnavbar from './components/Customnavbar.vue'
 import CategoryPannel from './components/CategoryPannel.vue'
-import HotPannel from './components/HotPannel.vue'
 import PageSkeleton from './components/PageSkeleton.vue'
 import TodayHasToBuy from './components/TodayHasToBuy.vue'
 import GuessLike from './components/GuessLike.vue'
@@ -196,9 +195,6 @@ const onRefresherrefresh = async () => {
       <!-- <SolaShopSwiper :list="bannerList" /> -->
       <!-- 今日必买 -->
       <TodayHasToBuy :bannerList="bannerList" :mustlist="mustBuyList" />
-
-      <!-- 热门推荐 -->
-      <!-- <HotPannel :list="hotList" /> -->
       <!-- 猜你喜欢 -->
       <GuessLike
         :activeIndex="activeIndex"
@@ -221,6 +217,6 @@ page {
 
 .sroll-view {
   flex: 1;
-  background-color: #fff;
+  // background-color: #fff;
 }
 </style>

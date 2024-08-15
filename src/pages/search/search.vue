@@ -1,9 +1,22 @@
 <script setup lang="ts">
 import { useGuessList } from '@/composables'
-import { getSearchListAPI } from '@/services/search'
+import { getHistorySearchListAPI, getSearchListAPI } from '@/services/search'
 import type { PageParams } from '@/types/global'
 import type { SearchGoodsItem } from '@/types/search'
+import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
+
+// 获取搜索历史接口数据
+const myHistorySearchList = ref<string[]>([])
+const searchDiscoverList = ref<string[]>([])
+const getHistorySearchListData = async () => {
+  const res = await getHistorySearchListAPI()
+  myHistorySearchList.value = res.result.myHistorySearch
+  searchDiscoverList.value = res.result.searchDiscover
+}
+
+// 排序参数 // default price
+const orderType = ref('default')
 
 // 分页参数
 const pageParams: Required<PageParams> = {
@@ -28,7 +41,10 @@ const resetData = () => {
 
 // 搜索列表
 const searchList = ref<SearchGoodsItem[]>([])
-const getSearchListData = async (action: string = '') => {
+const getSearchListData = async (action: string = '', other: string = '') => {
+  if (other) {
+    keyword.value = other
+  }
   if (action === 'tap') {
     resetData()
   }
@@ -55,22 +71,21 @@ const onScrollToLower = () => {
 // 回到首页
 
 const goToHome = () => {
-  uni.switchTab({ url: '/pages/index/index' })
+  uni.navigateBack()
 }
+
+onLoad(() => {
+  getHistorySearchListData()
+})
 </script>
 
 <template>
   <scroll-view class="viewport" scroll-y @scrolltolower="getSearchListData">
-    <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + '0' + 'px' }">
-      <view @tap="goToHome" class="back icon icon-left"></view>
+    <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
+      <view @tap="goToHome" class="back ftysIcon icon-xiangzuojiantou"></view>
       <!-- 搜索条 -->
       <view class="search">
-        <input
-          @input="onChangeKeyword"
-          class="uni-input"
-          confirm-type="search"
-          placeholder="搜索"
-        />
+        <input v-model="keyword" class="uni-input" confirm-type="search" placeholder="搜索" />
         <button
           @tap="($event) => getSearchListData('tap')"
           class="search-btn"
@@ -83,19 +98,31 @@ const goToHome = () => {
     <view v-if="searchList.length === 0" class="history">
       <view class="title">
         <view class="text">历史搜索</view>
-        <view class="icon icon-delete"></view>
+        <view @tap="myHistorySearchList = []" class="ftysIcon icon-shanchu"></view>
       </view>
       <view class="content">
-        <view class="item" :key="item" v-for="item in 10"> 苹果香蕉{{ item }} </view>
+        <view
+          @tap="($event) => getSearchListData('tap', item)"
+          class="item"
+          :key="index"
+          v-for="(item, index) in myHistorySearchList"
+          >{{ item }}
+        </view>
       </view>
     </view>
     <view v-if="searchList.length === 0" class="history">
       <view class="title">
         <view class="text">搜索发现</view>
-        <view class="icon icon-left"></view>
+        <view @tap="getHistorySearchListData" class="ftysIcon icon-shuaxin"></view>
       </view>
       <view class="content">
-        <view class="item" :key="item" v-for="item in 10"> 苹果香蕉{{ item }} </view>
+        <view
+          @tap="($event) => getSearchListData('tap', item)"
+          class="item"
+          :key="index"
+          v-for="(item, index) in searchDiscoverList"
+          >{{ item }}
+        </view>
       </view>
     </view>
     <view class="search-list" v-else>
@@ -105,14 +132,14 @@ const goToHome = () => {
       </view>
       <view class="list-container">
         <view class="item" v-for="item in searchList" :key="item.goodsId">
-          <image :src="item.image" />
+          <image :src="item.images[0]" />
           <view class="info">
             <view class="title">{{ item.name }}</view>
             <view class="price">￥{{ item.price }}</view>
           </view>
           <view class="right">
-            <view class="shoucang icon icon-search"></view>
-            <view class="jiagou icon icon-search"></view>
+            <view class="ftysIcon icon-shoucang"></view>
+            <view class="ftysIcon icon-a-jiagou2x"></view>
           </view>
         </view>
       </view>
@@ -138,13 +165,15 @@ page {
   position: relative;
   display: flex;
   align-items: center;
-  padding-top: 120px;
+  padding-top: 20px;
   width: 100%;
+
   .back {
     color: #fff;
     width: 60rpx;
     text-align: center;
   }
+
   .logo {
     display: flex;
     align-items: center;
@@ -180,6 +209,7 @@ page {
     font-size: 28rpx;
     border-radius: 32rpx;
     background-color: rgba(255, 255, 255, 0.5);
+
     .search-btn {
       color: #fff;
       border-radius: 30rpx;
@@ -247,36 +277,50 @@ page {
     }
   }
 }
+
 .search-list {
   margin: 20rpx 20rpx 0;
+
   .order {
     display: flex;
   }
+
   .list-container {
     .item {
       display: flex;
-      justify-content: space-around;
       border-bottom: 1px solid #eee2e2;
       margin-top: 30rpx;
+
       image {
         height: 200rpx;
         width: 200rpx;
       }
+
       .info {
         display: flex;
         flex-direction: column;
+        justify-content: center;
+        width: 90%;
+
         .title {
         }
+
         .price {
-          margin-top: 50rpx;
+          margin-top: 30rpx;
+          color: #ff5040;
         }
       }
+
       .right {
         display: flex;
         flex-direction: column;
+        flex: 1;
+        justify-content: space-around;
+
         .shoucang {
           height: 50%;
         }
+
         .jiagou {
           flex: 1;
         }

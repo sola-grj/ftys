@@ -19,9 +19,14 @@ const query = defineProps<{
       <text class="logo-text">新鲜 · 亲民 · 快捷</text>
     </view> -->
     <!-- 搜索条 -->
-    <view class="search">
-      <text @tap="goToSearch" class="icon-search">搜索商品</text>
+    <!-- <view class="search"> -->
+    <!-- <text @tap="goToSearch" class="icon-search">搜索商品</text> -->
+    <view @tap="goToSearch" class="search">
+      <text class="ftysIcon icon-sousuo"></text>
+      <input disabled />
+      <button class="search-btn">搜索</button>
     </view>
+    <!-- </view> -->
     <view class="recommand-list">
       <view class="recommand-item" v-for="item in query.topList" :key="item.goodsId">{{
         item.name
@@ -64,6 +69,7 @@ const query = defineProps<{
   }
 
   .search {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -74,6 +80,18 @@ const query = defineProps<{
     font-size: 28rpx;
     border-radius: 32rpx;
     background-color: rgba(255, 255, 255, 0.5);
+
+    .search-btn {
+      color: #fff;
+      border-radius: 30rpx;
+      height: 54rpx;
+      line-height: 54rpx;
+      background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
+      font-size: 26rpx;
+      font-weight: 400;
+      margin: 0;
+      margin: 5rpx;
+    }
   }
 
   .icon-search {

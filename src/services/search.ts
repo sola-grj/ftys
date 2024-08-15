@@ -1,4 +1,4 @@
-import type { SearchGoodsResult } from '@/types/search'
+import type { SearchGoodsResult, SearchHistoryGoodsResult } from '@/types/search'
 import type { PageParams, PageResult } from '@/types/global'
 import { http } from '@/utils/http'
 
@@ -11,5 +11,16 @@ export const getSearchListAPI = (data: { keyword: string; page: number; pageSize
     method: 'GET',
     url: '/goods/searchGoods',
     data,
+  })
+}
+
+/**
+ * 历史搜索&amp;搜索发现
+ * @param
+ */
+export const getHistorySearchListAPI = () => {
+  return http<SearchHistoryGoodsResult>({
+    method: 'GET',
+    url: '/search_keyword/getHistoryKeyword',
   })
 }
