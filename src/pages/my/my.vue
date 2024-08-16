@@ -2,7 +2,22 @@
 import { useGuessList } from '@/composables'
 import { useMemberStore } from '@/stores'
 import type { SolaShopGuessInstance } from '@/types/component'
+import { onShow } from '@dcloudio/uni-app'
 import { ref } from 'vue'
+
+// 获取会员信息
+const memberStore = useMemberStore()
+
+// 三种用户角色
+// 我的页面判断用户权限
+onShow(() => {
+  // 司机角色，不显示底部tabbar  	1:业务员 2:司机 3:生鲜 4:干货 5:生鲜&干货
+  if (memberStore.profile?.userinfo.type_id === '2') {
+    uni.hideTabBar({
+      animation: false,
+    })
+  }
+})
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -35,8 +50,6 @@ const HelpCenterTypes = [
   { type: 2, text: '服务条款', icon: 'icon-fuwutiaokuan' },
   { type: 3, text: '关于我们', icon: 'icon-guanyuwomen' },
 ]
-// 获取会员信息
-const memberStore = useMemberStore()
 
 const { guessRef, onScrollToLower } = useGuessList()
 </script>

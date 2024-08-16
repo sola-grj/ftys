@@ -47,6 +47,12 @@
 			}
 		},
 		{
+			"path": "pages/quickbuy/quickbuy",
+			"style": {
+				"navigationBarTitleText": "快捷下单"
+			}
+		},
+		{
 			"path": "pages/login/login",
 			"style": {
 				"navigationBarTitleText": "登录"
@@ -103,6 +109,12 @@
 				"pagePath": "pages/category/category",
 				"iconPath": "static/tabs/category_default.png",
 				"selectedIconPath": "static/tabs/category_selected.png"
+			},
+			{
+				"text": "快捷下单",
+				"pagePath": "pages/quickbuy/quickbuy",
+				"iconPath": "static/tabs/quick_buy_default.png",
+				"selectedIconPath": "static/tabs/quick_buy_checked.png"
 			},
 			{
 				"text": "购物车",
