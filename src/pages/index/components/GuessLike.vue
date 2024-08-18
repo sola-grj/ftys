@@ -9,6 +9,9 @@ defineProps<{
   activeIndex: number
   onActiveChange: (activeIndex: number) => void
 }>()
+const goToCoupon = () => {
+  uni.navigateTo({ url: '/pages/coupon/coupon?from=home' })
+}
 </script>
 
 <template>
@@ -30,7 +33,7 @@ defineProps<{
       </view>
     </view>
 
-    <view class="right">
+    <view class="right" @tap="goToCoupon">
       <image
         src="https://img.js.design/assets/img/647f508ef4cf090efd244f0d.png#abcd9de40757a3e271102c0dfedec16e"
       />

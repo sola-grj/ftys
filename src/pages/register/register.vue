@@ -212,7 +212,7 @@ const chooseAddress = (type: string) => {
 const test = ref({})
 const onSelect = (event: any) => {
   uni.uploadFile({
-    url: 'common/upload', //仅为示例，非真实的接口地址
+    url: '/common/upload', //仅为示例，非真实的接口地址
     filePath: event.tempFilePaths[0],
     name: 'file',
     success: (res) => {

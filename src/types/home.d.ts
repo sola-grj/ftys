@@ -76,6 +76,6 @@ export type RecommendItem = {
 
 export type RecommendResult = {
   list: RecommendItem[]
-  total: string
+  total: number
   page: string
 }

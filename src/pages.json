@@ -29,6 +29,14 @@
 			}
 		},
 		{
+			"path": "pages/coupon/coupon",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTextStyle": "white",
+				"navigationBarTitleText": "我的优惠券"
+			}
+		},
+		{
 			"path": "pages/cart/cart",
 			"style": {
 				"navigationBarTitleText": "购物车"
@@ -160,6 +168,34 @@
 				{
 					"path": "address-form/address-form",
 					"style": {
+						"navigationBarTitleText": ""
+					}
+				},
+				{
+					"path": "feedback/feedback",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": ""
+					}
+				},
+				{
+					"path": "addfeedback/addfeedback",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": ""
+					}
+				},
+				{
+					"path": "performance/performance",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": ""
+					}
+				},
+				{
+					"path": "orderstatus/orderstatus",
+					"style": {
+						"navigationStyle": "custom",
 						"navigationBarTitleText": ""
 					}
 				}

@@ -101,7 +101,7 @@ const getRecommendData = async () => {
   const res = await getRecommendGoodsAPI({ ...recommendPageParams })
   // 分页数据增加
   recommendList.value.push(...res.result.list)
-  if (recommendPageParams.page < res.result.list.length) {
+  if (recommendPageParams.page < res.result.total) {
     // 页码累加
     recommendPageParams.page++
   } else {
@@ -119,7 +119,7 @@ const getHistoryData = async () => {
   const res = await getFootPrintGoodsAPI({ ...historyPageParams })
   // 分页数据增加
   historyList.value.push(...res.result.list)
-  if (historyPageParams.page < res.result.list.length) {
+  if (historyPageParams.page < res.result.total) {
     // 页码累加
     historyPageParams.page++
   } else {

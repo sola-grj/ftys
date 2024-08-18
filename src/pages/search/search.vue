@@ -55,7 +55,7 @@ const getSearchListData = async (action: string = '', other: string = '') => {
   const res = await getSearchListAPI({ keyword: keyword.value, ...pageParams })
   // 分页数据增加
   searchList.value.push(...res.result.list)
-  if (pageParams.page < res.result.list.length) {
+  if (pageParams.page < res.result.total) {
     // 页码累加
     pageParams.page++
   } else {

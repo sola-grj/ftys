@@ -8,6 +8,22 @@ import { ref } from 'vue'
 // 获取会员信息
 const memberStore = useMemberStore()
 
+// 查看当前账号是主账号还是子账号 1:主账号 2:子账号
+let user_role = memberStore.profile?.userinfo.user_role
+// 用户type_id
+/**  1:业务员 2:司机 3:生鲜 4:干货 5:生鲜&干货
+ *  type_id 1 最高权限
+    type_id 2 只展示 我的 页面
+    type_id 3 4 5 && user_role === 2  客户 客户才有主账号 子账号
+ */
+const type_id = memberStore.profile?.userinfo.type_id
+
+// 子账号是否展示欠款信息 1 0
+let credit_price = memberStore.profile?.userinfo.credit_price
+
+// user_role = '2'
+// credit_price = '0'
+
 // 三种用户角色
 // 我的页面判断用户权限
 onShow(() => {
@@ -16,6 +32,10 @@ onShow(() => {
     uni.hideTabBar({
       animation: false,
     })
+  }
+  // 子账号 查看 欠款权限
+  if (user_role === '2' && credit_price === '0') {
+    CouponTypes.value = CouponTypes.value.filter((item) => item.name !== '欠款')
   }
 })
 
@@ -29,19 +49,19 @@ const orderTypes = [
   { type: 4, text: '退换/售后', icon: 'icon-shouhou' },
 ]
 // 优惠券、欠款、余额
-const CouponTypes = [
+const CouponTypes = ref([
   { name: '优惠券', data: '38', desc: '下单立省' },
   { name: '欠款', data: '2677.00', desc: '当前欠款' },
   { name: '账户余额', data: '0.00', desc: '在线充值' },
-]
+])
 // 常用工具
 const ToolTypes = [
-  { type: 1, text: '子账号', icon: 'icon-touxiang' },
-  { type: 2, text: '我的报表', icon: 'icon-baobiao' },
-  { type: 3, text: '导出对账单', icon: 'icon-shujuguanli-daohang-daorushuju' },
-  { type: 4, text: '新品需求', icon: 'icon-xinpin' },
-  { type: 5, text: '意见反馈', icon: 'icon-yijianfankui' },
-  { type: 6, text: '在线客服', icon: 'icon-kefu' },
+  { type: 1, name: '子账号', icon: 'icon-touxiang' },
+  { type: 2, name: '我的报表', icon: 'icon-baobiao' },
+  { type: 3, name: '导出对账单', icon: 'icon-shujuguanli-daohang-daorushuju' },
+  { type: 4, name: '新品需求', icon: 'icon-xinpin' },
+  { type: 5, name: '意见反馈', icon: 'icon-yijianfankui' },
+  { type: 6, name: '在线客服', icon: 'icon-kefu' },
 ]
 
 // 帮助中心
@@ -52,6 +72,71 @@ const HelpCenterTypes = [
 ]
 
 const { guessRef, onScrollToLower } = useGuessList()
+
+// 图表相关
+const opts = {
+  color: [
+    '#1890FF',
+    '#91CB74',
+    '#FAC858',
+    '#EE6666',
+    '#73C0DE',
+    '#3CA272',
+    '#FC8452',
+    '#9A60B4',
+    '#ea7ccc',
+  ],
+  padding: [15, 10, 0, 15],
+  enableScroll: false,
+  legend: {},
+  xAxis: {
+    disableGrid: true,
+  },
+  yAxis: {
+    gridType: 'dash',
+    dashLength: 2,
+  },
+  extra: {
+    line: {
+      type: 'curve',
+      width: 2,
+      activeType: 'hollow',
+    },
+  },
+}
+
+const lineData = {
+  categories: ['2018', '2019', '2020', '2021', '2022', '2023'],
+  series: [
+    {
+      name: '成交量A',
+      lineType: 'dash',
+      data: [35, 8, 25, 37, 4, 20],
+    },
+    {
+      name: '成交量B',
+      data: [70, 40, 65, 100, 44, 68],
+    },
+    {
+      name: '成交量C',
+      data: [100, 80, 95, 150, 112, 132],
+    },
+  ],
+}
+// 跳转
+const onJump = (data: any) => {
+  switch (data.name) {
+    case '优惠券':
+      uni.navigateTo({ url: '/pages/coupon/coupon?from=my' })
+      break
+    case '意见反馈':
+      uni.navigateTo({ url: '/pagesMember/feedback/feedback' })
+      break
+
+    default:
+      break
+  }
+}
 </script>
 
 <template>
@@ -124,10 +209,16 @@ const { guessRef, onScrollToLower } = useGuessList()
       </view>
     </view>
     <!-- 优惠券、欠款、账户余额 -->
-    <view class="coupons">
+    <view
+      v-if="
+        type_id?.toString() === '3' || type_id?.toString() === '4' || type_id?.toString() === '5'
+      "
+      class="coupons"
+    >
       <view class="coupons-item">
         <!-- 订单 -->
         <navigator
+          @tap="($event) => onJump(item)"
           v-for="item in CouponTypes"
           :key="item.name"
           class="navigator"
@@ -144,14 +235,14 @@ const { guessRef, onScrollToLower } = useGuessList()
     <!-- 常用工具 -->
     <view class="tools">
       <view class="title"> 常用工具 </view>
-      <view class="tool-item" v-for="item in ToolTypes" :key="item.type">
-        <navigator
-          :class="`ftysIcon ${item.icon}`"
-          :url="`/PagesOrder/list/list?type=${item.type}`"
-          class="navigator"
-          hover-class="none"
-        >
-          <text class="text">{{ item.text }}</text>
+      <view
+        class="tool-item"
+        @tap="($event) => onJump(item)"
+        v-for="item in ToolTypes"
+        :key="item.type"
+      >
+        <navigator :class="`ftysIcon ${item.icon}`" class="navigator" hover-class="none">
+          <text class="text">{{ item.name }}</text>
         </navigator>
       </view>
     </view>
@@ -168,6 +259,14 @@ const { guessRef, onScrollToLower } = useGuessList()
           <text class="text">{{ item.text }}</text>
         </navigator>
       </view>
+    </view>
+    <!-- 业务员图表 -->
+    <view v-if="type_id === '1'" class="charts-box">
+      <view class="title">
+        <text class="left">30天业绩变化（发货）</text>
+        <text class="right">更多</text>
+      </view>
+      <qiun-data-charts type="line" :opts="opts" :chartData="lineData" />
     </view>
   </scroll-view>
 </template>
@@ -278,8 +377,9 @@ page {
   .title {
     height: 40rpx;
     line-height: 40rpx;
-    font-size: 28rpx;
+    // font-size: 28rpx;
     color: #1e1e1e;
+    font-weight: bold;
 
     .navigator {
       font-size: 24rpx;
@@ -338,16 +438,21 @@ page {
 .coupons {
   position: relative;
   z-index: 99;
-  padding: 30rpx;
+  padding: 30rpx 0;
   margin: 50rpx 20rpx 0;
   background-color: #fff;
   border-radius: 10rpx;
   box-shadow: 0 4rpx 6rpx rgba(240, 240, 240, 0.6);
 
+  .title {
+    font-weight: bold;
+    height: 60rpx;
+  }
+
   .coupons-item {
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     padding: 20rpx 20rpx 10rpx;
 
     .navigator {
@@ -356,9 +461,11 @@ page {
       display: flex;
       flex-direction: column;
       align-items: center;
+      flex: 1;
 
       .data {
-        font-size: 40rpx;
+        font-size: 34rpx;
+        white-space: nowrap;
       }
 
       .name {
@@ -382,6 +489,11 @@ page {
   background-color: #fff;
   border-radius: 10rpx;
   box-shadow: 0 4rpx 6rpx rgba(240, 240, 240, 0.6);
+
+  .title {
+    font-weight: bold;
+    height: 60rpx;
+  }
 
   .tool-item {
     display: inline-block;
@@ -412,6 +524,11 @@ page {
   border-radius: 10rpx;
   box-shadow: 0 4rpx 6rpx rgba(240, 240, 240, 0.6);
 
+  .title {
+    font-weight: bold;
+    height: 60rpx;
+  }
+
   .help-center-item {
     display: inline-block;
     width: 25%;
@@ -436,5 +553,32 @@ page {
 .guess {
   background-color: #f7f7f8;
   margin-top: 20rpx;
+}
+
+.charts-box {
+  height: 300px;
+  position: relative;
+  z-index: 99;
+  padding: 30rpx;
+  margin: 50rpx 20rpx 0;
+  background-color: #fff;
+  border-radius: 10rpx;
+  box-shadow: 0 4rpx 6rpx rgba(240, 240, 240, 0.6);
+
+  .title {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    height: 60rpx;
+
+    .left {
+    }
+
+    .right {
+      font-size: 28rpx;
+      font-weight: 500;
+      color: #666666;
+    }
+  }
 }
 </style>
