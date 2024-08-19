@@ -21,37 +21,19 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
 
 // 接收页面参数
 const query = defineProps<{
-  id: string
+  source: string
+  goodsId: string
 }>()
+console.log('query', query)
 
 // 获取商品详情信息
 const goods = ref<GoodsResult>()
 const getGoodsByIdData = async () => {
-  const res = await getGoodsByIdAPI(query.id)
+  const res = await getGoodsByIdAPI({
+    source: query.source,
+    goodsId: query.goodsId,
+  })
   goods.value = res.result
-  // SKU组件所需格式
-  localdata.value = {
-    _id: res.result.id,
-    name: res.result.name,
-    goods_thumb: res.result.mainPictures[0],
-    spec_list: res.result.specs.map((v) => {
-      return {
-        name: v.name,
-        list: v.values,
-      }
-    }),
-    sku_list: res.result.skus.map((v) => {
-      return {
-        _id: v.id,
-        goods_id: res.result.id,
-        goods_name: res.result.name,
-        image: v.picture,
-        price: v.price * 100, // 注意需要乘以100
-        stock: v.inventory,
-        sku_name_arr: v.specs.map((vv) => vv.valueName),
-      }
-    }),
-  }
 }
 
 const addressStore = useAddressStore()
@@ -64,7 +46,7 @@ const getMemberAddressData = async () => {
 
 onLoad(() => {
   getGoodsByIdData()
-  getMemberAddressData()
+  // getMemberAddressData()
 })
 // 轮播图变化的回调
 const currentIndex = ref(0)
@@ -156,14 +138,14 @@ const onBuyNow = (ev: SkuPopupEvent) => {
       <!-- 商品主图 -->
       <view class="preview">
         <swiper @change="onChange" circular>
-          <swiper-item v-for="item in goods?.mainPictures" :key="item">
+          <swiper-item v-for="item in goods?.images" :key="item">
             <image @tap="onTapImage(item)" mode="aspectFill" :src="item" />
           </swiper-item>
         </swiper>
         <view class="indicator">
           <text class="current">{{ currentIndex + 1 }}</text>
           <text class="split">/</text>
-          <text class="total">{{ goods?.mainPictures.length }}</text>
+          <text class="total">{{ goods?.images.length }}</text>
         </view>
       </view>
 
@@ -173,12 +155,12 @@ const onBuyNow = (ev: SkuPopupEvent) => {
           <text class="symbol">¥</text>
           <text class="number">{{ goods?.price }}</text>
         </view>
-        <view class="name ellipsis">{{ goods?.name }} </view>
-        <view class="desc"> {{ goods?.desc }} </view>
+        <!-- <view class="name ellipsis">{{ goods?.name }} </view>
+        <view class="desc"> {{ goods?.desc }} </view> -->
       </view>
 
       <!-- 操作面板 -->
-      <view class="action">
+      <!-- <view class="action">
         <view @tap="($event) => openSkuPopup(SkuMode.Both)" class="item arrow">
           <text class="label">选择</text>
           <text class="text ellipsis"> {{ selectArrText }} </text>
@@ -197,7 +179,7 @@ const onBuyNow = (ev: SkuPopupEvent) => {
           <text class="label">服务</text>
           <text class="text ellipsis"> 无忧退 快速退款 免费包邮 </text>
         </view>
-      </view>
+      </view> -->
     </view>
 
     <!-- 商品详情 -->
@@ -208,34 +190,24 @@ const onBuyNow = (ev: SkuPopupEvent) => {
       <view class="content">
         <view class="properties">
           <!-- 属性详情 -->
-          <view class="item" v-for="item in goods?.details.properties" :key="item.name">
+          <!-- <view class="item" v-for="item in goods?.details.properties" :key="item.name">
             <text class="label">{{ item.name }}</text>
             <text class="value">{{ item.value }}</text>
-          </view>
+          </view> -->
         </view>
         <!-- 图片详情 -->
-        <image
-          v-for="item in goods?.details.pictures"
-          :key="item"
-          :src="item"
-          mode="widthFix"
-        ></image>
+        <!-- <image v-for="item in goods?.details.pictures" :key="item" :src="item" mode="widthFix"></image> -->
       </view>
     </view>
 
     <!-- 同类推荐 -->
-    <view class="similar panel">
+    <!-- <view class="similar panel">
       <view class="title">
         <text>同类推荐</text>
       </view>
       <view class="content">
-        <navigator
-          v-for="item in goods?.similarProducts"
-          :key="item.id"
-          class="goods"
-          hover-class="none"
-          :url="`/pages/goods/goods?id=${item.id}`"
-        >
+        <navigator v-for="item in goods?.similarProducts" :key="item.id" class="goods" hover-class="none"
+          :url="`/pages/goods/goods?id=${item.id}`">
           <image class="image" mode="aspectFill" :src="item.picture"></image>
           <view class="name ellipsis">{{ item.name }}</view>
           <view class="price">
@@ -244,7 +216,7 @@ const onBuyNow = (ev: SkuPopupEvent) => {
           </view>
         </navigator>
       </view>
-    </view>
+    </view> -->
   </scroll-view>
 
   <!-- 用户操作 -->

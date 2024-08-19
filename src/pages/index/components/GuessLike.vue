@@ -41,7 +41,12 @@ const goToCoupon = () => {
     </view>
   </view>
   <view v-if="activeIndex === 0" class="list-container">
-    <view class="item" v-for="item in recommendList" :key="item.goodsId">
+    <navigator
+      :url="`/pages/goods/goods?source=${item.source}&goodsId=${item.goodsId}`"
+      class="item"
+      v-for="item in recommendList"
+      :key="item.goodsId"
+    >
       <view class="item-container">
         <image :src="item.images[0]" />
         <view class="name">{{ item.name }}</view>
@@ -50,10 +55,15 @@ const goToCoupon = () => {
           <view class="ftysIcon icon-a-jiagou2x"></view>
         </view>
       </view>
-    </view>
+    </navigator>
   </view>
   <view v-if="activeIndex === 1" class="list-container">
-    <view class="item" v-for="item in historyList" :key="item.goodsId">
+    <navigator
+      :url="`/pages/goods/goods?source=${item.source}&goodsId=${item.goodsId}`"
+      class="item"
+      v-for="item in historyList"
+      :key="item.goodsId"
+    >
       <view class="item-container">
         <image :src="item.images[0]" />
         <view class="name">{{ item.name }}</view>
@@ -62,7 +72,7 @@ const goToCoupon = () => {
           <view class="ftysIcon icon-a-jiagou2x"></view>
         </view>
       </view>
-    </view>
+    </navigator>
   </view>
 </template>
 
