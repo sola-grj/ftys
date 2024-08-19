@@ -198,6 +198,20 @@
 						"navigationStyle": "custom",
 						"navigationBarTitleText": ""
 					}
+				},
+				{
+					"path": "debtSituation/debtSituation",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": ""
+					}
+				},
+				{
+					"path": "reports/reports",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": ""
+					}
 				}
 			]
 		},

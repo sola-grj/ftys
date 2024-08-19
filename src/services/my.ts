@@ -1,4 +1,5 @@
 import type {
+  CustomerBillResult,
   MyPerformanceResult,
   MySuggestItem,
   MySuggestResult,
@@ -57,5 +58,16 @@ export const getOrderPerformanceAPI = (data: { dateFilter: string }) => {
     method: 'POST',
     url: '/sales/getOrderPerformance',
     data,
+  })
+}
+
+/**
+ * 下单情况
+ * @param data 请求参数
+ */
+export const getcustomerBillAPI = () => {
+  return http<CustomerBillResult>({
+    method: 'POST',
+    url: '/sales/customerBill',
   })
 }

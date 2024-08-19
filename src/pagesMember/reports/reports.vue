@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { getMyCouponListAPI, getCouponListAPI, receiveCouponAPI } from '@/services/coupon'
 import { getMySuggestAPI, getOrderPerformanceAPI } from '@/services/my'
+import { getOrderListAPI } from '@/services/order'
 import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
 import type { MySuggestItem, OrderStatusItem } from '@/types/my'
+import type { OrderItem } from '@/types/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 
@@ -12,6 +13,54 @@ const formatDate = (date: Date) => {
   var month = addZero(date.getMonth() + 1)
   var day = addZero(date.getDate())
   return year + '-' + month + '-' + day
+}
+// 获取昨日数据
+const getYestDayOrNextDay = () => {
+  // 获取当前日期
+  const today = new Date()
+  // 计算前一天的日期
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1)
+
+  return yesterday.toLocaleDateString().replaceAll('/', '-')
+}
+// 获取本周首尾数据
+const getThisWeek = () => {
+  let today = new Date()
+  let dayOfWeek = today.getDay() - 1
+  let startDate = new Date(today.getTime() - dayOfWeek * 86400000)
+  let endDate = new Date(startDate.getTime() + 4 * 86400000)
+  return {
+    startDate: startDate.toLocaleDateString().replaceAll('/', '-'), // 2023/8/7
+    endDate: endDate.toLocaleDateString().replaceAll('/', '-'), // 2023/8/11
+  }
+}
+// 获取当月
+const getThisMonth = () => {
+  let today = new Date()
+  let year = today.getFullYear()
+  let month = today.getMonth() + 1
+  let daysInMonth = new Date(year, month, 0).getDate()
+  let startDate = new Date(year, month - 1, 1)
+  let endDate = new Date(year, month - 1, daysInMonth)
+  return {
+    startDate: startDate.toLocaleDateString(), // 2023/8/1
+    endDate: endDate.toLocaleDateString(), // 2023/8/31
+  }
+}
+// 获取上个月首尾
+const getLastMonth = () => {
+  let thisMonth = getThisMonth()
+  let startDate = new Date(
+    new Date(thisMonth.startDate).setMonth(new Date(thisMonth.startDate).getMonth() - 1),
+  )
+  let endDate = new Date(
+    new Date(thisMonth.endDate).setMonth(new Date(thisMonth.endDate).getMonth(), 0),
+  )
+  return {
+    startDate: startDate.toLocaleDateString().replaceAll('/', '-'), // 2023/7/1
+    endDate: endDate.toLocaleDateString().replaceAll('/', '-'), // 2023/7/31
+  }
 }
 
 const addZero = (num: number) => {
@@ -24,27 +73,26 @@ const pageParams: Required<PageParams> = {
   pageSize: 10,
 }
 const isFinish = ref(false)
-// 今天的日期
-const today = formatDate(new Date())
+// 昨天的日期
+const yesterday = getYestDayOrNextDay()
 
-// 近七天
-const sevenDay = formatDate(new Date(new Date().setDate(new Date().getDate() + 7)))
+// 本周
+const { startDate: startDateWeek, endDate: endDateWeek } = getThisWeek()
 
-// 近十五天
-const fifteenDay = formatDate(new Date(new Date().setDate(new Date().getDate() + 15)))
+// 上个月
+const { startDate: startDateMonth, endDate: endDateMonth } = getLastMonth()
 
-// 近三十天
-const thirteenDay = formatDate(new Date(new Date().setDate(new Date().getDate() + 30)))
+console.log('======', yesterday, startDateWeek, endDateWeek, startDateMonth, endDateMonth)
 
 // 获取下单情况数据
-const orderList = ref<OrderStatusItem[]>([])
-const getOrderPerformanceData = async (dateFilter: string) => {
+const orderList = ref<OrderItem[]>([])
+const getOrderListData = async (queryTimeType: string) => {
   // 退出判断
   if (isFinish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
   }
-  const res = await getOrderPerformanceAPI({
-    dateFilter,
+  const res = await getOrderListAPI({
+    queryTimeType,
   })
   const mock = [
     {
@@ -66,7 +114,7 @@ const getOrderPerformanceData = async (dateFilter: string) => {
       mobile: '13355556666',
     },
   ]
-  orderList.value.push(...mock)
+  // orderList.value.push(...mock)
   // orderList.value.push(...res.result.list)
 
   if (pageParams.page < res.result.total) {
@@ -80,78 +128,69 @@ const getOrderPerformanceData = async (dateFilter: string) => {
 const single = ref('')
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
-const activeIndex = ref('today')
+const activeIndex = ref('yesterday')
 const onChangeIndex = (index: string) => {
   activeIndex.value = index
-  getOrderPerformanceData(index)
+  getOrderListData(index)
 }
 
 onLoad(() => {
-  getOrderPerformanceData('today')
+  getOrderListData('week')
 })
 </script>
 
 <template>
-  <scroll-view
-    @scrolltolower="getOrderPerformanceData"
-    class="viewport"
-    scroll-y
-    enable-back-to-top
-  >
+  <scroll-view @scrolltolower="getOrderListData" class="viewport" scroll-y enable-back-to-top>
     <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
       <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">下单情况</text>
+      <text class="text">我的报表</text>
     </view>
     <view class="container">
       <view class="login-container">
         <view class="login-type">
           <view
-            @tap="($event) => onChangeIndex('today')"
+            @tap="($event) => onChangeIndex('yesterday')"
             class="pwd-btn"
-            :class="activeIndex === 'today' ? 'checked' : ''"
-            >今天
+            :class="activeIndex === 'yesterday' ? 'checked' : ''"
+            >昨日
           </view>
           <view
-            @tap="($event) => onChangeIndex('7')"
+            @tap="($event) => onChangeIndex('week')"
             class="code-btn"
-            :class="activeIndex === '7' ? 'checked' : ''"
-            >七天
-          </view>
-          <view
-            @tap="($event) => onChangeIndex('15')"
-            class="code-btn"
-            :class="activeIndex === '15' ? 'checked' : ''"
+            :class="activeIndex === 'week' ? 'checked' : ''"
           >
-            十五天
+            本周
           </view>
           <view
-            @tap="($event) => onChangeIndex('30')"
+            @tap="($event) => onChangeIndex('lastMonth')"
             class="code-btn"
-            :class="activeIndex === '30' ? 'checked' : ''"
+            :class="activeIndex === 'lastMonth' ? 'checked' : ''"
           >
-            三十天
+            上月
           </view>
         </view>
         <view class="show-time">
-          <text class="start-time">{{ today }}</text
-          >&nbsp;~
-          <text v-if="activeIndex === 'today'" class="end-time">{{ today }}</text>
-          <text v-if="activeIndex === '7'" class="end-time">{{ sevenDay }}</text>
-          <text v-if="activeIndex === '15'" class="end-time">{{ fifteenDay }}</text>
-          <text v-if="activeIndex === '30'" class="end-time">{{ thirteenDay }}</text>
+          <text v-if="activeIndex === 'yesterday'" class="start-time">{{ yesterday }}</text>
+          <text v-if="activeIndex === 'week'" class="start-time">{{ startDateWeek }}</text>
+          <text v-if="activeIndex === 'lastMonth'" class="start-time">{{ startDateMonth }}</text>
+          &nbsp;~
+          <text v-if="activeIndex === 'yesterday'" class="end-time">{{ yesterday }}</text>
+          <text v-if="activeIndex === 'week'" class="end-time">{{ endDateWeek }}</text>
+          <text v-if="activeIndex === 'lastMonth'" class="end-time">{{ endDateMonth }}</text>
           &nbsp;
           <text class="ftysIcon icon-riqi" />
         </view>
       </view>
       <view class="table-title table-item">
-        <text class="name">客户名称</text>
-        <text class="time">最近一次下单</text>
-        <text class="operate">操作</text>
+        <text class="total">总金额：￥00000</text>
       </view>
-      <view v-for="item in orderList" :key="item.userId" class="table-item">
-        <text class="name">{{ item.username }}</text>
-        <text class="time">{{ item.orderTime }}</text>
-        <text class="ftysIcon icon-dianhua"></text>
+      <view v-for="item in 5" :key="item" class="table-item">
+        <view class="left">
+          <text class="name">订单号：1234567 <text class="detail">详情>></text> </text>
+          <text class="time">2024-07-12 12:34:56</text>
+        </view>
+
+        <text class="amount">￥10.00</text>
       </view>
     </view>
   </scroll-view>
@@ -251,18 +290,44 @@ page {
     }
 
     .table-item {
-      height: 60rpx;
+      height: 120rpx;
       width: 100%;
       display: flex;
       justify-content: space-between;
       margin-top: 30rpx;
       border-bottom: 1px dashed #afb0b2;
       font-size: 28rpx;
+
+      .left {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+
+        .name {
+        }
+
+        .detail {
+          color: #ff941a;
+        }
+      }
+
+      .amount {
+        color: #ff5040;
+      }
     }
 
     .table-title {
-      border-bottom: 1px solid #afb0b2;
+      position: relative;
       font-weight: bold;
+      border-bottom: none;
+      height: 20rpx;
+      background: linear-gradient(96.62deg, rgba(255, 116, 88, 1) 0%, rgba(255, 137, 114, 0) 100%);
+
+      .total {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+      }
     }
   }
 }

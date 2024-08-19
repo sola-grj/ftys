@@ -58,3 +58,19 @@ export type OrderStatusResult = {
   page: string
   list: OrderStatusItem[]
 }
+
+export type CustomerBillItem = {
+  orderId: string
+  userId: string
+  username: string
+  mobile: string
+  SDebt: string
+  HDebt: string
+  totalDebt: string
+}
+
+export type CustomerBillResult = {
+  total: number
+  page: string
+  list: CustomerBillItem[]
+}

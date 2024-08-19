@@ -140,3 +140,16 @@ export const getMemberOrderAPI = (data: OrderListParams) => {
     data,
   })
 }
+
+// *******
+/**
+ * 获取订单信息
+ * @param data 请求参数
+ */
+export const getOrderListAPI = (data: { queryTimeType: string }) => {
+  return http<OrderListResult>({
+    method: 'POST',
+    url: '/order/getOrderList',
+    data,
+  })
+}
