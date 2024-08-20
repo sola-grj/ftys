@@ -22,5 +22,5 @@ export const useGuessList = () => {
 
 export const useCollect = async (source: string, goodsId: string) => {
   const res = await getGoodsCollectInfoAPI({ source, goodsId })
-  return res.result
+  return res
 }

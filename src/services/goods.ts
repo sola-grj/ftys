@@ -1,4 +1,5 @@
 import type { GoodsResult } from '@/types/goods'
+import type { RecommendResult } from '@/types/home'
 import { http } from '@/utils/http'
 
 /**
@@ -17,7 +18,7 @@ export const getGoodsByIdAPI = (data: { source: string; goodsId: string }) => {
  * 添加商品收藏
  * @param id 商品id
  */
-export const addGoodsCollectAPI = (data: { source: string; goodsId: string }) => {
+export const getGoodsCollectInfoAPI = (data: { source: string; goodsId: string }) => {
   return http({
     method: 'POST',
     url: '/goods/addGoodsCollect',
@@ -26,13 +27,18 @@ export const addGoodsCollectAPI = (data: { source: string; goodsId: string }) =>
 }
 
 /**
- * 添加商品收藏
+ * 產品詳情頁 商品推薦
  * @param id 商品id
  */
-export const getGoodsCollectInfoAPI = (data: { source: string; goodsId: string }) => {
-  return http({
+export const goodsDetailPageRecommendGoodsAPI = (data: {
+  source: string
+  goodsId: string
+  page: number
+  pageSize: number
+}) => {
+  return http<RecommendResult>({
     method: 'POST',
-    url: '/goods/addGoodsCollect',
+    url: '/goods/goodsDetailPageRecommendGoods',
     data,
   })
 }

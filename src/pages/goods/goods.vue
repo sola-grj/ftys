@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getGoodsByIdAPI } from '@/services/goods'
+import { getGoodsByIdAPI, goodsDetailPageRecommendGoodsAPI } from '@/services/goods'
 import type { GoodsResult } from '@/types/goods'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
@@ -15,6 +15,7 @@ import { postMemberCartAPI } from '@/services/cart'
 import { useAddressStore } from '@/stores/modules/address'
 import type { AddressItem } from '@/types/address'
 import { getMemberAddressAPI } from '@/services/address'
+import type { RecommendItem } from '@/types/home'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -25,6 +26,18 @@ const query = defineProps<{
   goodsId: string
 }>()
 console.log('query', query)
+
+// 獲取商品详情推荐
+const recommendGoods = ref<RecommendItem[]>([])
+const goodsDetailPageRecommendGoodsData = async () => {
+  const res = await goodsDetailPageRecommendGoodsAPI({
+    goodsId: query.goodsId,
+    source: query.source,
+    page: 1,
+    pageSize: 30,
+  })
+  recommendGoods.value = res.result.list
+}
 
 // 获取商品详情信息
 const goods = ref<GoodsResult>()
@@ -46,7 +59,7 @@ const getMemberAddressData = async () => {
 
 onLoad(() => {
   getGoodsByIdData()
-  // getMemberAddressData()
+  goodsDetailPageRecommendGoodsData()
 })
 // 轮播图变化的回调
 const currentIndex = ref(0)
@@ -172,14 +185,26 @@ const onShowModal = (tip: { tipTitle: string; tipDetail: string }) => {
     </view>
     <uni-popup ref="popup" type="dialog" background-color="#fff">
       <view class="popup-root">
-        <view class="title">订单取消</view>
-        <!--@ts-ignore -->
-        <view class="footer">
+        <!--eslint-disable-next-line-->
+        <view v-html="goods?.tip.tipDetail"></view>
+        <!-- <view class="footer">
           <view class="button primary" @tap="onClose">确认</view>
-        </view>
+        </view> -->
       </view>
     </uni-popup>
-    <view class="recommend"></view>
+    <view class="recommend">
+      <uni-number-box @change="changeValue" />
+      <swiper @change="onChange" circular>
+        <swiper-item v-for="item in goods?.images" :key="item">
+          <image @tap="onTapImage(item)" mode="aspectFill" :src="item" />
+        </swiper-item>
+      </swiper>
+      <view class="indicator">
+        <text class="current">{{ currentIndex + 1 }}</text>
+        <text class="split">/</text>
+        <text class="total">{{ goods?.images.length }}</text>
+      </view>
+    </view>
 
     <!-- 商品详情 -->
     <view class="detail panel">
@@ -210,7 +235,7 @@ const onShowModal = (tip: { tipTitle: string; tipDetail: string }) => {
       </view>
       <view class="detailimage">
         <image
-          mode="scaleToFill"
+          mode="aspectFill"
           class="detail-image"
           :key="item"
           :src="item"
@@ -241,24 +266,20 @@ const onShowModal = (tip: { tipTitle: string; tipDetail: string }) => {
   <!-- 用户操作 -->
   <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
     <view class="icons">
-      <button class="icons-button"><text class="icon-heart"></text>收藏</button>
-      <!-- #ifdef MP-WEIXIN -->
       <button class="icons-button" open-type="contact">
-        <text class="icon-handset"></text>客服
+        <text class="ftysIcon icon-kefu"></text>客服
       </button>
-      <!-- #endif -->
       <navigator class="icons-button" url="/pages/cart/cart2" open-type="navigate">
-        <text class="icon-cart"></text>购物车
+        <text class="ftysIcon icon-gouwuche"></text>购物车
       </navigator>
     </view>
     <view class="buttons">
       <view @tap="($event) => openSkuPopup(SkuMode.Cart)" class="addcart"> 加入购物车 </view>
-      <view @tap="($event) => openSkuPopup(SkuMode.Buy)" class="buynow"> 立即购买 </view>
     </view>
   </view>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 page {
   height: 100%;
   overflow: hidden;
@@ -271,11 +292,15 @@ page {
   margin-bottom: 200rpx;
 }
 
+::v-deep .uni-popup__wrapper {
+  border-radius: 20rpx;
+}
+
 .popup-root {
   padding: 30rpx 30rpx 0;
   border-radius: 10rpx 10rpx 0 0;
-  overflow: hidden;
-  height: 500rpx;
+  overflow: scroll;
+  min-height: 500rpx;
   width: 500rpx;
 
   .title {
@@ -364,7 +389,6 @@ page {
       font-size: 28rpx;
       color: #333;
       font-weight: 600;
-      border-left: 4rpx solid #27ba9b;
     }
 
     navigator {
@@ -489,6 +513,14 @@ page {
   }
 }
 
+.recommend {
+  margin-top: 20rpx;
+  min-height: 440rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 20rpx;
+}
+
 /* 商品详情 */
 .detail {
   .content {
@@ -513,9 +545,11 @@ page {
 }
 
 .detailimage {
+  width: 100%;
+
   .detail-image {
-    width: 300rpx;
-    height: 300rpx;
+    width: 750rpx;
+    height: 750rpx;
   }
 }
 
@@ -591,11 +625,11 @@ page {
       line-height: 72rpx;
       font-size: 26rpx;
       color: #fff;
-      border-radius: 72rpx;
+      border-radius: 20rpx;
     }
 
     .addcart {
-      background-color: #ffa868;
+      background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
     }
 
     .buynow,
@@ -612,7 +646,7 @@ page {
     flex: 1;
 
     .icons-button {
-      flex: 1;
+      width: 30%;
       text-align: center;
       line-height: 1.4;
       padding: 0;

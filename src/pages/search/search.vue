@@ -75,8 +75,26 @@ const goToHome = () => {
 }
 
 // 商品收藏 取消收藏
-const onCollect = async (source: string, goodsId: string) => {
-  const res = useCollect(source, goodsId)
+const onCollect = async (data: SearchGoodsItem) => {
+  const res = await useCollect(data.source, data.goodsId)
+  if (res.code === '1' && res.msg === '收藏成功') {
+    uni.showToast({ icon: 'success', title: '收藏成功' })
+    searchList.value.forEach((item) => {
+      if (item.goodsId === data.goodsId && item.source === data.source) {
+        item.isCollect = '1'
+      }
+    })
+    return
+  }
+  if (res.code === '1' && res.msg === '取消收藏') {
+    uni.showToast({ icon: 'success', title: '取消收藏' })
+    searchList.value.forEach((item) => {
+      if (item.goodsId === data.goodsId && item.source === data.source) {
+        item.isCollect = '0'
+      }
+    })
+    return
+  }
 }
 
 onLoad(() => {
@@ -144,7 +162,7 @@ onLoad(() => {
           </view>
           <view class="right">
             <view
-              @tap="($event) => onCollect(item.source, item.goodsId)"
+              @tap="($event) => onCollect(item)"
               :class="`ftysIcon ${
                 item.isCollect === '1' ? 'icon-huangsexingxing' : 'icon-shoucang'
               }`"
