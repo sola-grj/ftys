@@ -99,4 +99,6 @@ export type GoodsResult = {
   storage: string
   price: string
   unit: string
+  model: string
+  detailImages: string[]
 }

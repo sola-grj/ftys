@@ -12,3 +12,27 @@ export const getGoodsByIdAPI = (data: { source: string; goodsId: string }) => {
     data,
   })
 }
+
+/**
+ * 添加商品收藏
+ * @param id 商品id
+ */
+export const addGoodsCollectAPI = (data: { source: string; goodsId: string }) => {
+  return http({
+    method: 'POST',
+    url: '/goods/addGoodsCollect',
+    data,
+  })
+}
+
+/**
+ * 添加商品收藏
+ * @param id 商品id
+ */
+export const getGoodsCollectInfoAPI = (data: { source: string; goodsId: string }) => {
+  return http({
+    method: 'POST',
+    url: '/goods/addGoodsCollect',
+    data,
+  })
+}

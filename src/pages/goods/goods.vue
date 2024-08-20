@@ -74,9 +74,7 @@ const onClose = () => {
 
 // 弹出层条件渲染
 const popupName = ref<'address' | 'service'>()
-const openPopup = (name: typeof popupName.value) => {
-  // 修改弹出层名称
-  popupName.value = name
+const openPopup = () => {
   popup.value?.open()
 }
 // 是否显示SKU组件
@@ -113,6 +111,14 @@ const onAddCart = async (ev: SkuPopupEvent) => {
 const onBuyNow = (ev: SkuPopupEvent) => {
   uni.navigateTo({ url: `/PagesOrder/create/create?skuId=${ev._id}&count=${ev.buy_num}` })
 }
+
+const onShowModal = (tip: { tipTitle: string; tipDetail: string }) => {
+  uni.showModal({
+    title: '',
+    content: '',
+    confirmText: '确定',
+  })
+}
 </script>
 
 <template>
@@ -148,39 +154,32 @@ const onBuyNow = (ev: SkuPopupEvent) => {
           <text class="total">{{ goods?.images.length }}</text>
         </view>
       </view>
-
-      <!-- 商品简介 -->
-      <view class="meta">
-        <view class="price">
-          <text class="symbol">¥</text>
-          <text class="number">{{ goods?.price }}</text>
-        </view>
-        <!-- <view class="name ellipsis">{{ goods?.name }} </view>
-        <view class="desc"> {{ goods?.desc }} </view> -->
-      </view>
-
-      <!-- 操作面板 -->
-      <!-- <view class="action">
-        <view @tap="($event) => openSkuPopup(SkuMode.Both)" class="item arrow">
-          <text class="label">选择</text>
-          <text class="text ellipsis"> {{ selectArrText }} </text>
-        </view>
-        <view @tap="openPopup('address')" class="item arrow">
-          <text class="label">送至</text>
-          <text class="text ellipsis">
-            {{
-              addressStore.selectedAddress
-                ? addressStore.selectedAddress.fullLocation
-                : '请选择收获地址'
-            }}
-          </text>
-        </view>
-        <view @tap="openPopup('service')" class="item arrow">
-          <text class="label">服务</text>
-          <text class="text ellipsis"> 无忧退 快速退款 免费包邮 </text>
-        </view>
-      </view> -->
     </view>
+    <view class="meta">
+      <view class="meta-item">
+        <view class="label">选择</view>
+        <view class="value">
+          <view class="top">购买数量</view>
+          <view class="bottom">￥{{ goods?.price }}/{{ goods?.unit }}</view>
+        </view>
+      </view>
+      <view class="meta-item">
+        <view class="label">注意</view>
+        <view class="value"
+          >{{ goods?.tip.tipTitle }} <text @tap="openPopup" class="ftysIcon icon-wenhao"></text
+        ></view>
+      </view>
+    </view>
+    <uni-popup ref="popup" type="dialog" background-color="#fff">
+      <view class="popup-root">
+        <view class="title">订单取消</view>
+        <!--@ts-ignore -->
+        <view class="footer">
+          <view class="button primary" @tap="onClose">确认</view>
+        </view>
+      </view>
+    </uni-popup>
+    <view class="recommend"></view>
 
     <!-- 商品详情 -->
     <view class="detail panel">
@@ -188,15 +187,35 @@ const onBuyNow = (ev: SkuPopupEvent) => {
         <text>详情</text>
       </view>
       <view class="content">
-        <view class="properties">
-          <!-- 属性详情 -->
-          <!-- <view class="item" v-for="item in goods?.details.properties" :key="item.name">
-            <text class="label">{{ item.name }}</text>
-            <text class="value">{{ item.value }}</text>
-          </view> -->
+        <view class="content-item">
+          <text class="label">产地</text>
+          <text class="value">{{ goods?.productPlace }}</text>
         </view>
-        <!-- 图片详情 -->
-        <!-- <image v-for="item in goods?.details.pictures" :key="item" :src="item" mode="widthFix"></image> -->
+        <view class="content-item">
+          <text class="label">规格</text>
+          <text class="value">{{ goods?.model }}</text>
+        </view>
+        <view class="content-item">
+          <text class="label">重量</text>
+          <text class="value">{{ goods?.weight }}</text>
+        </view>
+        <view class="content-item">
+          <text class="label">包装</text>
+          <text class="value">{{ goods?.package }}</text>
+        </view>
+        <view class="content-item">
+          <text class="label">贮存条件</text>
+          <text class="value">{{ goods?.storage }}</text>
+        </view>
+      </view>
+      <view class="detailimage">
+        <image
+          mode="scaleToFill"
+          class="detail-image"
+          :key="item"
+          :src="item"
+          v-for="item in goods?.detailImages"
+        />
       </view>
     </view>
 
@@ -237,12 +256,6 @@ const onBuyNow = (ev: SkuPopupEvent) => {
       <view @tap="($event) => openSkuPopup(SkuMode.Buy)" class="buynow"> 立即购买 </view>
     </view>
   </view>
-
-  <!-- 弹出层 -->
-  <uni-popup ref="popup" type="bottom" background-color="#fff">
-    <AddressPannel :addressList="addressList" v-if="popupName === 'address'" @close="onClose" />
-    <ServicePannel v-if="popupName === 'service'" @close="onClose" />
-  </uni-popup>
 </template>
 
 <style lang="scss">
@@ -255,6 +268,82 @@ page {
 
 .viewport {
   background-color: #f4f4f4;
+  margin-bottom: 200rpx;
+}
+
+.popup-root {
+  padding: 30rpx 30rpx 0;
+  border-radius: 10rpx 10rpx 0 0;
+  overflow: hidden;
+  height: 500rpx;
+  width: 500rpx;
+
+  .title {
+    font-size: 30rpx;
+    text-align: center;
+    margin-bottom: 30rpx;
+  }
+
+  .description {
+    font-size: 28rpx;
+    padding: 0 20rpx;
+
+    .image {
+      width: 100%;
+      height: 100%;
+    }
+
+    .tips {
+      color: #444;
+      margin-bottom: 12rpx;
+    }
+
+    .cell {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15rpx 0;
+      color: #666;
+    }
+
+    .icon::before {
+      content: '\e6cd';
+      font-family: 'erabbit' !important;
+      font-size: 38rpx;
+      color: #999;
+    }
+
+    .icon.checked::before {
+      content: '\e6cc';
+      font-size: 38rpx;
+      color: #27ba9b;
+    }
+  }
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 30rpx 0 40rpx;
+    font-size: 28rpx;
+    color: #444;
+
+    .button {
+      flex: 1;
+      height: 72rpx;
+      text-align: center;
+      line-height: 72rpx;
+      margin: 0 20rpx;
+      color: #444;
+      border-radius: 72rpx;
+      border: 1rpx solid #ccc;
+    }
+
+    .primary {
+      color: #fff;
+      background-color: #27ba9b;
+      border: none;
+    }
+  }
 }
 
 .panel {
@@ -338,48 +427,6 @@ page {
     }
   }
 
-  .meta {
-    position: relative;
-    border-bottom: 1rpx solid #eaeaea;
-
-    .price {
-      height: 130rpx;
-      padding: 25rpx 30rpx 0;
-      color: #fff;
-      font-size: 34rpx;
-      box-sizing: border-box;
-      background-color: #35c8a9;
-    }
-
-    .number {
-      font-size: 56rpx;
-    }
-
-    .brand {
-      width: 160rpx;
-      height: 80rpx;
-      overflow: hidden;
-      position: absolute;
-      top: 26rpx;
-      right: 30rpx;
-    }
-
-    .name {
-      max-height: 88rpx;
-      line-height: 1.4;
-      margin: 20rpx;
-      font-size: 32rpx;
-      color: #333;
-    }
-
-    .desc {
-      line-height: 1;
-      padding: 0 20rpx 30rpx;
-      font-size: 24rpx;
-      color: #cf4444;
-    }
-  }
-
   .action {
     padding-left: 20rpx;
 
@@ -411,38 +458,64 @@ page {
   }
 }
 
-/* 商品详情 */
-.detail {
-  padding-left: 20rpx;
+/*价格信息 */
+.meta {
+  margin-top: 20rpx;
+  min-height: 240rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 20rpx;
 
-  .content {
-    margin-left: -20rpx;
-
-    .image {
-      width: 100%;
-    }
-  }
-
-  .properties {
-    padding: 0 20rpx;
-    margin-bottom: 30rpx;
-
-    .item {
-      display: flex;
-      line-height: 2;
-      padding: 10rpx;
-      font-size: 26rpx;
-      color: #333;
-      border-bottom: 1rpx dashed #ccc;
-    }
+  .meta-item {
+    display: flex;
 
     .label {
-      width: 200rpx;
+      color: #999;
+      margin-right: 20rpx;
     }
 
     .value {
-      flex: 1;
+      .bottom {
+        width: 240rpx;
+        height: 100rpx;
+        line-height: 100rpx;
+        text-align: center;
+        color: #fff;
+        margin: 30rpx 0;
+        border-radius: 4px;
+        background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
+      }
     }
+  }
+}
+
+/* 商品详情 */
+.detail {
+  .content {
+    margin: 20rpx;
+    border: 1px solid #ebebeb;
+    font-size: 26rpx;
+
+    .content-item {
+      display: flex;
+      color: #666;
+      height: 70rpx;
+      border-bottom: 1px solid #ebebeb;
+      line-height: 70rpx;
+
+      .label {
+        width: 150rpx;
+        margin-left: 20rpx;
+        margin-right: 60rpx;
+      }
+    }
+  }
+}
+
+.detailimage {
+  .detail-image {
+    width: 300rpx;
+    height: 300rpx;
   }
 }
 

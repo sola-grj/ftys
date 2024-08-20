@@ -63,6 +63,7 @@ export type BannerItem = {
 /** 首页-今日必买 */
 export type MustBuyItem = TopItem & {
   price: string
+  images: string[]
 }
 
 /** 首页-推荐购买 */
@@ -72,6 +73,7 @@ export type RecommendItem = {
   images: string[]
   source: string
   price: string
+  isCollect: string
 }
 
 export type RecommendResult = {

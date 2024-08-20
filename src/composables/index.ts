@@ -1,3 +1,4 @@
+import { getGoodsCollectInfoAPI } from '@/services/goods'
 import type { SolaShopGuessInstance } from '@/types/component'
 import { ref } from 'vue'
 /**
@@ -17,4 +18,9 @@ export const useGuessList = () => {
     guessRef,
     onScrollToLower,
   }
+}
+
+export const useCollect = async (source: string, goodsId: string) => {
+  const res = await getGoodsCollectInfoAPI({ source, goodsId })
+  return res.result
 }

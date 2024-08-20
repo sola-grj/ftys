@@ -5,6 +5,7 @@ export type SearchGoodsItem = {
   source: string
   price: string
   images: string[]
+  isCollect: string // 0 1
 }
 
 export type SearchGoodsResult = {

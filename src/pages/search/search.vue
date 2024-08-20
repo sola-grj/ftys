@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useGuessList } from '@/composables'
+import { useCollect, useGuessList } from '@/composables'
 import { getHistorySearchListAPI, getSearchListAPI } from '@/services/search'
 import type { PageParams } from '@/types/global'
 import type { SearchGoodsItem } from '@/types/search'
@@ -74,6 +74,11 @@ const goToHome = () => {
   uni.navigateBack()
 }
 
+// 商品收藏 取消收藏
+const onCollect = async (source: string, goodsId: string) => {
+  const res = useCollect(source, goodsId)
+}
+
 onLoad(() => {
   getHistorySearchListData()
 })
@@ -138,7 +143,12 @@ onLoad(() => {
             <view class="price">￥{{ item.price }}</view>
           </view>
           <view class="right">
-            <view class="ftysIcon icon-shoucang"></view>
+            <view
+              @tap="($event) => onCollect(item.source, item.goodsId)"
+              :class="`ftysIcon ${
+                item.isCollect === '1' ? 'icon-huangsexingxing' : 'icon-shoucang'
+              }`"
+            ></view>
             <view class="ftysIcon icon-a-jiagou2x"></view>
           </view>
         </view>
