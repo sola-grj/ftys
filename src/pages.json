@@ -39,12 +39,14 @@
 		{
 			"path": "pages/cart/cart",
 			"style": {
+				"navigationStyle": "custom",
 				"navigationBarTitleText": "购物车"
 			}
 		},
 		{
 			"path": "pages/cart/cart2",
 			"style": {
+				"navigationStyle": "custom",
 				"navigationBarTitleText": "购物车"
 			}
 		},
@@ -126,6 +128,7 @@
 			},
 			{
 				"text": "购物车",
+				"navigationStyle": "custom",
 				"pagePath": "pages/cart/cart",
 				"iconPath": "static/tabs/cart_default.png",
 				"selectedIconPath": "static/tabs/cart_selected.png"

@@ -11,11 +11,12 @@ import type {
   SkuPopupLocaldata,
 } from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
 import { computed } from 'vue'
-import { postMemberCartAPI } from '@/services/cart'
+import { addShoppingCartAPI, postMemberCartAPI } from '@/services/cart'
 import { useAddressStore } from '@/stores/modules/address'
 import type { AddressItem } from '@/types/address'
 import { getMemberAddressAPI } from '@/services/address'
 import type { RecommendItem } from '@/types/home'
+import { useAddShoppingCart, useUpdateShoppingCart } from '@/composables'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -27,8 +28,17 @@ const query = defineProps<{
 }>()
 console.log('query', query)
 
+const splitArray = (array: any[], size: number) => {
+  var result = []
+  for (var i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size))
+  }
+  return result
+}
+
 // 獲取商品详情推荐
 const recommendGoods = ref<RecommendItem[]>([])
+const swipperRecommendGoods = ref<any[]>([])
 const goodsDetailPageRecommendGoodsData = async () => {
   const res = await goodsDetailPageRecommendGoodsAPI({
     goodsId: query.goodsId,
@@ -37,6 +47,7 @@ const goodsDetailPageRecommendGoodsData = async () => {
     pageSize: 30,
   })
   recommendGoods.value = res.result.list
+  swipperRecommendGoods.value = splitArray(res.result.list, 6)
 }
 
 // 获取商品详情信息
@@ -132,6 +143,50 @@ const onShowModal = (tip: { tipTitle: string; tipDetail: string }) => {
     confirmText: '确定',
   })
 }
+// 更新购物车
+// 添加购物车
+const cartNum = ref(0)
+const addShoppingCart = async (data: any, num: number, type: string) => {
+  let orderId = ''
+  if (type === 'first') {
+    useAddShoppingCart
+    const res = await useAddShoppingCart(
+      {
+        source: data.source,
+        goodsId: data.goodsId,
+        fGoodsId: data.fGoodsId,
+        num,
+        units: data.unit,
+        unitPrice: data.price,
+      },
+      num,
+    )
+    if (res.code === '1') {
+      orderId = res.result.orderId
+      cartNum.value = 1
+    }
+  } else {
+    const res = await useUpdateShoppingCart(
+      {
+        cartId: orderId,
+        num,
+        unitPrice: data.price,
+        units: data.unit,
+      },
+      num,
+    )
+    if (res.code === '1') {
+      cartNum.value = num
+    }
+  }
+}
+
+// 更新购物车数量
+const changeCartNum = async (value: number) => {
+  // @ts-ignore
+  await addShoppingCart(goods, value, '')
+  console.log(value)
+}
 </script>
 
 <template>
@@ -193,17 +248,26 @@ const onShowModal = (tip: { tipTitle: string; tipDetail: string }) => {
       </view>
     </uni-popup>
     <view class="recommend">
-      <uni-number-box @change="changeValue" />
-      <swiper @change="onChange" circular>
-        <swiper-item v-for="item in goods?.images" :key="item">
-          <image @tap="onTapImage(item)" mode="aspectFill" :src="item" />
+      <swiper
+        @change="onChange"
+        indicator-active-color="#999999"
+        circular
+        :indicator-dots="true"
+        :autoplay="true"
+      >
+        <swiper-item v-for="(item, index) in swipperRecommendGoods" :key="index">
+          <view class="recommend-container">
+            <view class="recommend-item" v-for="i in item" :key="i.goodsId">
+              <image mode="aspectFill" class="img" :src="i.images[0]" />
+              <view class="name">{{ i.name }}</view>
+              <view class="bottom">
+                <text>￥{{ i.price }}</text>
+                <text class="ftysIcon icon-a-jiagou2x"></text>
+              </view>
+            </view>
+          </view>
         </swiper-item>
       </swiper>
-      <view class="indicator">
-        <text class="current">{{ currentIndex + 1 }}</text>
-        <text class="split">/</text>
-        <text class="total">{{ goods?.images.length }}</text>
-      </view>
     </view>
 
     <!-- 商品详情 -->
@@ -243,24 +307,6 @@ const onShowModal = (tip: { tipTitle: string; tipDetail: string }) => {
         />
       </view>
     </view>
-
-    <!-- 同类推荐 -->
-    <!-- <view class="similar panel">
-      <view class="title">
-        <text>同类推荐</text>
-      </view>
-      <view class="content">
-        <navigator v-for="item in goods?.similarProducts" :key="item.id" class="goods" hover-class="none"
-          :url="`/pages/goods/goods?id=${item.id}`">
-          <image class="image" mode="aspectFill" :src="item.picture"></image>
-          <view class="name ellipsis">{{ item.name }}</view>
-          <view class="price">
-            <text class="symbol">¥</text>
-            <text class="number">{{ item.price }}</text>
-          </view>
-        </navigator>
-      </view>
-    </view> -->
   </scroll-view>
 
   <!-- 用户操作 -->
@@ -270,11 +316,17 @@ const onShowModal = (tip: { tipTitle: string; tipDetail: string }) => {
         <text class="ftysIcon icon-kefu"></text>客服
       </button>
       <navigator class="icons-button" url="/pages/cart/cart2" open-type="navigate">
-        <text class="ftysIcon icon-gouwuche"></text>购物车
+        <uni-badge class="uni-badge-left-margin" :text="8" absolute="rightTop" size="small">
+          <view class="box"><text class="ftysIcon icon-gouwuche"></text></view>
+        </uni-badge>
+        <view class="text">购物车</view>
       </navigator>
     </view>
     <view class="buttons">
-      <view @tap="($event) => openSkuPopup(SkuMode.Cart)" class="addcart"> 加入购物车 </view>
+      <uni-number-box class="number-box" v-if="cartNum" @change="changeCartNum" />
+      <view v-else @tap="($event: any) => addShoppingCart(goods, 1, 'first')" class="addcart">
+        加入购物车
+      </view>
     </view>
   </view>
 </template>
@@ -515,10 +567,42 @@ page {
 
 .recommend {
   margin-top: 20rpx;
-  min-height: 440rpx;
+  height: 900rpx;
   background: #fff;
   border-radius: 20rpx;
   padding: 20rpx;
+
+  .recommend-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+
+    .recommend-item {
+      // flex: 1; // width: 100rpx;
+      // height: 100rpx;
+      width: 33%;
+      height: 70%;
+      background-color: #fff;
+      padding: 10rpx;
+
+      .name {
+        height: 60rpx;
+        margin-top: 10rpx;
+        font-size: 26rpx;
+      }
+
+      .bottom {
+        color: #cf4444;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .img {
+        width: 100%;
+        height: 270rpx;
+      }
+    }
+  }
 }
 
 /* 商品详情 */
@@ -608,7 +692,7 @@ page {
   bottom: 0;
   z-index: 1;
   background-color: #fff;
-  height: 100rpx;
+  height: 130rpx;
   padding: 0 20rpx var(--window-bottom);
   border-top: 1rpx solid #eaeaea;
   display: flex;

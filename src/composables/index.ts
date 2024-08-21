@@ -1,3 +1,4 @@
+import { addShoppingCartAPI, updateShoppingCartAPI } from '@/services/cart'
 import { getGoodsCollectInfoAPI } from '@/services/goods'
 import type { SolaShopGuessInstance } from '@/types/component'
 import { ref } from 'vue'
@@ -22,5 +23,29 @@ export const useGuessList = () => {
 
 export const useCollect = async (source: string, goodsId: string) => {
   const res = await getGoodsCollectInfoAPI({ source, goodsId })
+  return res
+}
+
+// 添加购物车
+export const useAddShoppingCart = async (data: any, num: number) => {
+  const res = await addShoppingCartAPI({
+    source: data.source,
+    goodsId: data.goodsId,
+    fGoodsId: data.fGoodsId,
+    num,
+    units: data.unit,
+    unitPrice: data.price,
+  })
+  return res
+}
+
+// 更新购物车
+export const useUpdateShoppingCart = async (data: any, num: number) => {
+  const res = await updateShoppingCartAPI({
+    cartId: data.orderId,
+    num,
+    unitPrice: data.price,
+    units: data.unit,
+  })
   return res
 }

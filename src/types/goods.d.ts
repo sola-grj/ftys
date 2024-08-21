@@ -91,6 +91,7 @@ export type GoodsResult = {
     tipTitle: string
     tipDetail: string
   }
+  fGoodsId: string
   images: string[]
   brand: string
   productPlace: string

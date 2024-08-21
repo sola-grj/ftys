@@ -61,3 +61,55 @@ export const putMemberCartSelectedAPI = (data: { selected: boolean }) => {
     data,
   })
 }
+
+// ************
+
+export type AddShoppingCartDataType = {
+  source: string
+  goodsId: string
+  fGoodsId: string
+  num: number
+  units: string
+  unitPrice: string
+}
+
+export type UpdateShoppingCartDataType = {
+  cartId: string
+  num: number
+  unitPrice: string
+  units: string
+}
+/**
+ * 添加购物车
+ * @param data selected 是否选中
+ */
+export const addShoppingCartAPI = (data: AddShoppingCartDataType) => {
+  return http<{ orderId: string }>({
+    method: 'POST',
+    url: '/shopping_cart/addShoppingCart',
+    data,
+  })
+}
+
+/**
+ * 更新购物车
+ * @param data selected 是否选中
+ */
+export const updateShoppingCartAPI = (data: UpdateShoppingCartDataType) => {
+  return http<{ orderId: string }>({
+    method: 'POST',
+    url: '/shopping_cart/updateShoppingCart',
+    data,
+  })
+}
+
+/**
+ * 购物车列表
+ * @param
+ */
+export const getShoppingCartAPI = () => {
+  return http<CartItem[]>({
+    method: 'POST',
+    url: '/shopping_cart/getShoppingCart',
+  })
+}

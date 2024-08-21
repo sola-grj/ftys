@@ -7,6 +7,7 @@ import { useGuessList } from '@/composables'
 import {
   deleteMemberCartAPI,
   getMemberCartAPI,
+  getShoppingCartAPI,
   putMemberCartBySkuIdAPI,
   putMemberCartSelectedAPI,
 } from '@/services/cart'
@@ -15,15 +16,22 @@ import type { CartItem } from '@/types/cart'
 import { onShow } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 
+// 获取屏幕边界到安全区域距离
+const { safeAreaInsets } = uni.getSystemInfoSync()
 // 获取会员store
 const memberStore = useMemberStore()
 
 // 获取购物车
 const cartList = ref<CartItem[]>([])
 const getMemberCartData = async () => {
-  const res = await getMemberCartAPI()
-  cartList.value = res.result
-  console.log('====', cartList)
+  const res = await getShoppingCartAPI()
+
+  cartList.value = res.result.map((item) => {
+    //@ts-ignore
+    item.check = false
+    return item
+  })
+  console.log('====', cartList.value)
 }
 
 // 初始化调用
@@ -56,13 +64,17 @@ const onChangeCount = async (ev: InputNumberBoxEvent) => {
 
 // 修改选中状态
 const onChangeSelected = (item: CartItem) => {
-  item.selected = !item.selected
-  putMemberCartBySkuIdAPI(item.skuId, { selected: item.selected })
+  cartList.value = cartList.value.map((i) => {
+    if (i.id === item.id) {
+      i.check = !i.check
+    }
+    return i
+  })
 }
 
 // 计算全选
 const isSelectedAll = computed(() => {
-  return cartList.value.length && cartList.value.every((v) => v.selected)
+  return cartList.value.length && cartList.value.every((v) => v.check)
 })
 
 // 修改全选状态
@@ -71,9 +83,8 @@ const onChangeSelectedAll = async () => {
   const _isSelectedAll = !isSelectedAll.value
   // 前端数据更新
   cartList.value.forEach((item) => {
-    item.selected = _isSelectedAll
+    item.check = _isSelectedAll
   })
-  await putMemberCartSelectedAPI({ selected: _isSelectedAll })
 }
 
 // 计算选中单品列表
@@ -103,55 +114,58 @@ const { guessRef, onScrollToLower } = useGuessList()
 </script>
 
 <template>
-  <scroll-view @scrolltolower="onScrollToLower" scroll-y class="scroll-view">
+  <scroll-view
+    @scrolltolower="onScrollToLower"
+    scroll-y
+    class="scroll-view"
+    :style="{ paddingTop: safeAreaInsets!.top + 'px' }"
+  >
+    <view class="top-title">
+      <view class="title-container">
+        <view class="text">购物车</view>
+        <view class="position">
+          <text class="ftysIcon icon-dingwei"></text>
+          <text>qqqqqqqqqqqqqqq</text>
+        </view>
+        <view class="manage">管理</view>
+      </view>
+    </view>
     <!-- 已登录: 显示购物车 -->
     <template v-if="memberStore.profile">
       <!-- 购物车列表 -->
       <view class="cart-list" v-if="cartList.length">
-        <!-- 优惠提示 -->
-        <view class="tips">
-          <text class="label">满减</text>
-          <text class="desc">满1件, 即可享受9折优惠</text>
-        </view>
         <!-- 滑动操作分区 -->
         <uni-swipe-action>
           <!-- 滑动操作项 -->
-          <uni-swipe-action-item v-for="item in cartList" :key="item.skuId" class="cart-swipe">
+          <uni-swipe-action-item v-for="item in cartList" :key="item.id" class="cart-swipe">
             <!-- 商品信息 -->
             <view class="goods">
               <!-- 选中状态 -->
-              <text
-                @tap="($event) => onChangeSelected(item)"
-                class="checkbox"
-                :class="{ checked: item.selected }"
-              ></text>
+              <view class="check-container">
+                <text
+                  @tap="($event) => onChangeSelected(item)"
+                  :class="`ftysIcon ${item.check ? 'icon-xuanzhong1-copy' : 'icon-xuanzhong1'}`"
+                ></text>
+              </view>
               <navigator
                 :url="`/pages/goods/goods?id=${item.id}`"
                 hover-class="none"
                 class="navigator"
               >
-                <image mode="aspectFill" class="picture" :src="item.picture"></image>
+                <image mode="aspectFill" class="picture" :src="item.images"></image>
                 <view class="meta">
                   <view class="name ellipsis">{{ item.name }}</view>
-                  <view class="attrsText ellipsis">{{ item.attrsText }}</view>
-                  <view class="price">{{ item.nowPrice }}</view>
+                  <!-- <view class="attrsText ellipsis">{{ item.attrsText }}</view> -->
+                  <view class="price">{{ item.unit_price }}</view>
                 </view>
               </navigator>
               <!-- 商品数量 -->
-              <view class="count">
-                <vk-data-input-number-box
-                  :index="item.skuId"
-                  v-model="item.count"
-                  :min="1"
-                  :max="item.stock"
-                  @change="onChangeCount"
-                />
-              </view>
+              <uni-number-box class="number-box" v-model="item.num" />
             </view>
             <!-- 右侧删除按钮 -->
             <template #right>
               <view class="cart-swipe-right">
-                <button @tap="($event) => onDeleteCart(item.skuId)" class="button delete-button">
+                <button @tap="($event) => onDeleteCart(item.id)" class="button delete-button">
                   删除
                 </button>
               </view>
@@ -169,7 +183,14 @@ const { guessRef, onScrollToLower } = useGuessList()
       </view>
       <!-- 吸底工具栏 -->
       <view class="toolbar">
-        <text @tap="onChangeSelectedAll" class="all" :class="{ checked: isSelectedAll }">全选</text>
+        <view class="all">
+          <text
+            @tap="onChangeSelectedAll"
+            :class="`ftysIcon ${isSelectedAll ? 'icon-xuanzhong1-copy' : 'icon-xuanzhong1'}`"
+          />
+          <text>全选</text>
+        </view>
+
         <text class="text">合计:</text>
         <text class="amount">{{ selectedCardListMoney }}</text>
         <view class="button-grounp">
@@ -211,12 +232,49 @@ const { guessRef, onScrollToLower } = useGuessList()
 
 // 滚动容器
 .scroll-view {
+  position: relative;
   flex: 1;
+}
+
+.top-title {
+  height: 400rpx;
+  width: 100%;
+  background: linear-gradient(to bottom, rgb(241 73 17) 0%, #f7f7f8 100%);
+  padding: 20rpx;
+
+  .title-container {
+    display: flex;
+    justify-content: space-between;
+    color: #fff;
+    align-items: baseline;
+
+    .text {
+      font-size: 36rpx;
+      font-weight: bold;
+    }
+
+    .position {
+      height: 40rpx;
+      border-radius: 0px 8px, 8px, 8px;
+      background: rgba(255, 255, 255, 0.1);
+      font-size: 24rpx;
+      width: 300rpx;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .manage {
+      font-size: 30rpx;
+    }
+  }
 }
 
 // 购物车列表
 .cart-list {
   padding: 0 20rpx;
+  position: absolute;
+  top: 100rpx;
+  width: 100%;
 
   // 优惠提示
   .tips {
@@ -239,17 +297,25 @@ const { guessRef, onScrollToLower } = useGuessList()
 
   // 购物车商品
   .goods {
+    position: relative;
     display: flex;
     padding: 20rpx 20rpx 20rpx 80rpx;
     border-radius: 10rpx;
     background-color: #fff;
     position: relative;
 
-    .navigator {
-      display: flex;
+    .number-box {
+      position: absolute;
+      right: 20rpx;
+      bottom: 20rpx;
     }
 
-    .checkbox {
+    .navigator {
+      display: flex;
+      width: 100%;
+    }
+
+    .check-container {
       position: absolute;
       top: 0;
       left: 0;
@@ -260,17 +326,14 @@ const { guessRef, onScrollToLower } = useGuessList()
       width: 80rpx;
       height: 100%;
 
-      &::before {
-        content: '\e6cd';
-        font-family: 'erabbit' !important;
+      .icon-xuanzhong {
         font-size: 40rpx;
-        color: #444;
       }
+    }
 
-      &.checked::before {
-        content: '\e6cc';
-        color: #27ba9b;
-      }
+    .checked {
+      background-color: #cf4444;
+      font-size: 40rpx;
     }
 
     .picture {
@@ -282,7 +345,6 @@ const { guessRef, onScrollToLower } = useGuessList()
       flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
       margin-left: 20rpx;
     }
 
@@ -380,15 +442,18 @@ const { guessRef, onScrollToLower } = useGuessList()
   align-items: center;
   flex-direction: column;
   height: 60vh;
+
   .image {
     width: 400rpx;
     height: 281rpx;
   }
+
   .text {
     color: #444;
     font-size: 26rpx;
     margin: 20rpx 0;
   }
+
   .button {
     width: 240rpx !important;
     height: 60rpx;
@@ -424,13 +489,6 @@ const { guessRef, onScrollToLower } = useGuessList()
     color: #444;
     display: flex;
     align-items: center;
-  }
-
-  .all::before {
-    font-family: 'erabbit' !important;
-    content: '\e6cd';
-    font-size: 40rpx;
-    margin-right: 8rpx;
   }
 
   .checked::before {
@@ -483,6 +541,7 @@ const { guessRef, onScrollToLower } = useGuessList()
     }
   }
 }
+
 // 底部占位空盒子
 .toolbar-height {
   height: 100rpx;
