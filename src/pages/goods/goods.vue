@@ -145,11 +145,8 @@ const onShowModal = (tip: { tipTitle: string; tipDetail: string }) => {
 }
 // 更新购物车
 // 添加购物车
-const cartNum = ref(0)
-const addShoppingCart = async (data: any, num: number, type: string) => {
-  let orderId = ''
+const addShoppingCart = async (data: GoodsResult, num: number, type: string) => {
   if (type === 'first') {
-    useAddShoppingCart
     const res = await useAddShoppingCart(
       {
         source: data.source,
@@ -162,13 +159,12 @@ const addShoppingCart = async (data: any, num: number, type: string) => {
       num,
     )
     if (res.code === '1') {
-      orderId = res.result.orderId
-      cartNum.value = 1
+      data.cartGoodsNum = res.result.goodsNum
     }
   } else {
     const res = await useUpdateShoppingCart(
       {
-        cartId: orderId,
+        cartId: data.cartId,
         num,
         unitPrice: data.price,
         units: data.unit,
@@ -176,15 +172,14 @@ const addShoppingCart = async (data: any, num: number, type: string) => {
       num,
     )
     if (res.code === '1') {
-      cartNum.value = num
+      data.cartGoodsNum = res.result.goodsNum
     }
   }
 }
 
 // 更新购物车数量
-const changeCartNum = async (value: number) => {
-  // @ts-ignore
-  await addShoppingCart(goods, value, '')
+const changeCartNum = async (value: number, data: GoodsResult) => {
+  await addShoppingCart(data, value, '')
   console.log(value)
 }
 </script>
@@ -248,13 +243,7 @@ const changeCartNum = async (value: number) => {
       </view>
     </uni-popup>
     <view class="recommend">
-      <swiper
-        @change="onChange"
-        indicator-active-color="#999999"
-        circular
-        :indicator-dots="true"
-        :autoplay="true"
-      >
+      <swiper @change="onChange" indicator-active-color="#999999" circular :indicator-dots="true">
         <swiper-item v-for="(item, index) in swipperRecommendGoods" :key="index">
           <view class="recommend-container">
             <view class="recommend-item" v-for="i in item" :key="i.goodsId">
@@ -262,7 +251,17 @@ const changeCartNum = async (value: number) => {
               <view class="name">{{ i.name }}</view>
               <view class="bottom">
                 <text>￥{{ i.price }}</text>
-                <text class="ftysIcon icon-a-jiagou2x"></text>
+                <uni-number-box
+                  class="number-box"
+                  v-if="i?.cartGoodsNum"
+                  v-model="i.cartGoodsNum"
+                  @change="$event => changeCartNum($event, i as GoodsResult)"
+                />
+                <text
+                  v-else
+                  @tap="($event: any) => addShoppingCart(i, 1, 'first')"
+                  class="ftysIcon icon-a-jiagou2x"
+                ></text>
               </view>
             </view>
           </view>
@@ -323,7 +322,12 @@ const changeCartNum = async (value: number) => {
       </navigator>
     </view>
     <view class="buttons">
-      <uni-number-box class="number-box" v-if="cartNum" @change="changeCartNum" />
+      <uni-number-box
+        class="number-box"
+        v-if="goods?.cartGoodsNum"
+        v-model="goods.cartGoodsNum"
+        @change="$event => changeCartNum($event, goods as GoodsResult)"
+      />
       <view v-else @tap="($event: any) => addShoppingCart(goods, 1, 'first')" class="addcart">
         加入购物车
       </view>

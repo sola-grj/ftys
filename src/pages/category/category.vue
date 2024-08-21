@@ -2,26 +2,38 @@
 import { getCategoryTopAPI } from '@/services/category'
 import { getCategoryAPI, getHomeBannerAPI } from '@/services/home'
 import type { CategoryTopItem } from '@/types/category'
-import type { BannerItem, BasicCategoryItem } from '@/types/home'
+import type { BannerItem, BasicCategoryItem, SearchBasicCategoryItem } from '@/types/home'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import PageSkeleton from './components/PageSkeleton.vue'
 import { useMemberStore } from '@/stores'
+import { getGoodsListByIdAPI, goodsDetailPageRecommendGoodsAPI } from '@/services/goods'
+import type { PageParams } from '@/types/global'
+import { useAddShoppingCart, useUpdateShoppingCart } from '@/composables'
 
+// 分页参数
+const pageParams: Required<PageParams> = {
+  page: 1,
+  pageSize: 10,
+}
+// 页面是否加载完成 标识
+const isFinish = ref(false)
 // 获取当前用户角色信息
 const memberStore = useMemberStore()
 
 // 查看当前账号是主账号还是子账号 1:主账号 2:子账号
-let user_role = memberStore.profile?.userinfo.user_role
 // 用户type_id
 /**  1:业务员 2:司机 3:生鲜 4:干货 5:生鲜&干货
  *  type_id 1 最高权限
     type_id 2 只展示 我的 页面
     type_id 3 4 5 && user_role === 2  客户 客户才有主账号 子账号
  */
-const type_id = memberStore.profile?.userinfo.type_id
-
-const activeIndex = ref(0) // 0 是密码登录 1是短信
+// 一级分类选中状态
+const activeIndex = ref(0) // 0 是生鲜 1是干货
+// 二级分类选中状态
+const secondActiveIndex = ref(0)
+// 三级分类选中状态
+const thirdActiveIndex = ref(0)
 const onChangeIndex = (index: number) => {
   activeIndex.value = index
 }
@@ -29,16 +41,48 @@ const onChangeIndex = (index: number) => {
 // 获取商品分类数据
 const top1List = ref<BasicCategoryItem[]>([])
 const top2List = ref<BasicCategoryItem[]>([])
+// 二级分类
+const fruitCategory = ref<BasicCategoryItem[]>([])
+const dryCargoCategory = ref<BasicCategoryItem[]>([])
+// 三级分类
+const currentThirdTypeCategory = ref<BasicCategoryItem[]>([])
+// 查询当前选中三级分类对应的商品
+const fiveTypeCategory = ref<SearchBasicCategoryItem[]>([])
+const getFiveTypeCategoryData = async (source: string, category: string) => {
+  // 退出判断
+  if (isFinish.value === true) {
+    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
+  }
+  const res = await getGoodsListByIdAPI({
+    source,
+    category,
+    ...pageParams,
+  })
+  fiveTypeCategory.value.push(...res.result.list)
+  if (pageParams.page < res.result.total) {
+    // 页码累加
+    pageParams.page++
+  } else {
+    isFinish.value = true
+  }
+}
+
+// 首次初始化数据
 const getTypeListData = async () => {
   const res = await getCategoryAPI()
+  fruitCategory.value = res.result.fruitCategory.filter(
+    (item: BasicCategoryItem) => item.childlist.length > 0,
+  )
+  dryCargoCategory.value = res.result.dryCargoCategory.filter(
+    (item: BasicCategoryItem) => item.childlist.length > 0,
+  )
   top1List.value = res.result.top1
   top2List.value = res.result.top2
-  top2List.value.push({
-    id: 'more',
-    name: '更多',
-    image: 'http://47.95.197.8/uploads/20240814/1036867403937a234c7d8565c07f114b.jpeg',
-    source: 'H',
-  })
+  currentThirdTypeCategory.value = fruitCategory.value[0].childlist
+  getFiveTypeCategoryData(
+    fruitCategory.value[0].childlist[0].source,
+    fruitCategory.value[0].childlist[0].id,
+  )
 }
 
 // 获取首页参数
@@ -58,12 +102,10 @@ const getCategoryTopData = async () => {
   const res = await getCategoryTopAPI()
   categoryList.value = res.result
 }
-// 页面是否加载完成 标识
-const isFinish = ref(true)
+
 // 页面加载
 onLoad(async () => {
   await Promise.all([getTypeListData()])
-  isFinish.value = true
   if (query.type) {
     categoryList.value.forEach((item, index) => {
       if (item.id === query.type) {
@@ -75,29 +117,80 @@ onLoad(async () => {
 const goToSearch = () => {
   uni.navigateTo({ url: '/pages/search/search' })
 }
-// 获取当前二级分类数据
-const subCategoryList = computed(() => {
-  return categoryList.value[activeIndex.value]?.children || []
-})
-// {
-//   // 最上面大类目
-//   '新鲜水果id': [
-//     // 中类目
-//     '富士苹果id',
-//     '嘎啦苹果',
-//     '黄元帅',
-//   ],
-//     '海鲜水产id': [
-//       '大虾',
-//       '螃蟹',
-//       '鱼',
-//     ],
-//       '新鲜水果id': [
-//         '富士苹果',
-//         '嘎啦苹果',
-//         '黄元帅',
-//       ],
-// }
+
+// 点击二级分类
+const onTapTwoLevel = (data: BasicCategoryItem) => {
+  // 重置分页器
+  pageParams.page = 1
+  pageParams.pageSize = 10
+  isFinish.value = false
+  fiveTypeCategory.value = []
+  if (activeIndex.value === 0) {
+    const fruit: BasicCategoryItem[] = fruitCategory.value.find((item) => item.id === data.id)
+      ?.childlist as BasicCategoryItem[]
+    currentThirdTypeCategory.value = fruit
+    console.log('fruit', fruit)
+    getFiveTypeCategoryData(fruit[0].source, fruit[0].id)
+  }
+  if (activeIndex.value === 1) {
+    const dry: BasicCategoryItem[] = fruitCategory.value.find((item) => item.id === data.id)
+      ?.childlist as BasicCategoryItem[]
+    currentThirdTypeCategory.value = dry
+    console.log('fruit', dry)
+    getFiveTypeCategoryData(dry[0].source, dry[0].id)
+  }
+}
+
+// 点击三级分类
+const onTapThirdType = (data: BasicCategoryItem, index: number) => {
+  // 重置分页器
+  pageParams.page = 1
+  pageParams.pageSize = 10
+  isFinish.value = false
+  fiveTypeCategory.value = []
+  thirdActiveIndex.value = index
+  getFiveTypeCategoryData(data.source, data.id)
+}
+
+const addShoppingCart = async (data: SearchBasicCategoryItem, num: number, type: string) => {
+  let orderId = ''
+  if (type === 'first') {
+    const res = await useAddShoppingCart(
+      {
+        source: data.source,
+        goodsId: data.goodsId,
+        fGoodsId: data.fGoodsId,
+        num,
+        units: data.unit,
+        unitPrice: data.price,
+      },
+      num,
+    )
+    if (res.code === '1') {
+      orderId = res.result.orderId
+      data.cartGoodsNum = res.result.goodsNum
+    }
+  } else {
+    const res = await useUpdateShoppingCart(
+      {
+        cartId: data.cartId,
+        num,
+        unitPrice: data.price,
+        units: data.unit,
+      },
+      num,
+    )
+    if (res.code === '1') {
+      data.cartGoodsNum = res.result.goodsNum
+    }
+  }
+}
+
+// 更新购物车数量
+const changeCartNum = async (value: number, data: SearchBasicCategoryItem) => {
+  console.log('888888', value, data)
+  await addShoppingCart(data, value, '')
+}
 </script>
 
 <template>
@@ -125,50 +218,77 @@ const subCategoryList = computed(() => {
       <button class="search-btn">搜索</button>
     </view>
     <view class="head-types">
-      <view class="head-types-item" v-for="item in top1List" :key="item.id">
-        <image class="icon" :src="item.image" />
+      <view
+        class="head-types-item"
+        @tap="($event) => onTapTwoLevel(item)"
+        v-for="item in activeIndex === 0 ? fruitCategory : dryCargoCategory"
+        :key="item.id"
+      >
+        <view class="image-containers">
+          <image class="icon" :src="item.image" mode="aspectFit" />
+        </view>
         <text class="text"> {{ item.name }}</text>
       </view>
     </view>
     <!-- 分类 -->
     <view class="categories">
-      <!-- 左侧：一级分类 -->
+      <!-- 左侧：二级分类 -->
       <scroll-view class="primary" scroll-y>
         <view
-          @tap="activeIndex = index"
-          v-for="(item, index) in categoryList"
+          @tap="($event) => onTapThirdType(item, index)"
+          v-for="(item, index) in currentThirdTypeCategory"
           :key="item.id"
           class="item"
-          :class="{ active: index === activeIndex }"
+          :class="{ active: index === thirdActiveIndex }"
         >
           <text class="name"> {{ item.name }} </text>
         </view>
       </scroll-view>
-      <!-- 右侧：二级分类 -->
-      <scroll-view class="secondary" scroll-y>
-        <!-- 焦点图 -->
-        <SolaShopSwiper class="banner" :list="bannerList" />
+      <!-- 右侧：三级分类 -->
+      <scroll-view
+        class="secondary"
+        @scrolltolower="
+          ($event) =>
+            getFiveTypeCategoryData(
+              currentThirdTypeCategory[thirdActiveIndex].source,
+              currentThirdTypeCategory[thirdActiveIndex].id,
+            )
+        "
+        scroll-y
+      >
         <!-- 内容区域 -->
-        <view class="panel" v-for="item in subCategoryList" :key="item.id">
-          <view class="title">
-            <text class="name">{{ item.name }}</text>
-            <navigator class="more" hover-class="none">全部</navigator>
+        <view class="search-list">
+          <view class="order">
+            <view>默认</view>
+            <view>单价</view>
           </view>
-          <view class="section">
-            <navigator
-              v-for="goods in item.goods"
-              :key="goods.id"
-              class="goods"
-              hover-class="none"
-              :url="`/pages/goods/goods?id=${goods.id}`"
-            >
-              <image class="image" :src="goods.picture"></image>
-              <view class="name ellipsis">{{ goods.name }}</view>
-              <view class="price">
-                <text class="symbol">¥</text>
-                <text class="number">{{ goods.price }}</text>
+          <view class="list-container">
+            <view class="item" v-for="item in fiveTypeCategory" :key="item.goodsId">
+              <image :src="item.images[0]" mode="scaleToFill" />
+              <view class="info">
+                <view class="title">{{ item.name }}</view>
+                <view class="price">￥{{ item.price }}</view>
               </view>
-            </navigator>
+              <view class="right">
+                <view
+                  @tap="($event) => onCollect(item)"
+                  :class="`ftysIcon ${
+                    item.isCollect === '1' ? 'icon-huangsexingxing' : 'icon-shoucang'
+                  }`"
+                ></view>
+                <uni-number-box
+                  class="number-box"
+                  v-if="item.cartGoodsNum"
+                  @change="($event) => changeCartNum($event, item)"
+                  v-model="item.cartGoodsNum"
+                />
+                <view
+                  v-else
+                  @tap="($event) => addShoppingCart(item, 1, 'first')"
+                  class="ftysIcon icon-a-jiagou2x"
+                ></view>
+              </view>
+            </view>
           </view>
         </view>
       </scroll-view>
@@ -244,21 +364,21 @@ page {
 }
 
 .head-types {
+  width: 100%;
+  overflow-x: scroll;
   display: flex;
 
   .head-types-item {
-    flex: 1;
-    width: 150rpx;
-    // height: 150rpx;
     display: flex;
     justify-content: center;
     flex-direction: column;
     align-items: center;
     box-sizing: border-box;
+    margin: 20rpx;
 
     .icon {
-      width: 100rpx;
-      height: 100rpx;
+      width: 120rpx;
+      height: 120rpx;
     }
 
     .text {
@@ -331,6 +451,58 @@ page {
 .secondary {
   background-color: #fff;
 
+  .search-list {
+    margin: 20rpx 20rpx 0;
+
+    .order {
+      display: flex;
+    }
+
+    .list-container {
+      .item {
+        display: flex;
+        border-bottom: 1px solid #eee2e2;
+        margin-top: 30rpx;
+
+        image {
+          height: 160rpx;
+          width: 160rpx;
+        }
+
+        .info {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          width: 90%;
+
+          .title {
+          }
+
+          .price {
+            margin-top: 30rpx;
+            color: #ff5040;
+          }
+        }
+
+        .right {
+          display: flex;
+          flex-direction: column;
+          // flex: 1;
+          justify-content: space-around;
+          align-items: flex-end;
+
+          .shoucang {
+            height: 50%;
+          }
+
+          .jiagou {
+            flex: 1;
+          }
+        }
+      }
+    }
+  }
+
   .carousel {
     height: 200rpx;
     margin: 0 30rpx 20rpx;
@@ -347,7 +519,6 @@ page {
     line-height: 60rpx;
     color: #333;
     font-size: 28rpx;
-    border-bottom: 1rpx solid #f7f7f8;
 
     .more {
       float: right;

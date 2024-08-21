@@ -1,5 +1,5 @@
 import type { GoodsResult } from '@/types/goods'
-import type { RecommendResult } from '@/types/home'
+import type { RecommendResult, SearchBasicCategoryItem } from '@/types/home'
 import { http } from '@/utils/http'
 
 /**
@@ -39,6 +39,29 @@ export const goodsDetailPageRecommendGoodsAPI = (data: {
   return http<RecommendResult>({
     method: 'POST',
     url: '/goods/goodsDetailPageRecommendGoods',
+    data,
+  })
+}
+
+export type GetGoodsListByIdResult = {
+  list: SearchBasicCategoryItem[]
+  total: number
+  page: number
+}
+
+/**
+ * 根据分类查询商品
+ * @param id 商品id
+ */
+export const getGoodsListByIdAPI = (data: {
+  source: string
+  category: string
+  page: number
+  pageSize: number
+}) => {
+  return http<GetGoodsListByIdResult>({
+    method: 'POST',
+    url: '/goods/getGoodsList',
     data,
   })
 }

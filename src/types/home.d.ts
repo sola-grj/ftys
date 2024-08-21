@@ -43,6 +43,20 @@ export type BasicCategoryItem = {
   name: string
   image: string
   source: string
+  childlist: BasicCategoryItem[]
+}
+
+export type SearchBasicCategoryItem = {
+  price: string
+  fGoodsId: string
+  goodsId: string
+  isCollect: string
+  name: string
+  images: string[]
+  source: string
+  cartGoodsNum: number
+  cartId: string
+  unit: string
 }
 
 export type CategoryResult = {

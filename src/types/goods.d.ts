@@ -102,4 +102,8 @@ export type GoodsResult = {
   unit: string
   model: string
   detailImages: string[]
+  cartGoodsNum: number
+  source: string
+  goodsId: string
+  cartId: string
 }

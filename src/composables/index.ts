@@ -33,8 +33,8 @@ export const useAddShoppingCart = async (data: any, num: number) => {
     goodsId: data.goodsId,
     fGoodsId: data.fGoodsId,
     num,
-    units: data.unit,
-    unitPrice: data.price,
+    units: data.units,
+    unitPrice: data.unitPrice,
   })
   return res
 }
@@ -42,10 +42,10 @@ export const useAddShoppingCart = async (data: any, num: number) => {
 // 更新购物车
 export const useUpdateShoppingCart = async (data: any, num: number) => {
   const res = await updateShoppingCartAPI({
-    cartId: data.orderId,
+    cartId: data.cartId,
     num,
-    unitPrice: data.price,
-    units: data.unit,
+    unitPrice: data.unitPrice,
+    units: data.units,
   })
   return res
 }
