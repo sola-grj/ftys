@@ -221,7 +221,8 @@ const lineData = {
                 @tap="($event) => onChangeIndex('1')"
                 class="pwd-btn"
                 :class="activeIndex === '1' ? 'checked' : ''"
-                >业绩
+              >
+                业绩
               </view>
               <view
                 @tap="($event) => onChangeIndex('2')"
@@ -290,7 +291,7 @@ page {
   .container {
     height: 100%;
     background: #fff;
-    border-radius: 30rpx;
+    border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;
 
     .today {

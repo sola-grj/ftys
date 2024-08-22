@@ -5,6 +5,7 @@ import type {
   OrderLogisticResult,
   OrderPreResult,
   OrderResult,
+  QuickOrderResult,
 } from '@/types/order'
 import { http } from '@/utils/http'
 /**
@@ -150,6 +151,38 @@ export const getOrderListAPI = (data: { queryTimeType: string }) => {
   return http<OrderListResult>({
     method: 'POST',
     url: '/order/getOrderList',
+    data,
+  })
+}
+
+/**
+ * 常用清单
+ * @param data 请求参数
+ */
+export const getGoodsCollectsAPI = (data: {
+  categoryId?: string
+  page: number
+  pageSize: number
+}) => {
+  return http<QuickOrderResult>({
+    method: 'POST',
+    url: '/goods/getGoodsCollects',
+    data,
+  })
+}
+
+/**
+ * 最近购买
+ * @param data 请求参数
+ */
+export const getRecentlyOrderAPI = (data: {
+  categoryId?: string
+  page: number
+  pageSize: number
+}) => {
+  return http<QuickOrderResult>({
+    method: 'POST',
+    url: '/goods/getRecentlyOrder',
     data,
   })
 }

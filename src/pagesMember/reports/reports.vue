@@ -244,7 +244,7 @@ page {
   .container {
     height: 100%;
     background: #fff;
-    border-radius: 30rpx;
+    border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;
     padding: 30rpx;
 

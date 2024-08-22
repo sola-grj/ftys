@@ -59,6 +59,7 @@
 		{
 			"path": "pages/quickbuy/quickbuy",
 			"style": {
+				"navigationStyle": "custom",
 				"navigationBarTitleText": "快捷下单"
 			}
 		},
@@ -122,6 +123,7 @@
 			},
 			{
 				"text": "快捷下单",
+				"navigationStyle": "custom",
 				"pagePath": "pages/quickbuy/quickbuy",
 				"iconPath": "static/tabs/quick_buy_default.png",
 				"selectedIconPath": "static/tabs/quick_buy_checked.png"

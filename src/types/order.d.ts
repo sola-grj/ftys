@@ -173,3 +173,34 @@ export type OrderListResult = {
   page: number
   list: OrderItem[]
 }
+
+/** 快捷下单 */
+export type QuickOrderCategoryItem = {
+  categoryId: string
+  categoryName: string
+}
+
+export type QuickOrderListItem = {
+  cartGoodsNum: number
+  cartId: string
+  category1: string
+  category2: string
+  categoryId: string
+  categoryName: string
+  collectId: string
+  fGoodsId: string
+  goodsId: string
+  images: string[]
+  isCollect: string
+  name: string
+  price: string
+  source: string
+  unit: string
+}
+
+export type QuickOrderResult = {
+  total: number
+  categories: QuickOrderCategoryItem[]
+  page: number
+  list: QuickOrderListItem[]
+}
