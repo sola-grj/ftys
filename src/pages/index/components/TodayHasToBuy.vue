@@ -7,6 +7,10 @@ const query = defineProps<{
   mustlist: MustBuyItem[]
   bannerList: BannerItem[]
 }>()
+
+const goToDetail = (data: MustBuyItem) => {
+  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
+}
 </script>
 
 <template>
@@ -19,22 +23,30 @@ const query = defineProps<{
       <view class="title">今日必买</view>
       <view class="container">
         <view class="two">
-          <view class="item">
-            <image :src="mustlist[0].images.length > 0 && mustlist[0].images[0]" />
+          <view class="item" @tap="($event) => goToDetail(mustlist[0])">
+            <image
+              :src="mustlist.length > 0 && mustlist[0].images.length > 0 && mustlist[0].images[0]"
+            />
             <view class="price">￥{{ mustlist[0] && mustlist[0].price }}</view>
           </view>
-          <view class="item">
-            <image :src="mustlist[1].images.length > 0 && mustlist[1].images[0]" />
+          <view class="item" @tap="($event) => goToDetail(mustlist[1])">
+            <image
+              :src="mustlist.length > 0 && mustlist[1].images.length > 0 && mustlist[1].images[0]"
+            />
             <view class="price">￥{{ mustlist[1] && mustlist[1].price }}</view>
           </view>
         </view>
         <view class="two">
-          <view class="item">
-            <image :src="mustlist[2].images.length > 0 && mustlist[2].images[0]" />
+          <view class="item" @tap="($event) => goToDetail(mustlist[2])">
+            <image
+              :src="mustlist.length > 0 && mustlist[2].images.length > 0 && mustlist[2].images[0]"
+            />
             <view class="price">￥{{ mustlist[2] && mustlist[2].price }}</view>
           </view>
-          <view class="item">
-            <image :src="mustlist[3].images.length > 0 && mustlist[3].images[0]" />
+          <view class="item" @tap="($event) => goToDetail(mustlist[3])">
+            <image
+              :src="mustlist.length > 0 && mustlist[3].images.length > 0 && mustlist[3].images[0]"
+            />
             <view class="price">￥{{ mustlist[3] && mustlist[3].price }}</view>
           </view>
         </view>

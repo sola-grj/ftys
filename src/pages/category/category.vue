@@ -9,34 +9,35 @@ import PageSkeleton from './components/PageSkeleton.vue'
 import { useMemberStore } from '@/stores'
 import { getGoodsListByIdAPI, goodsDetailPageRecommendGoodsAPI } from '@/services/goods'
 import type { PageParams } from '@/types/global'
-import { useAddShoppingCart, useUpdateShoppingCart } from '@/composables'
+import { useAddShoppingCart, useCollect, useUpdateShoppingCart } from '@/composables'
+
+// 弹出层组件
+const typepopup = ref<UniHelper.UniPopupInstance>()
 
 // 分页参数
-const pageParams: Required<PageParams> = {
+const fruitPageParams: Required<PageParams> = {
+  page: 1,
+  pageSize: 10,
+}
+const dryPageParams: Required<PageParams> = {
   page: 1,
   pageSize: 10,
 }
 // 页面是否加载完成 标识
-const isFinish = ref(false)
-// 获取当前用户角色信息
-const memberStore = useMemberStore()
+const fruitIsFinish = ref(false)
+const dryIsFinish = ref(false)
 
-// 查看当前账号是主账号还是子账号 1:主账号 2:子账号
-// 用户type_id
-/**  1:业务员 2:司机 3:生鲜 4:干货 5:生鲜&干货
- *  type_id 1 最高权限
-    type_id 2 只展示 我的 页面
-    type_id 3 4 5 && user_role === 2  客户 客户才有主账号 子账号
- */
 // 一级分类选中状态
 const activeIndex = ref(0) // 0 是生鲜 1是干货
 // 二级分类选中状态
-const secondActiveIndex = ref(0)
+const secondActiveFruitIndex = ref(0)
+const secondActiveDryIndex = ref(0)
 // 三级分类选中状态
-const thirdActiveIndex = ref(0)
-const onChangeIndex = (index: number) => {
-  activeIndex.value = index
-}
+const thirdActiveFruitIndex = ref(0)
+const thirdActiveDryIndex = ref(0)
+// 四级分类选中状态
+const FourthActiveFruitIndex = ref(0)
+const FourthActiveDryIndex = ref(0)
 
 // 获取商品分类数据
 const top1List = ref<BasicCategoryItem[]>([])
@@ -45,25 +46,50 @@ const top2List = ref<BasicCategoryItem[]>([])
 const fruitCategory = ref<BasicCategoryItem[]>([])
 const dryCargoCategory = ref<BasicCategoryItem[]>([])
 // 三级分类
-const currentThirdTypeCategory = ref<BasicCategoryItem[]>([])
+const currentThirdFruitTypeCategory = ref<BasicCategoryItem[]>([])
+const currentThirdDryTypeCategory = ref<BasicCategoryItem[]>([])
+// 四级分类
+const currentFourthFruitTypeCategory = ref<BasicCategoryItem[]>([])
+const currentFourthDryTypeCategory = ref<BasicCategoryItem[]>([])
 // 查询当前选中三级分类对应的商品
-const fiveTypeCategory = ref<SearchBasicCategoryItem[]>([])
-const getFiveTypeCategoryData = async (source: string, category: string) => {
+const fiveTypeFruitCategory = ref<SearchBasicCategoryItem[]>([])
+const fiveTypeDryCategory = ref<SearchBasicCategoryItem[]>([])
+
+const getFiveTypeFruitCategoryData = async (source: string, category: string) => {
   // 退出判断
-  if (isFinish.value === true) {
+  if (fruitIsFinish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
   }
   const res = await getGoodsListByIdAPI({
     source,
     category,
-    ...pageParams,
+    ...fruitPageParams,
   })
-  fiveTypeCategory.value.push(...res.result.list)
-  if (pageParams.page < res.result.total) {
+  fiveTypeFruitCategory.value.push(...res.result.list)
+  if (fruitPageParams.page < res.result.total) {
     // 页码累加
-    pageParams.page++
+    fruitPageParams.page++
   } else {
-    isFinish.value = true
+    fruitIsFinish.value = true
+  }
+}
+
+const getFiveTypeDryCategoryData = async (source: string, category: string) => {
+  // 退出判断
+  if (dryIsFinish.value === true) {
+    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
+  }
+  const res = await getGoodsListByIdAPI({
+    source,
+    category,
+    ...dryPageParams,
+  })
+  fiveTypeDryCategory.value.push(...res.result.list)
+  if (dryPageParams.page < res.result.total) {
+    // 页码累加
+    dryPageParams.page++
+  } else {
+    dryIsFinish.value = true
   }
 }
 
@@ -78,10 +104,27 @@ const getTypeListData = async () => {
   )
   top1List.value = res.result.top1
   top2List.value = res.result.top2
-  currentThirdTypeCategory.value = fruitCategory.value[0].childlist
-  getFiveTypeCategoryData(
+  // 设置三级数据
+  currentThirdFruitTypeCategory.value = fruitCategory.value[0].childlist
+  currentThirdDryTypeCategory.value = dryCargoCategory.value[0].childlist
+  // 设置四级数据
+  currentFourthFruitTypeCategory.value =
+    fruitCategory.value[0].childlist.length > 0 ? fruitCategory.value[0].childlist[0].childlist : []
+  currentFourthDryTypeCategory.value =
+    dryCargoCategory.value[0].childlist.length > 0
+      ? dryCargoCategory.value[0].childlist[0].childlist
+      : []
+  // 测试数据
+
+  // @ts-ignore
+  // currentFourthFruitTypeCategory.value = [{ name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, ...currentFourthFruitTypeCategory.value]
+  getFiveTypeFruitCategoryData(
     fruitCategory.value[0].childlist[0].source,
     fruitCategory.value[0].childlist[0].id,
+  )
+  getFiveTypeDryCategoryData(
+    dryCargoCategory.value[0].childlist[0].source,
+    dryCargoCategory.value[0].childlist[0].id,
   )
 }
 
@@ -89,71 +132,113 @@ const getTypeListData = async () => {
 const query = defineProps<{
   type: string
 }>()
-// 获取轮播图数据
-const bannerList = ref<BannerItem[]>([])
-const getBannerListData = async () => {
-  const res = await getHomeBannerAPI(2)
-  bannerList.value = res.result
-}
-
-// 获取分类列表数据
-const categoryList = ref<CategoryTopItem[]>([])
-const getCategoryTopData = async () => {
-  const res = await getCategoryTopAPI()
-  categoryList.value = res.result
-}
 
 // 页面加载
 onLoad(async () => {
   await Promise.all([getTypeListData()])
-  if (query.type) {
-    categoryList.value.forEach((item, index) => {
-      if (item.id === query.type) {
-        activeIndex.value = index
-      }
-    })
-  }
 })
 const goToSearch = () => {
   uni.navigateTo({ url: '/pages/search/search' })
 }
 
+// 点击一级分类
+const onChangeIndex = (index: number) => {
+  activeIndex.value = index
+  // 更新三级分类数据
+}
+
 // 点击二级分类
-const onTapTwoLevel = (data: BasicCategoryItem) => {
+const onTapTwoLevelFruit = (data: BasicCategoryItem, index: number) => {
   // 重置分页器
-  pageParams.page = 1
-  pageParams.pageSize = 10
-  isFinish.value = false
-  fiveTypeCategory.value = []
+  fruitPageParams.page = 1
+  fruitPageParams.pageSize = 10
+  fruitIsFinish.value = false
+  thirdActiveFruitIndex.value = 0
+  currentThirdFruitTypeCategory.value = []
+  currentFourthFruitTypeCategory.value = []
+  fiveTypeFruitCategory.value = []
+  secondActiveFruitIndex.value = index
   if (activeIndex.value === 0) {
     const fruit: BasicCategoryItem[] = fruitCategory.value.find((item) => item.id === data.id)
       ?.childlist as BasicCategoryItem[]
-    currentThirdTypeCategory.value = fruit
+    currentThirdFruitTypeCategory.value = fruit
+    currentFourthFruitTypeCategory.value =
+      fruit.length > 0 ? (fruit[0].childlist.length > 0 ? fruit[0].childlist : []) : []
     console.log('fruit', fruit)
-    getFiveTypeCategoryData(fruit[0].source, fruit[0].id)
+    getFiveTypeFruitCategoryData(fruit[0].source, fruit[0].id)
   }
+}
+
+const onTapTwoLevelDry = (data: BasicCategoryItem, index: number) => {
+  // 重置分页器
+  dryPageParams.page = 1
+  dryPageParams.pageSize = 10
+  dryIsFinish.value = false
+  thirdActiveDryIndex.value = 0
+  currentThirdDryTypeCategory.value = []
+  currentFourthDryTypeCategory.value = []
+  fiveTypeDryCategory.value = []
+  secondActiveDryIndex.value = index
   if (activeIndex.value === 1) {
-    const dry: BasicCategoryItem[] = fruitCategory.value.find((item) => item.id === data.id)
+    const dry: BasicCategoryItem[] = dryCargoCategory.value.find((item) => item.id === data.id)
       ?.childlist as BasicCategoryItem[]
-    currentThirdTypeCategory.value = dry
-    console.log('fruit', dry)
-    getFiveTypeCategoryData(dry[0].source, dry[0].id)
+    currentThirdDryTypeCategory.value = dry
+    currentFourthDryTypeCategory.value =
+      dry.length > 0 ? (dry[0].childlist.length > 0 ? dry[0].childlist : []) : []
+    console.log('dry', dry)
+    getFiveTypeDryCategoryData(dry[0].source, dry[0].id)
   }
 }
 
 // 点击三级分类
-const onTapThirdType = (data: BasicCategoryItem, index: number) => {
+const onTapThirdFruitType = (data: BasicCategoryItem, index: number) => {
   // 重置分页器
-  pageParams.page = 1
-  pageParams.pageSize = 10
-  isFinish.value = false
-  fiveTypeCategory.value = []
-  thirdActiveIndex.value = index
-  getFiveTypeCategoryData(data.source, data.id)
+  fruitPageParams.page = 1
+  fruitPageParams.pageSize = 10
+  fruitIsFinish.value = false
+  fiveTypeFruitCategory.value = []
+  thirdActiveFruitIndex.value = index
+  currentFourthFruitTypeCategory.value = data.childlist.length > 0 ? data.childlist : []
+  getFiveTypeFruitCategoryData(data.source, data.id)
+}
+const onTapThirdDryType = (data: BasicCategoryItem, index: number) => {
+  // 重置分页器
+  dryPageParams.page = 1
+  dryPageParams.pageSize = 10
+  dryIsFinish.value = false
+  fiveTypeDryCategory.value = []
+  thirdActiveDryIndex.value = index
+  currentFourthDryTypeCategory.value = data.childlist.length > 0 ? data.childlist : []
+  getFiveTypeDryCategoryData(data.source, data.id)
 }
 
+// 点击四级分类
+const onTapFourthFruitType = (data: BasicCategoryItem, index: number) => {
+  // 重置分页器
+  // @ts-ignore
+  typepopup!.value?.close()
+  fruitPageParams.page = 1
+  fruitPageParams.pageSize = 10
+  fruitIsFinish.value = false
+  fiveTypeFruitCategory.value = []
+  FourthActiveFruitIndex.value = index
+  getFiveTypeFruitCategoryData(data.source, data.id)
+}
+const onTapFourthDryType = (data: BasicCategoryItem, index: number) => {
+  // 重置分页器
+  // @ts-ignore
+  typepopup!.value?.close()
+  dryPageParams.page = 1
+  dryPageParams.pageSize = 10
+  dryIsFinish.value = false
+  fiveTypeDryCategory.value = []
+  FourthActiveDryIndex.value = index
+  getFiveTypeDryCategoryData(data.source, data.id)
+}
+
+// 添加、更新购物车
+const currentCartId = ref('')
 const addShoppingCart = async (data: SearchBasicCategoryItem, num: number, type: string) => {
-  let orderId = ''
   if (type === 'first') {
     const res = await useAddShoppingCart(
       {
@@ -167,13 +252,13 @@ const addShoppingCart = async (data: SearchBasicCategoryItem, num: number, type:
       num,
     )
     if (res.code === '1') {
-      orderId = res.result.orderId
+      currentCartId.value = res.result.cartId
       data.cartGoodsNum = res.result.goodsNum
     }
   } else {
     const res = await useUpdateShoppingCart(
       {
-        cartId: data.cartId,
+        cartId: currentCartId.value || data.cartId,
         num,
         unitPrice: data.price,
         units: data.unit,
@@ -186,10 +271,27 @@ const addShoppingCart = async (data: SearchBasicCategoryItem, num: number, type:
   }
 }
 
-// 更新购物车数量
-const changeCartNum = async (value: number, data: SearchBasicCategoryItem) => {
-  console.log('888888', value, data)
-  await addShoppingCart(data, value, '')
+// 商品收藏 取消收藏
+const onCollect = async (data: SearchBasicCategoryItem) => {
+  const res = await useCollect(data.source, data.goodsId)
+  if (res.code === '1' && res.msg === '收藏成功') {
+    uni.showToast({ icon: 'success', title: '收藏成功' })
+    fiveTypeFruitCategory.value.forEach((item) => {
+      if (item.goodsId === data.goodsId && item.source === data.source) {
+        item.isCollect = '1'
+      }
+    })
+    return
+  }
+  if (res.code === '1' && res.msg === '取消收藏') {
+    uni.showToast({ icon: 'success', title: '取消收藏' })
+    fiveTypeFruitCategory.value.forEach((item) => {
+      if (item.goodsId === data.goodsId && item.source === data.source) {
+        item.isCollect = '0'
+      }
+    })
+    return
+  }
 }
 </script>
 
@@ -220,11 +322,24 @@ const changeCartNum = async (value: number, data: SearchBasicCategoryItem) => {
     <view class="head-types">
       <view
         class="head-types-item"
-        @tap="($event) => onTapTwoLevel(item)"
-        v-for="item in activeIndex === 0 ? fruitCategory : dryCargoCategory"
+        @tap="
+          ($event) =>
+            activeIndex === 0 ? onTapTwoLevelFruit(item, index) : onTapTwoLevelDry(item, index)
+        "
+        v-for="(item, index) in activeIndex === 0 ? fruitCategory : dryCargoCategory"
         :key="item.id"
+        :class="{
+          active:
+            activeIndex === 0 ? secondActiveFruitIndex === index : secondActiveDryIndex === index,
+        }"
       >
-        <view class="image-containers">
+        <view
+          class="image-containers"
+          :class="{
+            active:
+              activeIndex === 0 ? secondActiveFruitIndex === index : secondActiveDryIndex === index,
+          }"
+        >
           <image class="icon" :src="item.image" mode="aspectFit" />
         </view>
         <text class="text"> {{ item.name }}</text>
@@ -235,11 +350,19 @@ const changeCartNum = async (value: number, data: SearchBasicCategoryItem) => {
       <!-- 左侧：二级分类 -->
       <scroll-view class="primary" scroll-y>
         <view
-          @tap="($event) => onTapThirdType(item, index)"
-          v-for="(item, index) in currentThirdTypeCategory"
+          @tap="
+            ($event) =>
+              activeIndex === 0 ? onTapThirdFruitType(item, index) : onTapThirdDryType(item, index)
+          "
+          v-for="(item, index) in activeIndex === 0
+            ? currentThirdFruitTypeCategory
+            : currentThirdDryTypeCategory"
           :key="item.id"
           class="item"
-          :class="{ active: index === thirdActiveIndex }"
+          :class="{
+            active:
+              activeIndex === 0 ? thirdActiveFruitIndex === index : thirdActiveDryIndex === index,
+          }"
         >
           <text class="name"> {{ item.name }} </text>
         </view>
@@ -249,21 +372,78 @@ const changeCartNum = async (value: number, data: SearchBasicCategoryItem) => {
         class="secondary"
         @scrolltolower="
           ($event) =>
-            getFiveTypeCategoryData(
-              currentThirdTypeCategory[thirdActiveIndex].source,
-              currentThirdTypeCategory[thirdActiveIndex].id,
-            )
+            activeIndex === 0
+              ? getFiveTypeFruitCategoryData(
+                  currentThirdFruitTypeCategory[thirdActiveFruitIndex].source,
+                  currentThirdFruitTypeCategory[thirdActiveFruitIndex].id,
+                )
+              : getFiveTypeDryCategoryData(
+                  currentThirdDryTypeCategory[thirdActiveDryIndex].source,
+                  currentThirdDryTypeCategory[thirdActiveDryIndex].id,
+                )
         "
         scroll-y
       >
         <!-- 内容区域 -->
         <view class="search-list">
+          <view class="fourth-category">
+            <view
+              :class="{
+                active:
+                  activeIndex === 0
+                    ? FourthActiveFruitIndex === index
+                    : FourthActiveDryIndex === index,
+              }"
+              @tap="
+                ($event) =>
+                  activeIndex === 0
+                    ? onTapFourthFruitType(item, index)
+                    : onTapFourthDryType(item, index)
+              "
+              class="fourth-item"
+              v-for="(item, index) in activeIndex === 0
+                ? currentFourthFruitTypeCategory
+                : currentFourthDryTypeCategory"
+              :key="item.id"
+              >{{ item.name }}
+            </view>
+            <view class="spread" @tap="typepopup?.open?.('top')">
+              <text class="ftysIcon icon-xiangxiajiantou" />
+            </view>
+            <uni-popup ref="typepopup" background-color="#fff">
+              <view
+                class="popup-content"
+                :class="{ 'popup-height': type === 'left' || type === 'right' }"
+              >
+                <view class="text">分类</view>
+                <view
+                  class="type-item"
+                  :key="item.id"
+                  @tap="
+                    ($event) =>
+                      activeIndex === 0
+                        ? onTapFourthFruitType(item, index)
+                        : onTapFourthDryType(item, index)
+                  "
+                  v-for="(item, index) in activeIndex === 0
+                    ? currentFourthFruitTypeCategory
+                    : currentFourthDryTypeCategory"
+                >
+                  {{ item.name }}
+                </view>
+              </view>
+            </uni-popup>
+          </view>
           <view class="order">
             <view>默认</view>
             <view>单价</view>
           </view>
           <view class="list-container">
-            <view class="item" v-for="item in fiveTypeCategory" :key="item.goodsId">
+            <view
+              class="item"
+              v-for="item in activeIndex === 0 ? fiveTypeFruitCategory : fiveTypeDryCategory"
+              :key="item.goodsId"
+            >
               <image :src="item.images[0]" mode="scaleToFill" />
               <view class="info">
                 <view class="title">{{ item.name }}</view>
@@ -279,14 +459,15 @@ const changeCartNum = async (value: number, data: SearchBasicCategoryItem) => {
                 <uni-number-box
                   class="number-box"
                   v-if="item.cartGoodsNum"
-                  @change="($event) => changeCartNum($event, item)"
+                  @change="($event) => addShoppingCart(item, $event, '')"
                   v-model="item.cartGoodsNum"
                 />
                 <view
                   v-else
                   @tap="($event) => addShoppingCart(item, 1, 'first')"
                   class="ftysIcon icon-a-jiagou2x"
-                ></view>
+                >
+                </view>
               </view>
             </view>
           </view>
@@ -307,6 +488,41 @@ page {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.popup-content {
+  width: 100%;
+  min-height: 300rpx;
+  padding: 20rpx;
+
+  .type-item {
+    font-size: 26rpx;
+    color: rgba(50, 50, 51, 1);
+    font-weight: 400;
+    margin-top: 20rpx;
+    margin-right: 20rpx;
+    display: inline-block;
+    height: 60rpx;
+    line-height: 40rpx;
+    padding: 10rpx;
+    border-radius: 4px;
+    background: rgba(242, 244, 247, 1);
+    white-space: nowrap;
+  }
+}
+
+::v-deep .uni-numbox {
+  .uni-numbox-btns {
+    padding: 0 4px;
+    // background-color: #e1d7d7 !important;
+  }
+
+  .uni-numbox__value {
+    width: 48rpx !important;
+    height: 30rpx !important;
+    font-size: 26rpx !important;
+    // background-color: #e1d7d7 !important;
+  }
 }
 
 .login-container {
@@ -376,14 +592,38 @@ page {
     box-sizing: border-box;
     margin: 20rpx;
 
-    .icon {
-      width: 120rpx;
-      height: 120rpx;
+    .image-containers {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 130rpx;
+      height: 130rpx;
+      border-radius: 50%;
+
+      .icon {
+        width: 120rpx;
+        height: 120rpx;
+        border-radius: 50%;
+      }
     }
 
     .text {
       font-size: 26rpx;
       color: #666;
+    }
+
+    .active {
+      border: 5rpx solid rgba(255, 80, 64, 1);
+
+      .text {
+        color: rgba(255, 80, 64, 1);
+      }
+    }
+  }
+
+  .active {
+    .text {
+      color: #ff5040;
     }
   }
 }
@@ -437,7 +677,7 @@ page {
       top: 0;
       width: 8rpx;
       height: 100%;
-      background-color: #27ba9b;
+      background-color: #ff5040;
     }
   }
 }
@@ -453,6 +693,55 @@ page {
 
   .search-list {
     margin: 20rpx 20rpx 0;
+
+    .fourth-category {
+      position: relative;
+      height: 100rpx;
+      display: flex;
+      width: 100%;
+      overflow-x: scroll;
+      padding-right: 60rpx;
+
+      .spread {
+        position: fixed;
+        right: 0;
+        z-index: 99;
+        font-size: 26rpx;
+        color: rgba(50, 50, 51, 1);
+        font-weight: 400;
+        margin-top: 20rpx;
+        margin-right: 20rpx;
+        display: inline-block;
+        height: 60rpx;
+        width: 60rpx;
+        line-height: 40rpx;
+        padding: 10rpx;
+        border-radius: 4px;
+        background: #fff;
+        white-space: nowrap;
+        text-align: center;
+      }
+
+      .fourth-item {
+        font-size: 26rpx;
+        color: rgba(50, 50, 51, 1);
+        font-weight: 400;
+        margin-top: 20rpx;
+        margin-right: 20rpx;
+        display: inline-block;
+        height: 60rpx;
+        line-height: 40rpx;
+        padding: 10rpx;
+        border-radius: 4px;
+        background: rgba(242, 244, 247, 1);
+        white-space: nowrap;
+      }
+
+      .active {
+        background: #ffe8e5;
+        color: #ff5040;
+      }
+    }
 
     .order {
       display: flex;
@@ -474,6 +763,7 @@ page {
           display: flex;
           flex-direction: column;
           width: 90%;
+          padding-left: 20rpx;
 
           .title {
           }

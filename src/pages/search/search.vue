@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCollect, useGuessList } from '@/composables'
+import { useAddShoppingCart, useCollect, useGuessList, useUpdateShoppingCart } from '@/composables'
 import { getHistorySearchListAPI, getSearchListAPI } from '@/services/search'
 import type { PageParams } from '@/types/global'
 import type { SearchGoodsItem } from '@/types/search'
@@ -100,6 +100,45 @@ const onCollect = async (data: SearchGoodsItem) => {
 onLoad(() => {
   getHistorySearchListData()
 })
+// 更新购物车
+// 添加购物车
+const currentCartId = ref('')
+const addShoppingCart = async (data: SearchGoodsItem, num: number, type: string) => {
+  if (type === 'first') {
+    const res = await useAddShoppingCart(
+      {
+        source: data.source,
+        goodsId: data.goodsId,
+        fGoodsId: data.fGoodsId,
+        num,
+        units: data.unit,
+        unitPrice: data.price,
+      },
+      num,
+    )
+    if (res.code === '1') {
+      currentCartId.value = res.result.cartId
+      data.cartGoodsNum = res.result.goodsNum
+    }
+  } else {
+    const res = await useUpdateShoppingCart(
+      {
+        cartId: currentCartId.value || data.cartId,
+        num,
+        unitPrice: data.price,
+        units: data.unit,
+      },
+      num,
+    )
+    if (res.code === '1') {
+      data.cartGoodsNum = res.result.goodsNum
+    }
+  }
+}
+
+const goToDetail = (data: SearchGoodsItem) => {
+  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
+}
 </script>
 
 <template>
@@ -154,20 +193,35 @@ onLoad(() => {
         <view>单价</view>
       </view>
       <view class="list-container">
-        <view class="item" v-for="item in searchList" :key="item.goodsId">
+        <view
+          class="item"
+          @tap="($event) => goToDetail(item)"
+          v-for="item in searchList"
+          :key="item.goodsId"
+        >
           <image :src="item.images[0]" />
           <view class="info">
             <view class="title">{{ item.name }}</view>
             <view class="price">￥{{ item.price }}</view>
           </view>
-          <view class="right">
+          <view class="right" @tap.stop.prevent>
             <view
               @tap="($event) => onCollect(item)"
               :class="`ftysIcon ${
                 item.isCollect === '1' ? 'icon-huangsexingxing' : 'icon-shoucang'
               }`"
             ></view>
-            <view class="ftysIcon icon-a-jiagou2x"></view>
+            <uni-number-box
+              class="number-box"
+              v-if="item?.cartGoodsNum"
+              v-model="item.cartGoodsNum"
+              @change="($event) => addShoppingCart(item, $event, '')"
+            />
+            <view
+              @tap="($event) => addShoppingCart(item, 1, 'first')"
+              v-else
+              class="ftysIcon icon-a-jiagou2x"
+            ></view>
           </view>
         </view>
       </view>
@@ -184,6 +238,20 @@ page {
 
 .viewport {
   height: 100%;
+}
+
+::v-deep .uni-numbox {
+  .uni-numbox-btns {
+    padding: 0 4px;
+    background-color: #e1d7d7 !important;
+  }
+
+  .uni-numbox__value {
+    width: 48rpx !important;
+    height: 30rpx !important;
+    font-size: 26rpx !important;
+    background-color: #e1d7d7 !important;
+  }
 }
 
 /* 自定义导航条 */
@@ -325,10 +393,12 @@ page {
       }
 
       .info {
+        flex: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
         width: 90%;
+        padding-left: 20rpx;
 
         .title {
         }
@@ -342,8 +412,8 @@ page {
       .right {
         display: flex;
         flex-direction: column;
-        flex: 1;
         justify-content: space-around;
+        align-items: flex-end;
 
         .shoucang {
           height: 50%;

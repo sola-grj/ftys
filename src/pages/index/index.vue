@@ -215,6 +215,18 @@ page {
   flex-direction: column;
 }
 
+::v-deep .uni-numbox {
+  .uni-numbox-btns {
+    padding: 0 4px;
+  }
+
+  .uni-numbox__value {
+    width: 48rpx !important;
+    height: 30rpx !important;
+    font-size: 26rpx !important;
+  }
+}
+
 .sroll-view {
   flex: 1;
   // background-color: #fff;

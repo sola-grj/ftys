@@ -78,6 +78,11 @@ export type BannerItem = {
 export type MustBuyItem = TopItem & {
   price: string
   images: string[]
+  isCollect: string // 0 1
+  cartGoodsNum: number
+  cartId: string
+  fGoodsId: string
+  unit: string
 }
 
 /** 首页-推荐购买 */
@@ -88,6 +93,10 @@ export type RecommendItem = {
   source: string
   price: string
   isCollect: string
+  cartGoodsNum: number
+  cartId: string
+  fGoodsId: string
+  unit: string
 }
 
 export type RecommendResult = {

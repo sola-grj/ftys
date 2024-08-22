@@ -6,6 +6,10 @@ export type SearchGoodsItem = {
   price: string
   images: string[]
   isCollect: string // 0 1
+  cartGoodsNum: number
+  cartId: string
+  fGoodsId: string
+  unit: string
 }
 
 export type SearchGoodsResult = {

@@ -145,6 +145,7 @@ const onShowModal = (tip: { tipTitle: string; tipDetail: string }) => {
 }
 // 更新购物车
 // 添加购物车
+const currentCartId = ref('')
 const addShoppingCart = async (data: GoodsResult, num: number, type: string) => {
   if (type === 'first') {
     const res = await useAddShoppingCart(
@@ -159,12 +160,13 @@ const addShoppingCart = async (data: GoodsResult, num: number, type: string) => 
       num,
     )
     if (res.code === '1') {
+      currentCartId.value = res.result.cartId
       data.cartGoodsNum = res.result.goodsNum
     }
   } else {
     const res = await useUpdateShoppingCart(
       {
-        cartId: data.cartId,
+        cartId: currentCartId.value || data.cartId,
         num,
         unitPrice: data.price,
         units: data.unit,
@@ -177,10 +179,8 @@ const addShoppingCart = async (data: GoodsResult, num: number, type: string) => 
   }
 }
 
-// 更新购物车数量
-const changeCartNum = async (value: number, data: GoodsResult) => {
-  await addShoppingCart(data, value, '')
-  console.log(value)
+const goToDetail = (data: RecommendItem) => {
+  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
 }
 </script>
 
@@ -246,20 +246,25 @@ const changeCartNum = async (value: number, data: GoodsResult) => {
       <swiper @change="onChange" indicator-active-color="#999999" circular :indicator-dots="true">
         <swiper-item v-for="(item, index) in swipperRecommendGoods" :key="index">
           <view class="recommend-container">
-            <view class="recommend-item" v-for="i in item" :key="i.goodsId">
+            <view
+              class="recommend-item"
+              @tap="($event) => goToDetail(i)"
+              v-for="i in item"
+              :key="i.goodsId"
+            >
               <image mode="aspectFill" class="img" :src="i.images[0]" />
               <view class="name">{{ i.name }}</view>
-              <view class="bottom">
-                <text>￥{{ i.price }}</text>
+              <view class="bottom" @tap.stop.prevent>
+                <text class="money">￥{{ i.price }}</text>
                 <uni-number-box
                   class="number-box"
                   v-if="i?.cartGoodsNum"
                   v-model="i.cartGoodsNum"
-                  @change="$event => changeCartNum($event, i as GoodsResult)"
+                  @change="$event => addShoppingCart(i as GoodsResult, $event, '')"
                 />
                 <text
                   v-else
-                  @tap="($event: any) => addShoppingCart(i, 1, 'first')"
+                  @tap="($event) => addShoppingCart(i, 1, 'first')"
                   class="ftysIcon icon-a-jiagou2x"
                 ></text>
               </view>
@@ -326,9 +331,13 @@ const changeCartNum = async (value: number, data: GoodsResult) => {
         class="number-box"
         v-if="goods?.cartGoodsNum"
         v-model="goods.cartGoodsNum"
-        @change="$event => changeCartNum($event, goods as GoodsResult)"
+        @change="$event => addShoppingCart(goods as GoodsResult, $event, '')"
       />
-      <view v-else @tap="($event: any) => addShoppingCart(goods, 1, 'first')" class="addcart">
+      <view
+        v-else
+        @tap="($event: any) => addShoppingCart(goods as GoodsResult, 1, 'first')"
+        class="addcart"
+      >
         加入购物车
       </view>
     </view>
@@ -350,6 +359,20 @@ page {
 
 ::v-deep .uni-popup__wrapper {
   border-radius: 20rpx;
+}
+
+::v-deep .uni-numbox {
+  zoom: 0.8;
+
+  .uni-numbox-btns {
+    padding: 0 4px;
+  }
+
+  .uni-numbox__value {
+    width: 48rpx !important;
+    height: 30rpx !important;
+    font-size: 26rpx !important;
+  }
 }
 
 .popup-root {
@@ -574,7 +597,7 @@ page {
   height: 900rpx;
   background: #fff;
   border-radius: 20rpx;
-  padding: 20rpx;
+  padding: 10rpx;
 
   .recommend-container {
     width: 100%;
@@ -599,6 +622,11 @@ page {
         color: #cf4444;
         display: flex;
         justify-content: space-between;
+        align-items: center;
+
+        .money {
+          font-size: 24rpx;
+        }
       }
 
       .img {

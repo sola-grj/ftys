@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAddShoppingCart, useUpdateShoppingCart } from '@/composables'
 import type { PageParams } from '@/types/global'
 import type { RecommendItem } from '@/types/home'
 import { ref } from 'vue'
@@ -11,6 +12,45 @@ defineProps<{
 }>()
 const goToCoupon = () => {
   uni.navigateTo({ url: '/pages/coupon/coupon?from=home' })
+}
+// 更新购物车
+// 添加购物车
+const currentCartId = ref('')
+const addShoppingCart = async (data: RecommendItem, num: number, type: string) => {
+  if (type === 'first') {
+    const res = await useAddShoppingCart(
+      {
+        source: data.source,
+        goodsId: data.goodsId,
+        fGoodsId: data.fGoodsId,
+        num,
+        units: data.unit,
+        unitPrice: data.price,
+      },
+      num,
+    )
+    if (res.code === '1') {
+      currentCartId.value = res.result.cartId
+      data.cartGoodsNum = res.result.goodsNum
+    }
+  } else {
+    const res = await useUpdateShoppingCart(
+      {
+        cartId: currentCartId.value || data.cartId,
+        num,
+        unitPrice: data.price,
+        units: data.unit,
+      },
+      num,
+    )
+    if (res.code === '1') {
+      data.cartGoodsNum = res.result.goodsNum
+    }
+  }
+}
+
+const goToDetail = (data: RecommendItem) => {
+  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
 }
 </script>
 
@@ -41,8 +81,8 @@ const goToCoupon = () => {
     </view>
   </view>
   <view v-if="activeIndex === 0" class="list-container">
-    <navigator
-      :url="`/pages/goods/goods?source=${item.source}&goodsId=${item.goodsId}`"
+    <view
+      @tap="($event) => goToDetail(item)"
       class="item"
       v-for="item in recommendList"
       :key="item.goodsId"
@@ -50,16 +90,26 @@ const goToCoupon = () => {
       <view class="item-container">
         <image :src="item.images[0]" />
         <view class="name">{{ item.name }}</view>
-        <view class="info">
+        <view class="info" @tap.stop.prevent>
           <view class="price">￥{{ item.price }}</view>
-          <view class="ftysIcon icon-a-jiagou2x"></view>
+          <uni-number-box
+            class="number-box"
+            v-if="item.cartGoodsNum"
+            @change.stop="($event) => addShoppingCart(item, $event, '')"
+            v-model="item.cartGoodsNum"
+          />
+          <view
+            v-else
+            @tap="($event) => addShoppingCart(item, 1, 'first')"
+            class="ftysIcon icon-a-jiagou2x"
+          ></view>
         </view>
       </view>
-    </navigator>
+    </view>
   </view>
   <view v-if="activeIndex === 1" class="list-container">
-    <navigator
-      :url="`/pages/goods/goods?source=${item.source}&goodsId=${item.goodsId}`"
+    <view
+      @tap="($event) => goToDetail(item)"
       class="item"
       v-for="item in historyList"
       :key="item.goodsId"
@@ -67,12 +117,22 @@ const goToCoupon = () => {
       <view class="item-container">
         <image :src="item.images[0]" />
         <view class="name">{{ item.name }}</view>
-        <view class="info">
+        <view class="info" @tap.stop.prevent>
           <view class="price">￥{{ item.price }}</view>
-          <view class="ftysIcon icon-a-jiagou2x"></view>
+          <uni-number-box
+            class="number-box"
+            v-if="item.cartGoodsNum"
+            @change.stop="($event) => addShoppingCart(item, $event, '')"
+            v-model="item.cartGoodsNum"
+          />
+          <view
+            v-else
+            @tap="($event) => addShoppingCart(item, 1, 'first')"
+            class="ftysIcon icon-a-jiagou2x"
+          ></view>
         </view>
       </view>
-    </navigator>
+    </view>
   </view>
 </template>
 
