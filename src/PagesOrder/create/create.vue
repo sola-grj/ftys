@@ -84,79 +84,85 @@ const onOrderSubmit = async () => {
 
 <template>
   <scroll-view scroll-y class="viewport">
-    <!-- 收货地址 -->
-    <navigator
-      v-if="selectedAddress"
-      class="shipment"
-      hover-class="none"
-      url="/pagesMember/address/address?from=order"
-    >
-      <view class="user"> {{ selectedAddress.receiver }} {{ selectedAddress.contact }} </view>
+    <view class="top-title">
+      <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
+        <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
+        <text class="text">确认订单</text>
+      </view>
+    </view>
+    <view class="container">
+      <!-- 收货地址 -->
       <view class="address">
-        {{ selectedAddress.fullLocation }} {{ selectedAddress.address }}
-      </view>
-      <text class="icon icon-right"></text>
-    </navigator>
-    <navigator
-      v-else
-      class="shipment"
-      hover-class="none"
-      url="/pagesMember/address/address?from=order"
-    >
-      <view class="address"> 请选择收货地址 </view>
-      <text class="icon icon-right"></text>
-    </navigator>
-
-    <!-- 商品信息 -->
-    <view class="goods">
-      <navigator
-        v-for="item in orderPre?.goods"
-        :key="item.skuId"
-        :url="`/pages/goods/goods?id=${item.id}`"
-        class="item"
-        hover-class="none"
-      >
-        <image class="picture" :src="item.picture" />
-        <view class="meta">
-          <view class="name ellipsis"> {{ item.name }} </view>
-          <view class="attrs">{{ item.attrsText }}</view>
-          <view class="prices">
-            <view class="pay-price symbol">{{ item.payPrice }}</view>
-            <view class="price symbol">{{ item.price }}</view>
-          </view>
-          <view class="count">x{{ item.count }}</view>
+        <view class="add-title">收获方式</view>
+        <view class="add-psz">配送至</view>
+        <view class="add-detail">浙江省杭州市余杭区良渚街道博园路8号杭州果品批发市场</view>
+        <view class="add-person">
+          <text class="person-name">李亦男</text>
+          <text class="person-phone">189****7054</text>
         </view>
-      </navigator>
-    </view>
+      </view>
+      <!-- 支付方式 -->
+      <view class="pay-type">
+        <view class="pay-title">支付方式</view>
+        <view class="pay-value">货单付款</view>
+      </view>
+      <!-- 配送时间 -->
+      <view class="time">
+        <view class="time-title">配送时间</view>
+        <view class="time-value">2024-07-09 （周二）</view>
+      </view>
 
-    <!-- 配送及支付方式 -->
-    <view class="related">
-      <view class="item">
-        <text class="text">配送时间</text>
-        <picker :range="deliveryList" range-key="text" @change="onChangeDelivery">
-          <view class="icon-fonts picker">{{ activeDelivery.text }}</view>
-        </picker>
+      <!-- 商品信息 -->
+      <view class="goods">
+        <navigator
+          v-for="item in orderPre?.goods"
+          :key="item.skuId"
+          :url="`/pages/goods/goods?id=${item.id}`"
+          class="item"
+          hover-class="none"
+        >
+          <image class="picture" :src="item.picture" />
+          <view class="meta">
+            <view class="name ellipsis"> {{ item.name }} </view>
+            <view class="attrs">{{ item.attrsText }}</view>
+            <view class="prices">
+              <view class="pay-price symbol">{{ item.payPrice }}</view>
+              <view class="price symbol">{{ item.price }}</view>
+            </view>
+            <view class="count">x{{ item.count }}</view>
+          </view>
+        </navigator>
       </view>
-      <view class="item">
-        <text class="text">订单备注</text>
-        <input
-          class="input"
-          :cursor-spacing="30"
-          placeholder="选题，建议留言前先与商家沟通确认"
-          v-model="buyerMessage"
-        />
-      </view>
-    </view>
 
-    <!-- 支付金额 -->
-    <view class="settlement">
-      <view class="item">
-        <text class="text">商品总价: </text>
-        <text class="number symbol">{{ orderPre?.summary.totalPayPrice.toFixed(2) }}</text>
+      <!-- 配送及支付方式 -->
+      <view class="related">
+        <view class="item">
+          <text class="text">配送时间</text>
+          <picker :range="deliveryList" range-key="text" @change="onChangeDelivery">
+            <view class="icon-fonts picker">{{ activeDelivery.text }}</view>
+          </picker>
+        </view>
+        <view class="item">
+          <text class="text">订单备注</text>
+          <input
+            class="input"
+            :cursor-spacing="30"
+            placeholder="选题，建议留言前先与商家沟通确认"
+            v-model="buyerMessage"
+          />
+        </view>
       </view>
-      <view class="item">
-        <text class="text">运费: </text>
-        <text class="number symbol">{{ orderPre?.summary.postFee.toFixed(2) }}</text>
+
+      <!-- 支付金额 -->
+      <view class="settlement">
+        <view class="item">
+          <text class="text">商品总价: </text>
+          <text class="number symbol">{{ orderPre?.summary.totalPayPrice.toFixed(2) }}</text>
+        </view>
+        <view class="item">
+          <text class="text">运费: </text>
+          <text class="number symbol">{{ orderPre?.summary.postFee.toFixed(2) }}</text>
+        </view>
       </view>
     </view>
   </scroll-view>
@@ -179,6 +185,124 @@ page {
   height: 100%;
   overflow: hidden;
   background-color: #f4f4f4;
+}
+
+// 滚动容器
+.scroll-view {
+  width: 100%;
+  position: relative;
+}
+
+.top-title {
+  height: 400rpx;
+  width: 100%;
+  background: linear-gradient(to bottom, rgb(241 73 17) 0%, #f7f7f8 100%);
+  padding: 20rpx;
+
+  .title {
+    position: relative;
+    text-align: center;
+    color: #fff;
+    width: 100%;
+    height: 130rpx;
+
+    .text {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 20rpx;
+    }
+
+    .icon-xiangzuojiantou {
+      position: absolute;
+      left: 20rpx;
+      bottom: 20rpx;
+    }
+
+    .add-feedback {
+      width: 160rpx;
+      font-size: 28rpx;
+      height: 40rpx;
+      text-align: center;
+      line-height: 40rpx;
+      position: absolute;
+      right: 20rpx;
+      bottom: 20rpx;
+      border-radius: 20rpx;
+      background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
+    }
+  }
+}
+
+.container {
+  // overflow: scroll;
+  height: 100%;
+
+  .address {
+    overflow: hidden;
+    margin: 20rpx;
+    padding: 0 20rpx;
+    border-radius: 10rpx;
+    background-color: #fff;
+
+    .add-title {
+      margin-top: 40rpx;
+      font-weight: bold;
+    }
+
+    .add-psz {
+      color: #999;
+      margin-top: 40rpx;
+      font-size: 28rpx;
+    }
+
+    .add-detail {
+      font-weight: bold;
+      margin-top: 20rpx;
+    }
+
+    .add-person {
+      margin: 30rpx 0;
+      color: #999;
+      font-size: 28rpx;
+
+      .person-name {
+        margin-right: 30rpx;
+      }
+    }
+  }
+
+  .pay-type {
+    // overflow: hidden;
+    margin: 20rpx;
+    padding: 20rpx 20rpx;
+    border-radius: 10rpx;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+
+    .pay-value {
+      margin-right: 100rpx;
+      color: #ff5340;
+      font-weight: 600;
+    }
+  }
+
+  .time {
+    // overflow: hidden;
+    margin: 20rpx;
+    padding: 20rpx 20rpx;
+    border-radius: 10rpx;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+
+    .time-value {
+      margin-right: 100rpx;
+      color: #ff5340;
+      font-weight: 600;
+    }
+  }
 }
 
 .symbol::before {
@@ -287,43 +411,6 @@ page {
       font-size: 26rpx;
       color: #444;
     }
-  }
-}
-
-.related {
-  margin: 20rpx;
-  padding: 0 20rpx;
-  border-radius: 10rpx;
-  background-color: #fff;
-
-  .item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    min-height: 80rpx;
-    font-size: 26rpx;
-    color: #333;
-  }
-
-  .input {
-    flex: 1;
-    text-align: right;
-    margin: 20rpx 0;
-    padding-right: 20rpx;
-    font-size: 26rpx;
-    color: #999;
-  }
-
-  .item .text {
-    width: 125rpx;
-  }
-
-  .picker {
-    color: #666;
-  }
-
-  .picker::after {
-    content: '\e6c2';
   }
 }
 

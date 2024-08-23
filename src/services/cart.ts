@@ -113,3 +113,15 @@ export const getShoppingCartAPI = () => {
     url: '/shopping_cart/getShoppingCart',
   })
 }
+
+/**
+ * 删除购物车
+ * @param
+ */
+export const removeShoppingCartAPI = (data: { cartId: string }) => {
+  return http({
+    method: 'POST',
+    url: '/shopping_cart/removeShoppingCart',
+    data,
+  })
+}

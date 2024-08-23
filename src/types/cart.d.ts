@@ -18,6 +18,6 @@ export type CartItem = {
   name: string
   goodsId: string
   fGoodsId: string
-  images: string
+  images: string[]
   check: Boolean
 }

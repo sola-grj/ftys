@@ -226,6 +226,7 @@
 				{
 					"path": "create/create",
 					"style": {
+						"navigationStyle": "custom",
 						"navigationBarTitleText": "填写订单"
 					}
 				},

@@ -1,4 +1,4 @@
-import { addShoppingCartAPI, updateShoppingCartAPI } from '@/services/cart'
+import { addShoppingCartAPI, removeShoppingCartAPI, updateShoppingCartAPI } from '@/services/cart'
 import { getGoodsCollectInfoAPI } from '@/services/goods'
 import type { SolaShopGuessInstance } from '@/types/component'
 import { ref } from 'vue'
@@ -46,6 +46,14 @@ export const useUpdateShoppingCart = async (data: any, num: number) => {
     num,
     unitPrice: data.unitPrice,
     units: data.units,
+  })
+  return res
+}
+
+// 删除购物车
+export const removeShoppingCart = async (cartId: string) => {
+  const res = await removeShoppingCartAPI({
+    cartId,
   })
   return res
 }

@@ -3,7 +3,12 @@ import type {
   InputNumberBox,
   InputNumberBoxEvent,
 } from '@/components/vk-data-input-number-box/vk-data-input-number-box'
-import { useGuessList } from '@/composables'
+import {
+  removeShoppingCart,
+  useAddShoppingCart,
+  useGuessList,
+  useUpdateShoppingCart,
+} from '@/composables'
 import {
   deleteMemberCartAPI,
   getMemberCartAPI,
@@ -42,19 +47,43 @@ onShow(() => {
 })
 
 // 点击删除按钮
-const onDeleteCart = (skuId: string) => {
+const onDeleteCart = (id: string) => {
   // 弹窗二次确认
   uni.showModal({
     content: '是否删除',
     success: async (res) => {
       if (res.confirm) {
         // 后端删除单品
-        await deleteMemberCartAPI({ ids: [skuId] })
+        const res = await removeShoppingCart(id)
         // 重新获取列表
         getMemberCartData()
       }
     },
   })
+}
+
+const onDeleteCarts = (datas: CartItem[]) => {
+  if (seletedCardlistCount.value === 0) {
+    uni.showToast({ icon: 'none', title: '请选择要删除的商品' })
+  } else {
+    const ids: string[] = []
+    datas.forEach((item) => {
+      ids.push(item.id)
+    })
+    // 弹窗二次确认
+    uni.showModal({
+      content: '是否删除',
+      success: async (res) => {
+        if (res.confirm) {
+          // 后端删除单品
+          const res = await removeShoppingCart(ids.join(','))
+          // 重新获取列表
+          getMemberCartData()
+          isShowManage.value = false
+        }
+      },
+    })
+  }
 }
 
 // 修改商品数量
@@ -89,51 +118,128 @@ const onChangeSelectedAll = async () => {
 
 // 计算选中单品列表
 const selectedCardList = computed(() => {
-  return cartList.value.filter((v) => v.selected)
+  return cartList.value.filter((v) => v.check)
 })
 
 // 计算选中的总件数
 const seletedCardlistCount = computed(() => {
-  return selectedCardList.value.reduce((sum, item) => sum + item.count, 0)
+  return selectedCardList.value.reduce((sum, item) => sum + item.num, 0)
 })
 
 // 计算选中的总价格
 const selectedCardListMoney = computed(() => {
-  return selectedCardList.value.reduce((sum, item) => sum + item.nowPrice * item.count, 0).toFixed()
+  return selectedCardList.value
+    .reduce((sum, item) => sum + parseInt(item.unit_price) * item.num, 0)
+    .toFixed(2)
 })
 
 // 去结算
 const goToPayment = () => {
   if (seletedCardlistCount.value === 0) {
     uni.showToast({ icon: 'none', title: '请选择商品' })
+  } else {
+    uni.navigateTo({ url: '/PagesOrder/create/create' })
   }
-  uni.navigateTo({ url: '/PagesOrder/create/create' })
 }
 
-const { guessRef, onScrollToLower } = useGuessList()
+// 更新购物车
+// 添加购物车
+const currentCartId = ref('')
+const addShoppingCart = async (data: CartItem, num: number, type: string) => {
+  if (type === 'first') {
+    const res = await useAddShoppingCart(
+      {
+        source: data.source,
+        goodsId: data.goodsId,
+        fGoodsId: data.fGoodsId,
+        num,
+        units: data.units,
+        unitPrice: data.unit_price,
+      },
+      num,
+    )
+    if (res.code === '1') {
+      currentCartId.value = res.result.cartId
+      data.num = res.result.goodsNum
+    }
+  } else {
+    if (num === 0) {
+      // 弹窗二次确认
+      uni.showModal({
+        content: '是否删除',
+        success: async (res) => {
+          if (res.confirm) {
+            // 后端删除单品
+            const res = await removeShoppingCart(currentCartId.value || data.id)
+            if (res.code === '1') {
+              data.num = 0
+            }
+            // 重新获取列表
+            getMemberCartData()
+          } else {
+            // data.num = data.num
+          }
+        },
+        fail: (fail) => {
+          console.log(fail)
+        },
+      })
+    } else {
+      const res = await useUpdateShoppingCart(
+        {
+          cartId: currentCartId.value || data.id,
+          num,
+          unitPrice: data.unit_price,
+          units: data.units,
+        },
+        num,
+      )
+      if (res.code === '1') {
+        data.num = res.result.goodsNum
+      }
+    }
+  }
+}
+
+const isShowManage = ref(false)
+const onTapManage = () => {
+  isShowManage.value = !isShowManage.value
+}
 </script>
 
 <template>
-  <scroll-view
-    @scrolltolower="onScrollToLower"
-    scroll-y
-    class="scroll-view"
-    :style="{ paddingTop: safeAreaInsets!.top + 'px' }"
-  >
+  <scroll-view scroll-y class="scroll-view" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
     <view class="top-title">
       <view class="title-container">
         <view class="text">购物车</view>
         <view class="position">
-          <text class="ftysIcon icon-dingwei"></text>
-          <text>qqqqqqqqqqqqqqq</text>
+          <text class="ftysIcon icon-dingwei"
+            >大数据大数据大数据大数据大数据大数据大数据大数据大数据大数据大数据</text
+          >
         </view>
-        <view class="manage">管理</view>
+        <view v-if="!isShowManage" @tap="onTapManage" class="manage">管理</view>
+        <view v-else class="manage manage-btns">
+          <text @tap="($event) => onDeleteCarts(selectedCardList)" class="ftysIcon icon-shanchu"
+            >删除</text
+          >
+          <text @tap="onTapManage">取消</text>
+        </view>
       </view>
     </view>
     <!-- 已登录: 显示购物车 -->
     <template v-if="memberStore.profile">
       <!-- 购物车列表 -->
       <view class="cart-list" v-if="cartList.length">
+        <view class="top-check-all">
+          <view class="check-container">
+            <text
+              @tap="onChangeSelectedAll"
+              :class="`ftysIcon ${isSelectedAll ? 'icon-xuanzhong1-copy' : 'icon-xuanzhong1'}`"
+            ></text>
+            <text class="checked-all-text">全选</text>
+          </view>
+          <view class="text">免运费</view>
+        </view>
         <!-- 滑动操作分区 -->
         <uni-swipe-action>
           <!-- 滑动操作项 -->
@@ -152,15 +258,20 @@ const { guessRef, onScrollToLower } = useGuessList()
                 hover-class="none"
                 class="navigator"
               >
-                <image mode="aspectFill" class="picture" :src="item.images"></image>
+                <image mode="aspectFill" class="picture" :src="item.images[0]"></image>
                 <view class="meta">
                   <view class="name ellipsis">{{ item.name }}</view>
                   <!-- <view class="attrsText ellipsis">{{ item.attrsText }}</view> -->
-                  <view class="price">{{ item.unit_price }}</view>
+                  <view class="price">{{ item.unit_price }}/{{ item.units }}</view>
                 </view>
               </navigator>
               <!-- 商品数量 -->
-              <uni-number-box class="number-box" v-model="item.num" />
+              <uni-number-box
+                class="number-box"
+                :min="1"
+                :value="item.num"
+                @change="($event) => addShoppingCart(item, $event, '')"
+              />
             </view>
             <!-- 右侧删除按钮 -->
             <template #right>
@@ -211,10 +322,6 @@ const { guessRef, onScrollToLower } = useGuessList()
         <button class="button">去登录</button>
       </navigator>
     </view>
-    <!-- 猜你喜欢 -->
-    <view class="guess">
-      <SolaShopGuess ref="guessRef" />
-    </view>
     <!-- 底部占位空盒子 -->
     <view class="toolbar-height"></view>
   </scroll-view>
@@ -232,6 +339,7 @@ const { guessRef, onScrollToLower } = useGuessList()
 
 // 滚动容器
 .scroll-view {
+  width: 100%;
   position: relative;
   flex: 1;
 }
@@ -246,7 +354,8 @@ const { guessRef, onScrollToLower } = useGuessList()
     display: flex;
     justify-content: space-between;
     color: #fff;
-    align-items: baseline;
+    align-items: center;
+    height: 100rpx;
 
     .text {
       font-size: 36rpx;
@@ -261,20 +370,64 @@ const { guessRef, onScrollToLower } = useGuessList()
       width: 300rpx;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
+      padding-left: 10rpx;
     }
 
     .manage {
       font-size: 30rpx;
+    }
+
+    .manage-btns {
+      .icon-shanchu {
+        margin-right: 20rpx;
+      }
     }
   }
 }
 
 // 购物车列表
 .cart-list {
-  padding: 0 20rpx;
-  position: absolute;
-  top: 100rpx;
-  width: 100%;
+  margin: 0 20rpx;
+  position: relative;
+  padding-bottom: 100rpx;
+  background-color: #fff;
+  top: -270rpx;
+  border-radius: 20rpx;
+  overflow: scroll;
+
+  .top-check-all {
+    margin-top: 40rpx;
+    display: flex;
+    height: 60rpx;
+    justify-content: space-between;
+    align-items: center;
+
+    .check-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80rpx;
+      // height: 100%;
+
+      .icon-xuanzhong {
+        font-size: 40rpx;
+      }
+
+      .checked-all-text {
+        position: absolute;
+        left: 80rpx;
+        font-size: 30rpx;
+        white-space: nowrap;
+      }
+    }
+
+    .text {
+      margin-right: 30rpx;
+      font-size: 26rpx;
+    }
+  }
 
   // 优惠提示
   .tips {
@@ -472,7 +625,7 @@ const { guessRef, onScrollToLower } = useGuessList()
   left: 0;
   right: 0;
   bottom: var(--window-bottom);
-  z-index: 1;
+  z-index: 100;
 
   height: 100rpx;
   padding: 0 20rpx;
@@ -529,11 +682,11 @@ const { guessRef, onScrollToLower } = useGuessList()
     .button {
       width: 240rpx;
       margin: 0 10rpx;
-      border-radius: 72rpx;
+      border-radius: 20rpx;
     }
 
     .payment-button {
-      background-color: #27ba9b;
+      background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
 
       &.disabled {
         opacity: 0.6;

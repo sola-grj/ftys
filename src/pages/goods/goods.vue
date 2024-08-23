@@ -16,7 +16,7 @@ import { useAddressStore } from '@/stores/modules/address'
 import type { AddressItem } from '@/types/address'
 import { getMemberAddressAPI } from '@/services/address'
 import type { RecommendItem } from '@/types/home'
-import { useAddShoppingCart, useUpdateShoppingCart } from '@/composables'
+import { useAddShoppingCart, useUpdateShoppingCart, removeShoppingCart } from '@/composables'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -164,17 +164,24 @@ const addShoppingCart = async (data: GoodsResult, num: number, type: string) => 
       data.cartGoodsNum = res.result.goodsNum
     }
   } else {
-    const res = await useUpdateShoppingCart(
-      {
-        cartId: currentCartId.value || data.cartId,
+    if (num === 0) {
+      const res = await removeShoppingCart(currentCartId.value || data.cartId)
+      if (res.code === '1') {
+        data.cartGoodsNum = 0
+      }
+    } else {
+      const res = await useUpdateShoppingCart(
+        {
+          cartId: currentCartId.value || data.cartId,
+          num,
+          unitPrice: data.price,
+          units: data.unit,
+        },
         num,
-        unitPrice: data.price,
-        units: data.unit,
-      },
-      num,
-    )
-    if (res.code === '1') {
-      data.cartGoodsNum = res.result.goodsNum
+      )
+      if (res.code === '1') {
+        data.cartGoodsNum = res.result.goodsNum
+      }
     }
   }
 }
@@ -359,20 +366,6 @@ page {
 
 ::v-deep .uni-popup__wrapper {
   border-radius: 20rpx;
-}
-
-::v-deep .uni-numbox {
-  zoom: 0.8;
-
-  .uni-numbox-btns {
-    padding: 0 4px;
-  }
-
-  .uni-numbox__value {
-    width: 48rpx !important;
-    height: 30rpx !important;
-    font-size: 26rpx !important;
-  }
 }
 
 .popup-root {
@@ -623,6 +616,20 @@ page {
         display: flex;
         justify-content: space-between;
         align-items: center;
+
+        ::v-deep .uni-numbox {
+          zoom: 0.8;
+
+          .uni-numbox-btns {
+            padding: 0 4px;
+          }
+
+          .uni-numbox__value {
+            width: 48rpx !important;
+            height: 30rpx !important;
+            font-size: 26rpx !important;
+          }
+        }
 
         .money {
           font-size: 24rpx;

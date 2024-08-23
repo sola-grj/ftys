@@ -9,6 +9,9 @@ const goToSearch = () => {
 const query = defineProps<{
   topList: TopItem[]
 }>()
+const goToDetail = (data: TopItem) => {
+  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
+}
 </script>
 
 <template>
@@ -28,9 +31,14 @@ const query = defineProps<{
     </view>
     <!-- </view> -->
     <view class="recommand-list">
-      <view class="recommand-item" v-for="item in query.topList" :key="item.goodsId">{{
-        item.name
-      }}</view>
+      <view
+        class="recommand-item"
+        @tap="($event) => goToDetail(item)"
+        v-for="item in query.topList"
+        :key="item.goodsId"
+      >
+        {{ item.name }}</view
+      >
     </view>
   </view>
 </template>

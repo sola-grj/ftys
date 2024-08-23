@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { useAddShoppingCart, useCollect, useGuessList, useUpdateShoppingCart } from '@/composables'
+import {
+  removeShoppingCart,
+  useAddShoppingCart,
+  useCollect,
+  useGuessList,
+  useUpdateShoppingCart,
+} from '@/composables'
 import { getHistorySearchListAPI, getSearchListAPI } from '@/services/search'
 import type { PageParams } from '@/types/global'
 import type { SearchGoodsItem } from '@/types/search'
@@ -121,17 +127,24 @@ const addShoppingCart = async (data: SearchGoodsItem, num: number, type: string)
       data.cartGoodsNum = res.result.goodsNum
     }
   } else {
-    const res = await useUpdateShoppingCart(
-      {
-        cartId: currentCartId.value || data.cartId,
+    if (num === 0) {
+      const res = await removeShoppingCart(currentCartId.value || data.cartId)
+      if (res.code === '1') {
+        data.cartGoodsNum = 0
+      }
+    } else {
+      const res = await useUpdateShoppingCart(
+        {
+          cartId: currentCartId.value || data.cartId,
+          num,
+          unitPrice: data.price,
+          units: data.unit,
+        },
         num,
-        unitPrice: data.price,
-        units: data.unit,
-      },
-      num,
-    )
-    if (res.code === '1') {
-      data.cartGoodsNum = res.result.goodsNum
+      )
+      if (res.code === '1') {
+        data.cartGoodsNum = res.result.goodsNum
+      }
     }
   }
 }

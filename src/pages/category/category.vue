@@ -9,7 +9,17 @@ import PageSkeleton from './components/PageSkeleton.vue'
 import { useMemberStore } from '@/stores'
 import { getGoodsListByIdAPI, goodsDetailPageRecommendGoodsAPI } from '@/services/goods'
 import type { PageParams } from '@/types/global'
-import { useAddShoppingCart, useCollect, useUpdateShoppingCart } from '@/composables'
+import {
+  removeShoppingCart,
+  useAddShoppingCart,
+  useCollect,
+  useUpdateShoppingCart,
+} from '@/composables'
+
+// 跳转过来的参数
+const query = defineProps<{
+  type: string
+}>()
 
 // 弹出层组件
 const typepopup = ref<UniHelper.UniPopupInstance>()
@@ -127,15 +137,14 @@ const getTypeListData = async () => {
     dryCargoCategory.value[0].childlist[0].id,
   )
 }
-
-// 获取首页参数
-const query = defineProps<{
-  type: string
-}>()
+const scrollLeft = ref(300)
 
 // 页面加载
 onLoad(async () => {
   await Promise.all([getTypeListData()])
+  setTimeout(() => {
+    scrollLeft.value = 800
+  }, 100)
 })
 const goToSearch = () => {
   uni.navigateTo({ url: '/pages/search/search' })
@@ -256,17 +265,24 @@ const addShoppingCart = async (data: SearchBasicCategoryItem, num: number, type:
       data.cartGoodsNum = res.result.goodsNum
     }
   } else {
-    const res = await useUpdateShoppingCart(
-      {
-        cartId: currentCartId.value || data.cartId,
+    if (num === 0) {
+      const res = await removeShoppingCart(currentCartId.value || data.cartId)
+      if (res.code === '1') {
+        data.cartGoodsNum = 0
+      }
+    } else {
+      const res = await useUpdateShoppingCart(
+        {
+          cartId: currentCartId.value || data.cartId,
+          num,
+          unitPrice: data.price,
+          units: data.unit,
+        },
         num,
-        unitPrice: data.price,
-        units: data.unit,
-      },
-      num,
-    )
-    if (res.code === '1') {
-      data.cartGoodsNum = res.result.goodsNum
+      )
+      if (res.code === '1') {
+        data.cartGoodsNum = res.result.goodsNum
+      }
     }
   }
 }
@@ -320,31 +336,36 @@ const onCollect = async (data: SearchBasicCategoryItem) => {
       <button class="search-btn">搜索</button>
     </view>
     <view class="head-types">
-      <view
-        class="head-types-item"
-        @tap="
-          ($event) =>
-            activeIndex === 0 ? onTapTwoLevelFruit(item, index) : onTapTwoLevelDry(item, index)
-        "
-        v-for="(item, index) in activeIndex === 0 ? fruitCategory : dryCargoCategory"
-        :key="item.id"
-        :class="{
-          active:
-            activeIndex === 0 ? secondActiveFruitIndex === index : secondActiveDryIndex === index,
-        }"
-      >
+      <scroll-view scroll-x="true" :scroll-left="scrollLeft">
         <view
-          class="image-containers"
+          class="head-types-item"
+          @tap="
+            ($event) =>
+              activeIndex === 0 ? onTapTwoLevelFruit(item, index) : onTapTwoLevelDry(item, index)
+          "
+          v-for="(item, index) in activeIndex === 0 ? fruitCategory : dryCargoCategory"
+          :key="item.id"
           :class="{
             active:
               activeIndex === 0 ? secondActiveFruitIndex === index : secondActiveDryIndex === index,
           }"
         >
-          <image class="icon" :src="item.image" mode="aspectFit" />
+          <view
+            class="image-containers"
+            :class="{
+              active:
+                activeIndex === 0
+                  ? secondActiveFruitIndex === index
+                  : secondActiveDryIndex === index,
+            }"
+          >
+            <image class="icon" :src="item.image" mode="aspectFit" />
+          </view>
+          <text class="text"> {{ item.name }}</text>
         </view>
-        <text class="text"> {{ item.name }}</text>
-      </view>
+      </scroll-view>
     </view>
+
     <!-- 分类 -->
     <view class="categories">
       <!-- 左侧：二级分类 -->
@@ -581,11 +602,12 @@ page {
 
 .head-types {
   width: 100%;
-  overflow-x: scroll;
-  display: flex;
+  white-space: nowrap;
+  // overflow-x: scroll;
+  // display: flex;
 
   .head-types-item {
-    display: flex;
+    display: inline-flex;
     justify-content: center;
     flex-direction: column;
     align-items: center;
@@ -703,14 +725,14 @@ page {
       padding-right: 60rpx;
 
       .spread {
-        position: fixed;
+        position: absolute;
         right: 0;
         z-index: 99;
         font-size: 26rpx;
         color: rgba(50, 50, 51, 1);
         font-weight: 400;
         margin-top: 20rpx;
-        margin-right: 20rpx;
+        // margin-right: 20rpx;
         display: inline-block;
         height: 60rpx;
         width: 60rpx;

@@ -402,13 +402,13 @@ page {
       padding-right: 60rpx;
 
       .spread {
-        position: fixed;
+        position: absolute;
         right: 0;
         z-index: 99;
         font-size: 26rpx;
         color: rgba(50, 50, 51, 1);
         font-weight: 400;
-        margin-top: 20rpx;
+        // margin-top: 20rpx;
         margin-right: 20rpx;
         display: inline-block;
         height: 60rpx;
