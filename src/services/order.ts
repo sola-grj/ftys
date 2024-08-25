@@ -1,3 +1,4 @@
+import type { CartItem } from '@/types/cart'
 import type {
   OrderCreateParams,
   OrderListParams,
@@ -147,7 +148,7 @@ export const getMemberOrderAPI = (data: OrderListParams) => {
  * 获取订单信息
  * @param data 请求参数
  */
-export const getOrderListAPI = (data: { queryTimeType: string }) => {
+export const getOrderListAPI = (data?: { status: string }) => {
   return http<OrderListResult>({
     method: 'POST',
     url: '/order/getOrderList',
@@ -183,6 +184,76 @@ export const getRecentlyOrderAPI = (data: {
   return http<QuickOrderResult>({
     method: 'POST',
     url: '/goods/getRecentlyOrder',
+    data,
+  })
+}
+
+export type CreateOrderCartItem = {
+  cartId: string
+  num: number | string
+  unitPrice: string
+  costUnitPrice: string
+}
+
+export type CreateOrderData = {
+  userCoupon: string
+  couponId: string
+  couponAmount?: string
+  remark: string
+  cartList: CreateOrderCartItem[]
+}
+/**
+ * 创建订单
+ * @param data 请求参数
+ */
+export const createOrderAPI = (data: CreateOrderData) => {
+  return http<{ orderId: string }>({
+    method: 'POST',
+    url: '/order/createOrder',
+    data,
+  })
+}
+
+export type CreditItem = {
+  capitalId: string
+  capitalNo: string
+  money: string
+  userId: string
+  type: string
+  sign: string
+  orderId: string
+  orderNo: string
+  memo: string
+  createTime: string
+  check: boolean
+}
+
+export type CreditResult = {
+  totalCreditMoney: string
+  total: number
+  page: number
+  list: CreditItem[]
+}
+/**
+ * 获取欠款信息
+ * @param data 请求参数
+ */
+export const getMyCreditListAPI = (data: { page: number; pageSize: number }) => {
+  return http<CreditResult>({
+    method: 'POST',
+    url: '/capital/getMyCreditList',
+    data,
+  })
+}
+
+/**
+ * 获取欠款信息
+ * @param data 请求参数
+ */
+export const creditRepayAPI = (data: { capitalIds: string; repayMoney: string }) => {
+  return http({
+    method: 'POST',
+    url: '/capital/creditRepay',
     data,
   })
 }

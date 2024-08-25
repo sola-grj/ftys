@@ -65,3 +65,59 @@ export const getGoodsListByIdAPI = (data: {
     data,
   })
 }
+
+export type GetMyGoodsApplyItem = {
+  id: string
+  user_id: string
+  goods_name: string
+  goods_category: string
+  goods_source: string
+  goods_brand: string
+  goods_specification: string
+  goods_supplier: string
+  goods_price: string
+  goods_remark: string
+  status: string
+  create_time: string
+  update_time: string
+  goods_category_name: string
+}
+
+export type getMyGoodsApplyResult = {
+  page: number
+  total: number
+  list: GetMyGoodsApplyItem[]
+}
+
+/**
+ * 根据分类查询商品
+ * @param id 商品id
+ */
+export const getMyGoodsApplyAPI = (data: { page: number; pageSize: number }) => {
+  return http<getMyGoodsApplyResult>({
+    method: 'POST',
+    url: '/goods_apply/getMyGoodsApply',
+    data,
+  })
+}
+
+/**
+ * 新增商品需求
+ * @param id 商品id
+ */
+export const createGoodsApplyAPI = (data: {
+  goods_name: string
+  goods_source: string
+  goods_category: string
+  goods_brand: string
+  goods_specification: string
+  goods_supplier: string
+  goods_price: string
+  goods_remark: string
+}) => {
+  return http<{ applyId: string }>({
+    method: 'POST',
+    url: '/goods_apply/createGoodsApply',
+    data,
+  })
+}

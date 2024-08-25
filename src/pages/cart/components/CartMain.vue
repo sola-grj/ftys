@@ -138,7 +138,16 @@ const goToPayment = () => {
   if (seletedCardlistCount.value === 0) {
     uni.showToast({ icon: 'none', title: '请选择商品' })
   } else {
-    uni.navigateTo({ url: '/PagesOrder/create/create' })
+    uni.navigateTo({
+      url: '/PagesOrder/create/create',
+      success: (res) => {
+        uni.$emit('selectedCardList', {
+          selectedCardList: selectedCardList.value,
+          selectedCardListMoney: selectedCardListMoney.value,
+          cartList: cartList.value,
+        })
+      },
+    })
   }
 }
 

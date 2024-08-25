@@ -1,17 +1,78 @@
 <script setup lang="ts">
+import { getMyCouponListAPI } from '@/services/coupon'
 import {
+  createOrderAPI,
   getMemberOrderPreAPI,
   getMemberOrderPreNowAPI,
   getMemberOrderRepurchaseByIdAPI,
   postMemberOrderAPI,
+  type CreateOrderCartItem,
 } from '@/services/order'
+import { useMemberStore } from '@/stores'
 import { useAddressStore } from '@/stores/modules/address'
+import type { CartItem } from '@/types/cart'
+import type { CouponItem, MyCouponItem } from '@/types/coupon'
 import type { OrderPreResult } from '@/types/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 
+const couponpopup = ref()
+const memberStore = useMemberStore()
+const remark = ref('')
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
+// 获取当前日期
+let today = new Date()
+
+// 获取明天的日期
+let tomorrow = new Date(today)
+tomorrow.setDate(today.getDate() + 1)
+
+// 获取明天是星期几
+let dayOfWeek = tomorrow.getDay()
+
+// 获取明天数据
+const getYestDayOrNextDay = () => {
+  // 将星期几转换为中文
+  const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+  // 获取当前日期
+  const today = new Date()
+  // 计算前一天的日期
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
+  // 获取明天是星期几
+  const dayOfWeek = tomorrow.getDay()
+  const tomorrowOfWeek = weekdays[dayOfWeek]
+
+  return { tomorrow: tomorrow.toLocaleDateString().replaceAll('/', '-'), tomorrowOfWeek }
+}
+
+// 获取优惠券
+const couponList = ref<MyCouponItem[]>([])
+const getOwnCouponData = async () => {
+  const res = await getMyCouponListAPI({ status: '1' })
+  couponList.value = res.result.list
+  isAvalibleCouponList()
+}
+
+// 判断当前用户是否有可以使用的优惠券
+const avalibleCouponList = ref<MyCouponItem[]>([])
+const isAvalibleCouponList = () => {
+  avalibleCouponList.value = couponList.value.filter((item) => {
+    // 优惠券面额判定
+    const isAmountfit = Number(selectedCardListMoney.value) > Number(item.amount_limit)
+    // 优惠券有效起止时间
+    const today = new Date()
+    const start = new Date(Date.parse(item.expire_start_time))
+    const end = new Date(Date.parse(item.expire_end_time))
+    const isTimefit = today >= start && today <= end
+
+    if (isAmountfit && isTimefit) {
+      return item
+    }
+  })
+}
+
 // 订单备注
 const buyerMessage = ref('')
 // 配送时间
@@ -28,11 +89,19 @@ const activeDelivery = computed(() => deliveryList.value[activeIndex.value])
 const onChangeDelivery: UniHelper.SelectorPickerOnChange = (ev) => {
   activeIndex.value = ev.detail.value
 }
-
+const currentChooseCoupon = ref<MyCouponItem>({} as MyCouponItem)
+const chooseCoupon = (couponId: string) => {
+  uni.navigateBack()
+  currentChooseCoupon.value = avalibleCouponList.value.find(
+    (item) => item.couponId === couponId,
+  ) as MyCouponItem
+  console.log(couponId, 'couponId', currentChooseCoupon.value)
+}
 const query = defineProps<{
   skuId?: string
   count?: string
   orderId?: string
+  couponId?: string
 }>()
 
 // 获取订单信息
@@ -53,9 +122,17 @@ const getMemberOrderPreData = async () => {
     orderPre.value = res.result
   }
 }
-
+const selectedCardList = ref<CartItem[]>([])
+const cartList = ref<CartItem[]>([])
+const selectedCardListMoney = ref('')
 onLoad(() => {
-  getMemberOrderPreData()
+  uni.$on('selectedCardList', (data) => {
+    selectedCardList.value = data.selectedCardList
+    selectedCardListMoney.value = data.selectedCardListMoney
+    cartList.value = data.cartList
+    // 获取优惠券信息
+    getOwnCouponData()
+  })
 })
 
 const addressStore = useAddressStore()
@@ -66,19 +143,59 @@ const selectedAddress = computed(() => {
 
 // 提交订单
 const onOrderSubmit = async () => {
-  if (!selectedAddress.value?.id) {
-    return uni.showToast({ icon: 'none', title: '请选择收货地址' })
-  }
-  const res = await postMemberOrderAPI({
-    addressId: selectedAddress.value?.id,
-    buyerMessage: buyerMessage.value,
-    deliveryTimeType: activeDelivery.value.type,
-    goods: orderPre.value!.goods.map((v) => ({ count: v.count, skuId: v.skuId })),
-    payChannel: 2,
-    payType: 1,
+  let createCartList: CreateOrderCartItem[] = []
+  selectedCardList.value.forEach((item) => {
+    createCartList.push({
+      cartId: item.id.toString(),
+      num: item.num.toString(),
+      unitPrice: item.unit_price.toString(),
+      costUnitPrice: item.cost_unit_price ? item.cost_total_price : '',
+    })
+  })
+  const res = await createOrderAPI({
+    userCoupon: '0',
+    couponId: '0',
+    remark: '',
+    cartList: createCartList,
   })
   // 关闭当前页面，跳转到订单详情页
-  uni.redirectTo({ url: `/PagesOrder/detail/detail?id=${res.result.id}` })
+  uni.redirectTo({ url: `/PagesOrder/list/list` })
+}
+const goback = () => {
+  uni.navigateBack()
+}
+
+// 有效期展示
+const showExpireText = (data: MyCouponItem) => {
+  // 展示有效期
+  if (data.expire_type === '1') {
+    return `${data.expire_days}天后过期`
+  } else {
+    return `有效期 ${data.expire_start_time.slice(2)}-${data.expire_end_time.slice(2)}`
+  }
+}
+// 去选择优惠券
+const goToChooseCoupon = () => {
+  uni.navigateTo({
+    url: '/pages/coupon/coupon?from=order',
+    success: (res) => {
+      uni.$emit('avalibleCouponList', {
+        avalibleCouponList: avalibleCouponList.value,
+        chooseCoupon,
+      })
+    },
+  })
+}
+const showValue = () => {
+  if (avalibleCouponList.value.length === 0) {
+    return '暂无可用优惠券'
+  }
+  if (avalibleCouponList.value.length > 0 && !currentChooseCoupon.value) {
+    return '请选择优惠券'
+  }
+  if (avalibleCouponList.value.length > 0 && currentChooseCoupon.value) {
+    return `-￥${currentChooseCoupon.value.face_value}`
+  }
 }
 </script>
 
@@ -95,75 +212,95 @@ const onOrderSubmit = async () => {
       <view class="address">
         <view class="add-title">收获方式</view>
         <view class="add-psz">配送至</view>
-        <view class="add-detail">浙江省杭州市余杭区良渚街道博园路8号杭州果品批发市场</view>
+        <view class="add-detail">{{ memberStore.profile?.userinfo.shipping_addr }}</view>
         <view class="add-person">
-          <text class="person-name">李亦男</text>
-          <text class="person-phone">189****7054</text>
+          <text class="person-name">{{ memberStore.profile?.userinfo.username }}</text>
+          <text class="person-phone">{{ memberStore.profile?.userinfo.mobile }}</text>
         </view>
       </view>
       <!-- 支付方式 -->
       <view class="pay-type">
         <view class="pay-title">支付方式</view>
-        <view class="pay-value">货单付款</view>
+        <view class="pay-value">{{
+          memberStore.profile?.userinfo.pay_way === 'credit' ? '货到付款' : '在线支付'
+        }}</view>
       </view>
       <!-- 配送时间 -->
       <view class="time">
         <view class="time-title">配送时间</view>
-        <view class="time-value">2024-07-09 （周二）</view>
+        <view class="time-value"
+          >{{ getYestDayOrNextDay().tomorrow }}({{ getYestDayOrNextDay().tomorrowOfWeek }})</view
+        >
       </view>
 
       <!-- 商品信息 -->
-      <view class="goods">
-        <navigator
-          v-for="item in orderPre?.goods"
-          :key="item.skuId"
-          :url="`/pages/goods/goods?id=${item.id}`"
-          class="item"
-          hover-class="none"
-        >
-          <image class="picture" :src="item.picture" />
-          <view class="meta">
-            <view class="name ellipsis"> {{ item.name }} </view>
-            <view class="attrs">{{ item.attrsText }}</view>
-            <view class="prices">
-              <view class="pay-price symbol">{{ item.payPrice }}</view>
-              <view class="price symbol">{{ item.price }}</view>
+      <view class="list-container">
+        <view class="item" v-for="item in selectedCardList" :key="item.goodsId">
+          <image :src="item.images[0]" mode="scaleToFill" />
+          <view class="info">
+            <view class="title">{{ item.name }}</view>
+            <view class="right">
+              <view class="price">￥{{ item.unit_price }}/{{ item.units }}</view>
+              <view class="num"> X{{ item.num }}</view>
             </view>
-            <view class="count">x{{ item.count }}</view>
           </view>
-        </navigator>
-      </view>
-
-      <!-- 配送及支付方式 -->
-      <view class="related">
-        <view class="item">
-          <text class="text">配送时间</text>
-          <picker :range="deliveryList" range-key="text" @change="onChangeDelivery">
-            <view class="icon-fonts picker">{{ activeDelivery.text }}</view>
-          </picker>
         </view>
-        <view class="item">
-          <text class="text">订单备注</text>
-          <input
-            class="input"
-            :cursor-spacing="30"
-            placeholder="选题，建议留言前先与商家沟通确认"
-            v-model="buyerMessage"
-          />
+        <view class="remark">
+          <view class="title">备注</view>
+          <uni-easyinput
+            placeholder="建议备注前先与商家沟通确认"
+            class="question"
+            type="textarea"
+            v-model="remark"
+          ></uni-easyinput>
         </view>
       </view>
-
       <!-- 支付金额 -->
       <view class="settlement">
         <view class="item">
-          <text class="text">商品总价: </text>
-          <text class="number symbol">{{ orderPre?.summary.totalPayPrice.toFixed(2) }}</text>
+          <text class="text">商品金额: </text>
+          <text class="number symbol">{{ selectedCardListMoney }}</text>
         </view>
         <view class="item">
           <text class="text">运费: </text>
-          <text class="number symbol">{{ orderPre?.summary.postFee.toFixed(2) }}</text>
+          <text class="number symbol">0.00</text>
+        </view>
+        <view class="item coupon">
+          <text class="text">优惠券: </text>
+          <text
+            class="number"
+            :class="currentChooseCoupon.face_value ? 'amount' : ''"
+            @tap="goToChooseCoupon"
+            >{{ showValue() }}</text
+          >
+        </view>
+        <view class="total">
+          <text class="text">合计: </text>
+          <text class="total-num">{{ selectedCardListMoney }}</text>
         </view>
       </view>
+      <uni-popup ref="couponpopup" background-color="#fff">
+        <view class="popup-content">
+          <view class="text">分类</view>
+          <view class="coupon-list">
+            <view v-for="item in avalibleCouponList" :key="item.name" class="coupon-item">
+              <view class="left">
+                <text class="face-value">￥{{ item.face_value }}</text>
+                <text class="amount-limit">满{{ item.amount_limit }}元可用</text>
+              </view>
+              <view class="mid">
+                <text class="name">{{ item.name }}</text>
+                <text class="expire_type">{{ showExpireText(item) }}</text>
+              </view>
+              <view class="right" @tap="($event) => goToUse(item)">
+                <view v-if="item.status === '1'" class="use-btn">使用</view>
+                <image class="image" v-if="item.status === '2'" src="@/static/images/used.png" />
+                <image class="image" v-if="item.status === '3'" src="@/static/images/expired.png" />
+              </view>
+            </view>
+          </view>
+        </view>
+      </uni-popup>
     </view>
   </scroll-view>
 
@@ -171,6 +308,7 @@ const onOrderSubmit = async () => {
   <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
     <view class="total-pay symbol">
       <text class="number">{{ orderPre?.summary.totalPayPrice.toFixed(2) }}</text>
+      <text class="trans-fee">含运费：￥0.00</text>
     </view>
     <view class="button" @tap="onOrderSubmit" :class="{ disabled: !selectedAddress?.id }">
       提交订单
@@ -236,7 +374,11 @@ page {
 
 .container {
   // overflow: scroll;
+  position: relative;
+  top: -270rpx;
   height: 100%;
+  display: inline-block;
+  width: 100%;
 
   .address {
     overflow: hidden;
@@ -301,6 +443,104 @@ page {
       margin-right: 100rpx;
       color: #ff5340;
       font-weight: 600;
+    }
+  }
+
+  .list-container {
+    margin: 20rpx;
+    padding: 20rpx 20rpx;
+    border-radius: 10rpx;
+    background-color: #fff;
+
+    .item {
+      display: flex;
+      margin-top: 30rpx;
+
+      image {
+        height: 160rpx;
+        width: 160rpx;
+      }
+
+      .info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        width: 90%;
+        padding-left: 20rpx;
+
+        .title {
+        }
+
+        .price {
+          margin-top: 10rpx;
+          color: #ff5040;
+        }
+      }
+
+      .right {
+        display: flex;
+        // flex: 1;
+        justify-content: space-between;
+        align-items: flex-end;
+        color: #ff5040;
+
+        .shoucang {
+          height: 50%;
+        }
+
+        .jiagou {
+          flex: 1;
+        }
+
+        .num {
+          font-weight: bold;
+        }
+      }
+    }
+
+    .remark {
+      margin-top: 30rpx;
+      display: flex;
+
+      .title {
+        font-size: 30rpx;
+        margin-right: 40rpx;
+        color: rgba(50, 50, 51, 1);
+      }
+    }
+  }
+
+  /* 结算清单 */
+  .settlement {
+    margin: 20rpx;
+    padding: 20rpx;
+    border-radius: 10rpx;
+    background-color: #fff;
+
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 80rpx;
+      font-size: 26rpx;
+      color: #333;
+    }
+
+    .coupon {
+      border-bottom: 1px solid #d0cbcb;
+    }
+
+    .total {
+      margin: 30rpx 0;
+      text-align: right;
+
+      .total-num {
+        color: #cf4444;
+      }
+    }
+
+    .danger {
+      color: #cf4444;
     }
   }
 }
@@ -414,27 +654,6 @@ page {
   }
 }
 
-/* 结算清单 */
-.settlement {
-  margin: 20rpx;
-  padding: 0 20rpx;
-  border-radius: 10rpx;
-  background-color: #fff;
-
-  .item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 80rpx;
-    font-size: 26rpx;
-    color: #333;
-  }
-
-  .danger {
-    color: #cf4444;
-  }
-}
-
 /* 吸底工具栏 */
 .toolbar {
   position: fixed;
@@ -453,11 +672,18 @@ page {
   box-sizing: content-box;
 
   .total-pay {
+    display: flex;
+    flex-direction: column;
     font-size: 40rpx;
     color: #cf4444;
 
     .decimal {
       font-size: 75%;
+    }
+
+    .trans-fee {
+      color: #d0cbcb;
+      font-size: 22rpx;
     }
   }
 
@@ -467,8 +693,8 @@ page {
     line-height: 72rpx;
     font-size: 26rpx;
     color: #fff;
-    border-radius: 72rpx;
-    background-color: #27ba9b;
+    border-radius: 20rpx;
+    background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
   }
 
   .disabled {

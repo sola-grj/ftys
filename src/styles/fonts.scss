@@ -1,8 +1,9 @@
 @font-face {
-  font-family: "iconfont"; /* Project id 4654653 */
-  src: url('https://at.alicdn.com/t/c/font_4654653_hxeqnwzwgc.woff2?t=1724319474797') format('woff2'),
-       url('https://at.alicdn.com/t/c/font_4654653_hxeqnwzwgc.woff?t=1724319474797') format('woff'),
-       url('https://at.alicdn.com/t/c/font_4654653_hxeqnwzwgc.ttf?t=1724319474797') format('truetype');
+  font-family: "iconfont";
+  /* Project id 4654653 */
+  src: url('https://at.alicdn.com/t/c/font_4654653_uqsnr0dlwp.woff2?t=1724487014729') format('woff2'),
+    url('https://at.alicdn.com/t/c/font_4654653_uqsnr0dlwp.woff?t=1724487014729') format('woff'),
+    url('https://at.alicdn.com/t/c/font_4654653_uqsnr0dlwp.ttf?t=1724487014729') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +12,10 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-weixin:before {
+  content: "\e614";
 }
 
 .icon-xiangxiajiantou:before {

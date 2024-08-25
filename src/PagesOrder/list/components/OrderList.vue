@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { OrderState, orderStateList } from '@/services/constants'
-import { getMemberOrderAPI } from '@/services/order'
+import { getMemberOrderAPI, getOrderListAPI } from '@/services/order'
 import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 import type { OrderItem, OrderListParams } from '@/types/order'
 import { onMounted, ref } from 'vue'
@@ -22,8 +22,9 @@ const queryParams: OrderListParams = {
 // 获取订单列表
 const orderList = ref<OrderItem[]>([])
 const getMemberOrderData = async () => {
-  const res = await getMemberOrderAPI(queryParams)
-  orderList.value = res.result.items
+  const res = await getOrderListAPI({ status: '1' })
+
+  orderList.value = res.result.list
 }
 
 onMounted(() => {

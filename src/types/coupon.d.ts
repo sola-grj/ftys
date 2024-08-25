@@ -21,10 +21,11 @@ export type MyCouponItem = {
   amount_limit: string
   expire_type: string
   expire_start_time: string
-  expire_time: string
+  expire_end_time: string
   expire_days: string
   status: string
   receive_time: string
+  couponId: string
 }
 
 export type WholeCouponItem = CouponItem & MyCouponItem

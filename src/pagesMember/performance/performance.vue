@@ -76,7 +76,6 @@ const getFullPerformanceData = async (month: string) => {
   })
 }
 
-const selectedDate = ref('1yue')
 const range = ref([
   ['01月', '02月', '03月', '04月', '05月', '06月', '07月', '08月', '09月', '10月', '11月', '12月'],
 ])
@@ -186,7 +185,6 @@ const lineData = {
       <view class="month-data">
         <view class="month-title">
           <view>{{ currentMonth }}业绩</view>
-          <select></select>
           <picker mode="multiSelector" :range="range" @change="onPickerChange">
             <view class="change"> 更换 </view>
           </picker>

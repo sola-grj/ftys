@@ -16,76 +16,12 @@ const couponList = ref<CouponItem[]>([])
 const getCouponListData = async () => {
   const res = await getCouponListAPI()
   couponList.value = res.result
-  couponList.value = [
-    {
-      id: '2',
-      name: '满减优惠券2',
-      type: '1',
-      face_value: '10.00',
-      amount_limit: '40.00',
-      expire_type: '2',
-      expire_start_time: '2024-08-04',
-      expire_end_time: '2024-08-04',
-      expire_days: '7',
-      status: '1',
-      create_time: '2024-08-04',
-      update_time: '2024-08-04',
-    },
-    {
-      id: '1',
-      name: '满减优惠券1',
-      type: '1',
-      face_value: '10.00',
-      amount_limit: '40.00',
-      expire_type: '1',
-      expire_start_time: '2024-08-05',
-      expire_end_time: '2024-08-219',
-      expire_days: '',
-      status: '1',
-      create_time: '2024-08-04',
-      update_time: '2024-08-04',
-    },
-  ]
 }
 
 const getMyCouponListData = async () => {
   const res = await getMyCouponListAPI()
-  myCouponList.value = res.result
-  myCouponList.value = [
-    {
-      name: '满减优惠券2',
-      expire_type: '2',
-      face_value: '10.00',
-      amount_limit: '40.00',
-      expire_start_time: '2024-08-11',
-      expire_time: '2024-08-11',
-      expire_days: '7',
-      status: '1',
-      receive_time: '2024-08-04',
-    },
-    {
-      name: '满减优惠券3',
-      expire_type: '2',
-      face_value: '10.00',
-      amount_limit: '40.00',
-      expire_start_time: '2024-08-11',
-      expire_time: '2024-08-11',
-      expire_days: '7',
-      status: '2',
-      receive_time: '2024-08-04',
-    },
-    {
-      name: '满减优惠券4',
-      expire_type: '2',
-      face_value: '10.00',
-      amount_limit: '40.00',
-      expire_start_time: '2024-08-11',
-      expire_time: '2024-08-03',
-      expire_days: '7',
-      status: '3',
-      receive_time: '2024-08-01',
-    },
-  ]
+  myCouponList.value = res.result.list
+
   myCurrentCouponList.value = myCouponList.value.filter((v) => v.status === '1')
 }
 // 获取屏幕边界到安全区域距离
@@ -99,28 +35,31 @@ const onChangeIndex = (index: string) => {
 const goback = () => {
   uni.navigateBack()
 }
+const chooseCoupon = ref()
+// 从下单页面过来的
+const avalibleCouponList = ref<MyCouponItem[]>([])
 onLoad(() => {
   if (query.from === 'home') {
     getCouponListData()
-  } else {
+  } else if (query.from === 'my') {
     getMyCouponListData()
+  } else if (query.from === 'order') {
+    uni.$on('avalibleCouponList', (data) => {
+      ;(avalibleCouponList.value = data.avalibleCouponList),
+        (chooseCoupon.value = data.chooseCoupon)
+    })
   }
 })
 // 有效期展示
 const showExpireText = (data: MyCouponItem | CouponItem) => {
+  // 展示有效期
   if (query.from === 'my') {
-    // 展示有效期
-    if (data.expire_type === '1') {
-      return `有效期 ${data.expire_start_time.slice(2)}-${data.expire_time.slice(2)}`
-    } else {
-      return `有效期 ${data.expire_start_time.slice(2)}-${data.expire_time.slice(2)}`
-    }
+    return `有效期 ${data.expire_start_time.slice(2)}-${data.expire_end_time.slice(2)}`
   } else {
-    // 展示有效期
     if (data.expire_type === '1') {
       return `有效期 ${data.expire_start_time.slice(2)}-${data.expire_end_time.slice(2)}`
     } else {
-      return `有效期 ${data.expire_start_time.slice(2)}-${data.expire_end_time.slice(2)}`
+      return `${data.expire_days}天后过期`
     }
   }
 }
@@ -144,12 +83,16 @@ const getCoupon = async (data: CouponItem) => {
   // 重新加载优惠券信息
   await getCouponListData()
 }
+const goToUseCoupon = (couponId: string) => {
+  uni.navigateTo({ url: `/pagesOrder/create/create?couponId=${couponId}` })
+}
 </script>
 
 <template>
   <scroll-view class="viewport" scroll-y enable-back-to-top>
     <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
       <text v-if="from === 'my'" class="text">我的优惠券</text>
+      <text v-else-if="from === 'order'" class="text">选择优惠券</text>
       <!-- 搜索框 -->
       <view v-else @tap="goToSearch" class="search">
         <text class="ftysIcon icon-sousuo"></text>
@@ -218,6 +161,24 @@ const getCoupon = async (data: CouponItem) => {
           </view>
           <view class="right" @tap="($event) => getCoupon(item)">
             <view class="use-btn">领取</view>
+          </view>
+        </view>
+      </view>
+      <view v-if="from === 'order'" class="avalible-coupon-list">
+        <view v-for="item in avalibleCouponList" :key="item.name" class="avalible-coupon-item">
+          <view class="top">
+            <view class="left">
+              <text class="face-value">￥{{ item.face_value }}</text>
+              <text class="amount-limit">满{{ item.amount_limit }}元可用</text>
+            </view>
+            <view class="right">
+              <text class="right-title">邀请好友奖励</text>
+              <text class="right-desc">(邀请新用户进入小程序所得，下单支付时可抵扣）</text>
+            </view>
+          </view>
+          <view class="bottom">
+            <text class="bottom-title">{{ item.expire_end_time.split(' ')[0] }}过期</text>
+            <view class="use-btn" @tap="($event) => chooseCoupon(item.couponId)">去使用</view>
           </view>
         </view>
       </view>
@@ -421,6 +382,83 @@ page {
           .image {
             width: 120rpx;
             height: 120rpx;
+          }
+        }
+      }
+    }
+
+    .avalible-coupon-list {
+      .avalible-coupon-item {
+        border: 1px solid #f4ba73;
+        margin: 20rpx;
+        border-radius: 20rpx;
+
+        .top {
+          width: 100%;
+          height: 200rpx;
+          display: flex;
+          align-items: center;
+          justify-content: space-around;
+          border-bottom: 1px solid rgba(238, 238, 238, 1);
+
+          .left {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            font-size: 25rpx;
+            width: 40%;
+            align-items: center;
+            color: #f65332;
+            min-height: 200rpx;
+            justify-content: center;
+            white-space: nowrap;
+
+            .face-value {
+              font-size: 45rpx;
+              margin-bottom: 30rpx;
+            }
+          }
+
+          .right {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            .right-title {
+              margin-bottom: 30rpx;
+              font-weight: bold;
+            }
+
+            .right-desc {
+              color: #666666;
+            }
+          }
+        }
+
+        .bottom {
+          width: 100%;
+          height: 100rpx;
+          display: flex;
+          align-items: center;
+          justify-content: space-around;
+
+          .bottom-title {
+            width: 40%;
+            color: #666666;
+            font-size: 30rpx;
+          }
+
+          .use-btn {
+            font-size: 26rpx;
+            height: 50rpx;
+            width: 120rpx;
+            border-radius: 30rpx;
+            background-color: #f65332;
+            color: #fff;
+            line-height: 50rpx;
+            text-align: center;
           }
         }
       }

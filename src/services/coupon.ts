@@ -18,13 +18,20 @@ export const getCouponListAPI = () => {
   })
 }
 
+export type MyCouponListResult = {
+  page: string
+  total: string
+  list: MyCouponItem[]
+}
+
 /**
  * 我的优惠券
  */
-export const getMyCouponListAPI = () => {
-  return http<MyCouponItem[]>({
+export const getMyCouponListAPI = (data?: { status: string }) => {
+  return http<MyCouponListResult>({
     method: 'POST',
     url: '/coupon/getReceiveCoupon',
+    data,
   })
 }
 

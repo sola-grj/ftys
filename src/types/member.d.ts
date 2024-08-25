@@ -28,6 +28,8 @@ export type LoginResult = {
     account_status: string // 权限判断（未知位置权限）
     goods_price: string // 权限判断（商品价格，不用处理）
     credit_price: string // 权限判断（是否显示欠款情况）
+    shipping_addr: string
+    shipping_area: string
   }
 }
 
