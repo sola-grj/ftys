@@ -148,7 +148,7 @@ export const getMemberOrderAPI = (data: OrderListParams) => {
  * 获取订单信息
  * @param data 请求参数
  */
-export const getOrderListAPI = (data?: { status: string }) => {
+export const getOrderListAPI = (data: { status: number; page: number; pageSize: number }) => {
   return http<OrderListResult>({
     method: 'POST',
     url: '/order/getOrderList',

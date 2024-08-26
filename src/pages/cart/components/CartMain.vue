@@ -20,6 +20,7 @@ import { useMemberStore } from '@/stores'
 import type { CartItem } from '@/types/cart'
 import { onShow } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
+import { cal } from '@/utils/cal'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -128,9 +129,13 @@ const seletedCardlistCount = computed(() => {
 
 // 计算选中的总价格
 const selectedCardListMoney = computed(() => {
-  return selectedCardList.value
-    .reduce((sum, item) => sum + parseInt(item.unit_price) * item.num, 0)
-    .toFixed(2)
+  return (
+    selectedCardList.value
+      // @ts-ignore
+      .reduce((sum, item) => cal.jia(sum, cal.cheng(Number(item.unit_price), item.num)), 0)
+      // @ts-ignore
+      .toFixed(2)
+  )
 })
 
 // 去结算

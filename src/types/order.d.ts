@@ -142,7 +142,7 @@ export type LogisticItem = {
 
 import type { PageParams } from '@/types/global'
 /** 订单列表参数 */
-export type OrderListParams = PageParams & { orderState: number }
+export type OrderListParams = PageParams & { status: number }
 
 // *****
 export type DetailItem = {

@@ -13,6 +13,7 @@ import { useAddressStore } from '@/stores/modules/address'
 import type { CartItem } from '@/types/cart'
 import type { CouponItem, MyCouponItem } from '@/types/coupon'
 import type { OrderPreResult } from '@/types/order'
+import { cal } from '@/utils/cal'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 
@@ -95,6 +96,10 @@ const chooseCoupon = (couponId: string) => {
   currentChooseCoupon.value = avalibleCouponList.value.find(
     (item) => item.couponId === couponId,
   ) as MyCouponItem
+  // @ts-ignore
+  selectedCardListMoney.value = cal
+    .jian(selectedCardListMoney.value, currentChooseCoupon.value.face_value)
+    .toFixed(2)
   console.log(couponId, 'couponId', currentChooseCoupon.value)
 }
 const query = defineProps<{
@@ -144,6 +149,7 @@ const selectedAddress = computed(() => {
 // 提交订单
 const onOrderSubmit = async () => {
   let createCartList: CreateOrderCartItem[] = []
+  let res: { result: any; code: string; msg: string } = { result: null, code: '', msg: '' }
   selectedCardList.value.forEach((item) => {
     createCartList.push({
       cartId: item.id.toString(),
@@ -152,14 +158,39 @@ const onOrderSubmit = async () => {
       costUnitPrice: item.cost_unit_price ? item.cost_total_price : '',
     })
   })
-  const res = await createOrderAPI({
-    userCoupon: '0',
-    couponId: '0',
-    remark: '',
-    cartList: createCartList,
-  })
-  // 关闭当前页面，跳转到订单详情页
-  uni.redirectTo({ url: `/PagesOrder/list/list` })
+  // 不使用优惠券
+  if (!currentChooseCoupon.value.couponId) {
+    res = await createOrderAPI({
+      userCoupon: '0',
+      couponId: '0',
+      remark: remark.value,
+      cartList: createCartList,
+    })
+  } else {
+    // 使用优惠券
+    res = await createOrderAPI({
+      userCoupon: '1',
+      couponId: currentChooseCoupon.value.couponId,
+      couponAmount: currentChooseCoupon.value.face_value,
+      remark: remark.value,
+      cartList: createCartList,
+    })
+  }
+  if (res.code === '1' && res.result.orderId) {
+    uni.showToast({
+      icon: 'success',
+      title: '订单创建成功',
+    })
+  } else {
+    uni.showToast({
+      icon: 'success',
+      title: res.msg,
+    })
+  }
+  setTimeout(() => {
+    // 关闭当前页面，跳转到订单详情页
+    uni.redirectTo({ url: `/PagesOrder/list/list` })
+  }, 500)
 }
 const goback = () => {
   uni.navigateBack()
@@ -182,6 +213,7 @@ const goToChooseCoupon = () => {
       uni.$emit('avalibleCouponList', {
         avalibleCouponList: avalibleCouponList.value,
         chooseCoupon,
+        currentChooseCoupon: currentChooseCoupon.value,
       })
     },
   })
@@ -190,10 +222,10 @@ const showValue = () => {
   if (avalibleCouponList.value.length === 0) {
     return '暂无可用优惠券'
   }
-  if (avalibleCouponList.value.length > 0 && !currentChooseCoupon.value) {
+  if (avalibleCouponList.value.length > 0 && !currentChooseCoupon.value.couponId) {
     return '请选择优惠券'
   }
-  if (avalibleCouponList.value.length > 0 && currentChooseCoupon.value) {
+  if (avalibleCouponList.value.length > 0 && currentChooseCoupon.value.couponId) {
     return `-￥${currentChooseCoupon.value.face_value}`
   }
 }
@@ -307,12 +339,10 @@ const showValue = () => {
   <!-- 吸底工具栏 -->
   <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
     <view class="total-pay symbol">
-      <text class="number">{{ orderPre?.summary.totalPayPrice.toFixed(2) }}</text>
+      <text class="number">￥{{ selectedCardListMoney }}</text>
       <text class="trans-fee">含运费：￥0.00</text>
     </view>
-    <view class="button" @tap="onOrderSubmit" :class="{ disabled: !selectedAddress?.id }">
-      提交订单
-    </view>
+    <view class="button" @tap="onOrderSubmit"> 提交订单 </view>
   </view>
 </template>
 
@@ -527,6 +557,7 @@ page {
     }
 
     .coupon {
+      color: rgba(255, 80, 64, 1);
       border-bottom: 1px solid #d0cbcb;
     }
 
@@ -545,11 +576,11 @@ page {
   }
 }
 
-.symbol::before {
-  content: '¥';
-  font-size: 80%;
-  margin-right: 5rpx;
-}
+// .symbol::before {
+//   content: '¥';
+//   font-size: 80%;
+//   margin-right: 5rpx;
+// }
 
 .shipment {
   margin: 20rpx;

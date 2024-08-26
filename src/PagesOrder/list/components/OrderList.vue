@@ -12,17 +12,46 @@ const props = defineProps<{
   orderState: number
 }>()
 
-// 请求参数
-const queryParams: OrderListParams = {
+// 全部 请求参数
+const allQueryParams = {
   page: 1,
   pageSize: 5,
-  orderState: props.orderState,
+  status: props.orderState,
 }
+// 待支付
+const dzfQueryParams = {
+  page: 1,
+  pageSize: 5,
+  status: props.orderState,
+}
+// 待发货
+const dfhQueryParams = {
+  page: 1,
+  pageSize: 5,
+  status: props.orderState,
+}
+// 待收货
+const dshQueryParams = {
+  page: 1,
+  pageSize: 5,
+  status: props.orderState,
+}
+// 待售后
+const dpjQueryParams = {
+  page: 1,
+  pageSize: 5,
+  status: props.orderState,
+}
+const isAllFinish = ref(false)
+const isDzfFinish = ref(false)
+const isDfhFinish = ref(false)
+const isDshFinish = ref(false)
+const isDpjFinish = ref(false)
 
 // 获取订单列表
 const orderList = ref<OrderItem[]>([])
 const getMemberOrderData = async () => {
-  const res = await getOrderListAPI({ status: '1' })
+  const res = await getOrderListAPI(allQueryParams)
 
   orderList.value = res.result.list
 }
@@ -49,56 +78,27 @@ const onOrderPay = async (id: string) => {
 </script>
 <template>
   <scroll-view scroll-y class="orders">
-    <view class="card" v-for="order in orderList" :key="order.id">
-      <!-- 订单信息 -->
-      <view class="status">
-        <text class="date">{{ order.createTime }}</text>
-        <!-- 订单状态文字 -->
-        <text>{{ orderStateList[order.orderState].text }}</text>
-        <!-- 待评价/已完成/已取消 状态: 展示删除订单 -->
-        <text v-if="order.orderState >= OrderState.DaiPingJia" class="icon-delete"></text>
+    <view class="card" v-for="order in orderList" :key="order.orderId">
+      <view class="top">
+        <view class="order-id">{{ order.orderNo }} <text class="copy">复制</text> </view>
+        <view class="wait">等待付款30分钟 </view>
       </view>
-      <!-- 商品信息，点击商品跳转到订单详情，不是商品详情 -->
-      <navigator
-        v-for="sku in order.skus"
-        :key="sku.id"
-        class="goods"
-        :url="`/PagesOrder/detail/detail?id=${order.id}`"
-        hover-class="none"
-      >
-        <view class="cover">
-          <image mode="aspectFit" :src="sku.image"></image>
+      <view class="mid">
+        <image
+          class="image"
+          src="https://img.js.design/assets/img/6691ec1357bbf24e7d84d155.png#d1470ccbdcf1e16c04752d2922557bae"
+        />
+        <view class="name">{{ order.detail[0].goodsName }}</view>
+        <view class="info">
+          <view class="price">￥{{ order.detail[0].unitPrice }}</view>
+          <view class="num">共 {{ order.detail[0].num }} {{ order.detail[0].units }}</view>
         </view>
-        <view class="meta">
-          <view class="name ellipsis">{{ sku.name }}</view>
-          <view class="type">{{ sku.attrsText }}</view>
-        </view>
-      </navigator>
-      <!-- 支付信息 -->
-      <view class="payment">
-        <text class="quantity">共{{ order.totalNum }}件商品</text>
-        <text>实付</text>
-        <text class="amount"> <text class="symbol">¥</text>{{ order.payMoney }}</text>
       </view>
-      <!-- 订单操作按钮 -->
-      <view class="action">
-        <!-- 待付款状态：显示去支付按钮 -->
-        <template v-if="order.orderState === OrderState.DaiFuKuan">
-          <view @tap="($event) => onOrderPay(order.id)" class="button primary">去支付</view>
-        </template>
-        <template v-else>
-          <navigator
-            class="button secondary"
-            :url="`/PagesOrder/create/create?orderId=id`"
-            hover-class="none"
-          >
-            再次购买
-          </navigator>
-          <!-- 待收货状态: 展示确认收货 -->
-          <view v-if="order.orderState === OrderState.DaiShouHuo" class="button primary"
-            >确认收货</view
-          >
-        </template>
+      <view class="bottom">
+        <view class="btn">取消订单</view>
+        <view class="btn">编辑</view>
+        <view class="btn">再来一单</view>
+        <view class="btn pay-btn">去支付</view>
       </view>
     </view>
     <!-- 底部提示文字 -->
@@ -116,6 +116,78 @@ const onOrderPay = async (id: string) => {
     margin: 20rpx 20rpx 0;
     border-radius: 10rpx;
     background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    font-size: 26rpx;
+
+    .top {
+      display: flex;
+      justify-content: space-around;
+
+      .order-id {
+        .copy {
+          color: rgba(255, 80, 64, 1);
+        }
+      }
+    }
+
+    .mid {
+      display: flex;
+      justify-content: space-between;
+      height: 200rpx;
+      align-items: center;
+
+      .image {
+        width: 200rpx;
+        height: 200rpx;
+      }
+
+      .name {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-left: 10rpx;
+      }
+
+      .info {
+        width: 140rpx;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-end;
+
+        .price {
+          color: rgba(255, 80, 64, 1);
+        }
+
+        .num {
+          color: rgba(175, 176, 178, 1);
+          font-size: 24rpx;
+          margin-top: 10rpx;
+        }
+      }
+    }
+
+    .bottom {
+      display: flex;
+      justify-content: space-around;
+
+      .btn {
+        width: 140rpx;
+        height: 60rpx;
+        border: 1rpx solid rgba(175, 176, 178, 1);
+        border-radius: 40rpx;
+        line-height: 60rpx;
+        text-align: center;
+      }
+
+      .pay-btn {
+        border: 1rpx solid rgba(255, 80, 64, 1);
+      }
+    }
 
     &:last-child {
       padding-bottom: 40rpx;

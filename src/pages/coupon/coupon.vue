@@ -38,6 +38,7 @@ const goback = () => {
 const chooseCoupon = ref()
 // 从下单页面过来的
 const avalibleCouponList = ref<MyCouponItem[]>([])
+const currentChooseCoupon = ref<MyCouponItem>({} as MyCouponItem)
 onLoad(() => {
   if (query.from === 'home') {
     getCouponListData()
@@ -46,7 +47,8 @@ onLoad(() => {
   } else if (query.from === 'order') {
     uni.$on('avalibleCouponList', (data) => {
       ;(avalibleCouponList.value = data.avalibleCouponList),
-        (chooseCoupon.value = data.chooseCoupon)
+        (chooseCoupon.value = data.chooseCoupon),
+        (currentChooseCoupon.value = data.currentChooseCoupon)
     })
   }
 })
@@ -178,7 +180,9 @@ const goToUseCoupon = (couponId: string) => {
           </view>
           <view class="bottom">
             <text class="bottom-title">{{ item.expire_end_time.split(' ')[0] }}过期</text>
-            <view class="use-btn" @tap="($event) => chooseCoupon(item.couponId)">去使用</view>
+            <view class="use-btn" @tap="($event) => chooseCoupon(item.couponId)">{{
+              currentChooseCoupon.couponId === item.couponId ? '使用中' : '去使用'
+            }}</view>
           </view>
         </view>
       </view>

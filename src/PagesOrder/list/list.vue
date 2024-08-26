@@ -4,13 +4,13 @@ import OrderList from './components/OrderList.vue'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
-// tabs 数据
+// tabs 数据 1:待支付;2:已支付(待发货);3:已发货(待收货);4:待售后(已提交售后申请)
 const orderTabs = ref([
   { orderState: 0, title: '全部' },
-  { orderState: 1, title: '待付款' },
+  { orderState: 1, title: '待支付' },
   { orderState: 2, title: '待发货' },
   { orderState: 3, title: '待收货' },
-  { orderState: 4, title: '待评价' },
+  { orderState: 4, title: '待售后' },
 ])
 
 // 获取页面参数
