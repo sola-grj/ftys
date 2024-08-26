@@ -10,11 +10,13 @@ import {
   useUpdateShoppingCart,
 } from '@/composables'
 import {
+  batchAddShoppingCartAPI,
   deleteMemberCartAPI,
   getMemberCartAPI,
   getShoppingCartAPI,
   putMemberCartBySkuIdAPI,
   putMemberCartSelectedAPI,
+  type AddShoppingCartDataType,
 } from '@/services/cart'
 import { useMemberStore } from '@/stores'
 import type { CartItem } from '@/types/cart'
@@ -44,26 +46,26 @@ const getMemberCartData = async () => {
 // 初始化调用
 const againBuyGoodsOrder = ref<OrderItem>({} as OrderItem)
 onShow(() => {
-  uni.$on('againBuy', (data) => {
+  uni.$on('againBuy', async (data) => {
     // 再次购买
     againBuyGoodsOrder.value = data.againBuyGoodsOrder
-    againBuyGoodsOrder.value.detail.forEach(async (item) => {
-      const res = await useAddShoppingCart(
-        {
-          source: item.source,
-          goodsId: item.goodsId,
-          fGoodsId: 'xxx' || item.fGoodsId,
-          num: item.num,
-          units: item.units,
-          unitPrice: item.unitPrice,
-        },
-        Number(item.num),
-      )
-      if (res.code === '1') {
-        currentCartId.value = res.result.cartId
-        data.num = res.result.goodsNum
-      }
+    let goodsList: AddShoppingCartDataType[] = []
+    againBuyGoodsOrder.value.detail.forEach((item) => {
+      goodsList.push({
+        source: item.source,
+        goodsId: item.goodsId,
+        fGoodsId: item.fGoodsId,
+        num: Number(item.num),
+        units: item.units,
+        unitPrice: item.unitPrice,
+        remark: item.remark,
+      })
     })
+    const res = await batchAddShoppingCartAPI({
+      goodsList,
+    })
+    // 重新获取购物车数据
+    await getMemberCartData()
   })
   if (memberStore.profile) {
     getMemberCartData()
@@ -250,11 +252,15 @@ const onTapManage = () => {
       <view class="title-container">
         <view class="text">购物车</view>
         <view class="position">
-          <text class="ftysIcon icon-dingwei">大数据大数据大数据大数据大数据大数据大数据大数据大数据大数据大数据</text>
+          <text class="ftysIcon icon-dingwei"
+            >大数据大数据大数据大数据大数据大数据大数据大数据大数据大数据大数据</text
+          >
         </view>
         <view v-if="!isShowManage" @tap="onTapManage" class="manage">管理</view>
         <view v-else class="manage manage-btns">
-          <text @tap="($event) => onDeleteCarts(selectedCardList)" class="ftysIcon icon-shanchu">删除</text>
+          <text @tap="($event) => onDeleteCarts(selectedCardList)" class="ftysIcon icon-shanchu"
+            >删除</text
+          >
           <text @tap="onTapManage">取消</text>
         </view>
       </view>
@@ -265,8 +271,10 @@ const onTapManage = () => {
       <view class="cart-list" v-if="cartList.length">
         <view class="top-check-all">
           <view class="check-container">
-            <text @tap="onChangeSelectedAll"
-              :class="`ftysIcon ${isSelectedAll ? 'icon-xuanzhong1-copy' : 'icon-xuanzhong1'}`"></text>
+            <text
+              @tap="onChangeSelectedAll"
+              :class="`ftysIcon ${isSelectedAll ? 'icon-xuanzhong1-copy' : 'icon-xuanzhong1'}`"
+            ></text>
             <text class="checked-all-text">全选</text>
           </view>
           <view class="text">免运费</view>
@@ -279,10 +287,16 @@ const onTapManage = () => {
             <view class="goods">
               <!-- 选中状态 -->
               <view class="check-container">
-                <text @tap="($event) => onChangeSelected(item)"
-                  :class="`ftysIcon ${item.check ? 'icon-xuanzhong1-copy' : 'icon-xuanzhong1'}`"></text>
+                <text
+                  @tap="($event) => onChangeSelected(item)"
+                  :class="`ftysIcon ${item.check ? 'icon-xuanzhong1-copy' : 'icon-xuanzhong1'}`"
+                ></text>
               </view>
-              <navigator :url="`/pages/goods/goods?id=${item.id}`" hover-class="none" class="navigator">
+              <navigator
+                :url="`/pages/goods/goods?id=${item.id}`"
+                hover-class="none"
+                class="navigator"
+              >
                 <image mode="aspectFill" class="picture" :src="item.images[0]"></image>
                 <view class="meta">
                   <view class="name ellipsis">{{ item.name }}</view>
@@ -291,8 +305,12 @@ const onTapManage = () => {
                 </view>
               </navigator>
               <!-- 商品数量 -->
-              <uni-number-box class="number-box" :min="1" :value="item.num"
-                @change="($event) => addShoppingCart(item, $event, '')" />
+              <uni-number-box
+                class="number-box"
+                :min="1"
+                :value="item.num"
+                @change="($event) => addShoppingCart(item, $event, '')"
+              />
             </view>
             <!-- 右侧删除按钮 -->
             <template #right>
@@ -316,15 +334,21 @@ const onTapManage = () => {
       <!-- 吸底工具栏 -->
       <view class="toolbar">
         <view class="all">
-          <text @tap="onChangeSelectedAll"
-            :class="`ftysIcon ${isSelectedAll ? 'icon-xuanzhong1-copy' : 'icon-xuanzhong1'}`" />
+          <text
+            @tap="onChangeSelectedAll"
+            :class="`ftysIcon ${isSelectedAll ? 'icon-xuanzhong1-copy' : 'icon-xuanzhong1'}`"
+          />
           <text>全选</text>
         </view>
 
         <text class="text">合计:</text>
         <text class="amount">{{ selectedCardListMoney }}</text>
         <view class="button-grounp">
-          <view @tap="goToPayment" class="button payment-button" :class="{ disabled: seletedCardlistCount === 0 }">
+          <view
+            @tap="goToPayment"
+            class="button payment-button"
+            :class="{ disabled: seletedCardlistCount === 0 }"
+          >
             去结算({{ seletedCardlistCount }})
           </view>
         </view>

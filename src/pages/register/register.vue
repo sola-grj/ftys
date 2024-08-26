@@ -423,7 +423,7 @@ const onDelete = (event: any) => {
             @select="onSelect"
             class="choose-img"
             limit="3"
-            :title="`营业执照或门头照--${JSON.stringify(test)}`"
+            :title="`营业执照或门头照`"
           ></uni-file-picker>
         </uni-forms-item>
       </view>

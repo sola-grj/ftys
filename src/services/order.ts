@@ -260,7 +260,6 @@ export const creditRepayAPI = (data: { capitalIds: string; repayMoney: string })
   })
 }
 
-
 /**
  * 订单支付
  * @param data 请求参数
@@ -273,13 +272,13 @@ export const orderPayAPI = (data: { orderId: string }) => {
   })
 }
 
-
 export type OrderDetailResult = {
   couponInfo: {
-    userCouponId: number
+    userCouponId: string
     couponName: string
-     couponType: string
-    }
+    couponType: string
+    faceValue: string
+  }
   createTime: string
   deliveryInfo: {
     receiveWay: string
@@ -292,8 +291,10 @@ export type OrderDetailResult = {
   orderPayPrice: string
   orderPrice: string
   status: string
-  useCoupon: number
-  userCouponId: number
+  useCoupon: string
+  userCouponId: string
+  orderId: string
+  remark: string
 }
 
 /**
@@ -308,5 +309,86 @@ export const orderDetailAPI = (data: { orderId: string }) => {
   })
 }
 
+export type EditOrderCartItem = {
+  cartId: string
+  num: string
+  unitPrice: string
+  remark?: string
+}
 
+export type EditOrderData = {
+  userCoupon: string
+  couponId: string
+  couponAmount: string
+  orderId: string
+  remark: string
+  cartList: EditOrderCartItem[]
+}
 
+/**
+ * 订单详情
+ * @param data 请求参数
+ */
+export const editOrderAPI = (data: EditOrderData) => {
+  return http<{ order_id: string }>({
+    method: 'POST',
+    url: '/order/editOrder',
+    data,
+  })
+}
+
+/**
+ * 取消订单
+ * @param data 请求参数
+ */
+export const cancelOrderAPI = (data: { orderId: string }) => {
+  return http({
+    method: 'POST',
+    url: '/order/cancelOrder',
+    data,
+  })
+}
+export type AfterServiceItem = {
+  key: string
+  value: string
+}
+export type AfterServiceTypeResult = {
+  afterSalesType: AfterServiceItem[]
+  afterSalesReason: AfterServiceItem[]
+}
+
+/**
+ * 获取售后类型和原因
+ * @param data 请求参数
+ */
+export const getAfterServiceTypeAPI = () => {
+  return http<AfterServiceTypeResult>({
+    method: 'POST',
+    url: '/after_sales_service/getAfterServiceType',
+  })
+}
+export type AfterSaleReqItem = {
+  goodsId: string
+  num: string
+  units: string
+  source: string
+  remark: string
+}
+export type AfterSaleReqData = {
+  orderId: string
+  afterSalesType: string
+  afterSalesReason: string
+  remark: string
+  goodsList: AfterSaleReqItem[]
+}
+/**
+ * 获取售后类型和原因
+ * @param data 请求参数
+ */
+export const createAfterSalesAPI = (data: AfterSaleReqData) => {
+  return http({
+    method: 'POST',
+    url: '/after_sales_service/createAfterSales',
+    data,
+  })
+}

@@ -154,9 +154,10 @@ export type DetailItem = {
   unitPrice: string
   totalPrice: string
   goodsName: string
-  goodsImage: string
-  fGoodsIds:string
+  goodsImage: string[]
+  fGoodsId: string
   remark: string
+  cartId: string
 }
 
 export type OrderItem = {
@@ -166,6 +167,7 @@ export type OrderItem = {
   orderPrice: string
   orderPayPrice: string
   detail: DetailItem[]
+  fGoodsId: string
 }
 
 // 订单列表上送参数

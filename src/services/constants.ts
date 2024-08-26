@@ -1,4 +1,4 @@
-/** 订单状态枚举 */
+/** 订单状态枚举 1:待支付;2:已支付(待发货);3:已发货(待收货);4:待售后(已提交售后申请):5:售后处理完毕;6:已收货; */
 export enum OrderState {
   /** 待付款 */
   DaiFuKuan = '1',
@@ -6,12 +6,12 @@ export enum OrderState {
   DaiFaHuo = '2',
   /** 待收货 */
   DaiShouHuo = '3',
-  /** 待评价 */
-  DaiPingJia = '4',
-  /** 已完成 */
-  YiWanCheng = '5',
-  /** 已取消 */
-  YiQuXiao = '6',
+  /** 待售后 */
+  DaiShouHou = '4',
+  /** 售后完毕 */
+  SHWanBi = '5',
+  /** 已收货 */
+  YiShouHuo = '6',
 }
 
 /** 订单状态列表 */

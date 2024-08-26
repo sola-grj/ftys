@@ -318,6 +318,13 @@
 					"style": {
 						"navigationBarTitleText": "订单列表",
 					}
+				},
+				{
+					"path": "detail/applyaftersale",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "申请售后"
+					}
 				}
 			]
 		}

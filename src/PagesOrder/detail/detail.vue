@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { useGuessList } from '@/composables'
+import { useGuessList, useUpdateShoppingCart } from '@/composables'
 import { OrderState, orderStateList } from '@/services/constants'
 import {
   deleteMemberOrderAPI,
+  editOrderAPI,
   getMemberOrderByIdAPI,
   getMemberOrderCancelByIdAPI,
   getMemberOrderConsignmentByIdAPI,
@@ -11,17 +12,18 @@ import {
   putMemberOrderReceiptByIdAPI,
   type OrderDetailResult,
 } from '@/services/order'
-import type { LogisticItem, OrderResult } from '@/types/order'
+import type { DetailItem, LogisticItem, OrderResult } from '@/types/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
 import PageSkeleton from './components/PageSkeleton.vue'
 import { ref } from 'vue'
 import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 import { deleteMemberAddressByIdAPI } from '@/services/address'
+import type { CartItem } from '@/types/cart'
 
+// 只有在编辑的时候，输入框才能输入
+const inputDisabled = ref(true)
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
-// 猜你喜欢
-const { guessRef, onScrolltolower } = useGuessList()
 // 弹出层组件
 const popup = ref<UniHelper.UniPopupInstance>()
 // 取消原因列表
@@ -85,6 +87,9 @@ const order = ref<OrderDetailResult>({} as OrderDetailResult)
 const getMemberOrderByIdData = async () => {
   const res = await orderDetailAPI({ orderId: query.orderId })
   order.value = res.result
+  if (order.value.status === OrderState.DaiFaHuo) {
+    inputDisabled.value = false
+  }
 }
 
 // 是否加载中
@@ -175,47 +180,74 @@ const copy = (orderNo: string) => {
     success: function () {
       uni.showToast({
         icon: 'success',
-        title: '已复制到剪贴板'
+        title: '已复制到剪贴板',
       })
-    }
-  });
-
+    },
+  })
 }
 
-// 根据订单状态生成底部buttons
-const createButtons = () => {
-  switch (order.value.status) {
-    case '1':
-      // 待支付
-      return [
-        { id: 'cancel', name: '取消订单' },
-        { id: 'pay', name: '去支付' }
-      ]
-    case '2':
-      // 代发货
-      return [
-        { id: 'cancel', name: '取消订单' },
-        { id: 'edit', name: '编辑' },
-        { id: 'again', name: '再来一单' }
-      ]
-    case '3':
-      // 待收货
-      return [
-        { id: 'again', name: '再来一单' },
-        { id: 'cancel', name: '确认收货' }
-      ]
-    case '4':
-      // 待售后
-      return [
-        { id: 'again', name: '再来一单' },
-        { id: 'after-sales', name: '申请售后' }
-      ]
+const goback = () => {
+  uni.navigateBack()
+}
 
-    default:
-      break;
+const currentCartId = ref('')
+const addShoppingCart = async (data: DetailItem, num: number, type: string) => {
+  if (num === 0) {
+    // 弹窗二次确认
+    uni.showModal({
+      content: '是否删除',
+      success: async (res) => {
+        if (res.confirm) {
+          // 前端页面更新
+          order.value.orderDetail = order.value.orderDetail.filter(
+            (item) => item.cartId !== data.cartId,
+          )
+        } else {
+          data.num = '1'
+          // data.num = data.num
+        }
+      },
+      fail: (fail) => {
+        console.log(fail)
+      },
+    })
   }
 }
 
+const editOrder = async () => {
+  let cartList = []
+  order.value.orderDetail.forEach((item) => {
+    cartList.push({
+      cartId: item.cartId,
+      num: item.num,
+      unitPrice: item.unitPrice,
+      remark: item.remark,
+    })
+  })
+  const res = await editOrderAPI({
+    userCoupon: order.value.useCoupon,
+    couponId: order.value.userCouponId,
+    couponAmount: order.value.couponInfo.faceValue,
+    orderId: order.value.orderId,
+    remark: order.value.remark,
+    cartList: order.value.orderDetail,
+  })
+  if (res.code === '1') {
+    uni.navigateTo({ url: `/PagesOrder/list/list?type=2` })
+  }
+}
+
+//申请售后
+const goToApply = () => {
+  uni.navigateTo({
+    url: '/PagesOrder/detail/applyaftersale',
+    success: (success) => {
+      uni.$emit('applyaftersale', {
+        order: order.value,
+      })
+    },
+  })
+}
 </script>
 
 <template>
@@ -235,21 +267,52 @@ const createButtons = () => {
         <text class="text">订单详情</text>
       </view>
       <view class="container">
+        <view class="address-info" v-if="order.status === OrderState.YiShouHuo">
+          <text class="ftysIcon icon-ditu_dingwei" />
+          <view class="desc">
+            <view class="address">{{ order.deliveryInfo.shippingAddr }}</view>
+            <view class="user"
+              >{{ order.deliveryInfo.username }} {{ order.deliveryInfo.mobile }}</view
+            >
+          </view>
+        </view>
         <view class="list-container">
           <view class="item" v-for="item in order.orderDetail" :key="item.orderId">
-            <image src="https://img.js.design/assets/img/6691ec1357bbf24e7d84d155.png#d1470ccbdcf1e16c04752d2922557bae"
-              mode="scaleToFill" />
+            <image :src="item.goodsImage[0]" mode="scaleToFill" />
             <view class="info">
               <view class="infotitle">{{ item.goodsName }}</view>
               <view class="right">
                 <view class="price">￥{{ item.unitPrice }}/{{ item.units }}</view>
-                <view class="num"> X{{ item.num }}</view>
+                <view v-if="order.status !== OrderState.DaiFaHuo" class="num">
+                  X{{ item.num }}</view
+                >
+                <uni-number-box
+                  v-else
+                  class="number-box"
+                  v-model="item.num"
+                  @change="($event) => addShoppingCart(item, $event, '')"
+                />
+              </view>
+              <view class="note">
+                <uni-easyinput
+                  v-model="item.remark"
+                  :disabled="inputDisabled"
+                  placeholder="请输入商品备注"
+                  class="question"
+                  type="text"
+                ></uni-easyinput>
               </view>
             </view>
           </view>
           <view class="remark">
             <view class="rtitle">备注</view>
-            <uni-easyinput placeholder="建议备注前先与商家沟通确认" class="question" type="textarea"></uni-easyinput>
+            <uni-easyinput
+              v-model="order.remark"
+              :disabled="inputDisabled"
+              placeholder="建议备注前先与商家沟通确认"
+              class="question"
+              type="textarea"
+            ></uni-easyinput>
           </view>
         </view>
         <view class="detail-container">
@@ -262,8 +325,10 @@ const createButtons = () => {
             <text class="value">0.00</text>
           </view>
           <view class="detail-item">
-            <text class="label">优惠券 <text class="coupon-info">{{ order.couponInfo.couponName }}</text> </text>
-            <text class="value">{{ 0.00 }}</text>
+            <text class="label"
+              >优惠券 <text class="coupon-info">{{ order.couponInfo.couponName }}</text>
+            </text>
+            <text class="value">{{ 0.0 }}</text>
           </view>
           <view class="detail-item">
             <text class="label">实付款</text>
@@ -273,8 +338,9 @@ const createButtons = () => {
         <view class="detail-container">
           <view class="detail-item">
             <text class="label">订单编号</text>
-            <text class="value">{{ order.orderNo }} <text class="m">|</text> <text class="copy"
-                @tap="$event => copy(order.orderNo)"> 复制</text>
+            <text class="value"
+              >{{ order.orderNo }} <text class="m">|</text>
+              <text class="copy" @tap="($event) => copy(order.orderNo)"> 复制</text>
             </text>
           </view>
           <view class="detail-item">
@@ -286,6 +352,12 @@ const createButtons = () => {
             <text class="value">{{ order.deliveryInfo.shippingAddr }}</text>
           </view>
         </view>
+        <view class="btn" v-if="order.status === OrderState.YiShouHuo">
+          <button open-type="" hover-class="button-hover" @tap="goToApply">申请售后</button>
+        </view>
+        <view class="btn" v-if="order.status === OrderState.DaiFaHuo">
+          <button @tap="editOrder" open-type="" hover-class="button-hover">保存修改</button>
+        </view>
       </view>
     </template>
     <template v-else>
@@ -293,7 +365,6 @@ const createButtons = () => {
       <PageSkeleton />
     </template>
   </scroll-view>
-
 </template>
 
 <style lang="scss">
@@ -345,7 +416,6 @@ page {
 .viewport {
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
 
-
   .title {
     position: relative;
     text-align: center;
@@ -368,11 +438,35 @@ page {
   }
 
   .container {
+    position: relative;
     height: 100%;
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;
     padding: 30rpx;
+
+    .address-info {
+      display: flex;
+
+      .icon-ditu_dingwei {
+        color: rgba(255, 80, 64, 1);
+        font-size: 80rpx;
+      }
+
+      .desc {
+        display: flex;
+        flex-direction: column;
+        font-size: 26rpx;
+
+        .address {
+          color: rgba(102, 102, 102, 1);
+        }
+
+        .user {
+          color: rgba(50, 50, 51, 1);
+        }
+      }
+    }
 
     .list-container {
       padding: 20rpx 20rpx;
@@ -413,6 +507,18 @@ page {
           align-items: flex-end;
           color: #ff5040;
 
+          ::v-deep .uni-numbox {
+            .uni-numbox-btns {
+              padding: 0 4px;
+            }
+
+            .uni-numbox__value {
+              width: 48rpx !important;
+              height: 30rpx !important;
+              font-size: 26rpx !important;
+            }
+          }
+
           .shoucang {
             height: 50%;
           }
@@ -423,6 +529,14 @@ page {
 
           .num {
             font-weight: bold;
+          }
+        }
+
+        .note {
+          margin-top: 10rpx;
+
+          .uni-easyinput__content {
+            height: 60rpx;
           }
         }
       }
@@ -474,7 +588,16 @@ page {
           font-weight: bold;
           color: rgba(255, 80, 64, 1);
         }
+      }
+    }
 
+    .btn {
+      margin-top: 40rpx;
+
+      button {
+        color: #fff;
+        border-radius: 20rpx;
+        background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
       }
     }
   }

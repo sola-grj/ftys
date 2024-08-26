@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { OrderState, orderStateList } from '@/services/constants'
-import { getMemberOrderAPI, getOrderListAPI, orderPayAPI } from '@/services/order'
+import { cancelOrderAPI, getMemberOrderAPI, getOrderListAPI, orderPayAPI } from '@/services/order'
 import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 import type { OrderItem, OrderListParams, OrderListReqData } from '@/types/order'
 import { onMounted, ref } from 'vue'
@@ -16,7 +16,7 @@ const isFinish = ref(false)
 const allQueryParams = ref<OrderListReqData>({
   page: 1,
   pageSize: 5,
-  status: props.orderState
+  status: props.orderState,
 })
 // 待支付
 const dzfQueryParams = {
@@ -57,36 +57,36 @@ const createButtons = () => {
         { id: 'cancel', name: '取消订单' },
         { id: 'edit', name: '编辑' },
         { id: 'again', name: '再来一单' },
-        { id: 'pay', name: '去支付' }
+        { id: 'pay', name: '去支付' },
       ]
     case '1':
       // 待支付
       return [
         { id: 'cancel', name: '取消订单' },
-        { id: 'pay', name: '去支付' }
+        { id: 'pay', name: '去支付' },
       ]
     case '2':
       // 代发货
       return [
         { id: 'cancel', name: '取消订单' },
         { id: 'edit', name: '编辑' },
-        { id: 'again', name: '再来一单' }
+        { id: 'again', name: '再来一单' },
       ]
     case '3':
       // 待收货
       return [
         { id: 'again', name: '再来一单' },
-        { id: 'cancel', name: '确认收货' }
+        { id: 'cancel', name: '确认收货' },
       ]
     case '4':
       // 待售后
       return [
         { id: 'again', name: '再来一单' },
-        { id: 'after-sales', name: '申请售后' }
+        { id: 'after-sales', name: '申请售后' },
       ]
 
     default:
-      break;
+      break
   }
 }
 
@@ -120,7 +120,7 @@ const onTapBottom = (order: OrderItem, id: string) => {
     cancelOrder(order.orderId)
   }
   if (id === 'edit') {
-
+    goToOrderDetail(order)
   }
   if (id === 'again') {
     againBuy(order)
@@ -129,7 +129,7 @@ const onTapBottom = (order: OrderItem, id: string) => {
     onOrderPay(order.orderId)
   }
   if (id === 'after-sales') {
-
+    goToOrderDetail(order)
   }
 }
 
@@ -143,12 +143,11 @@ const againBuy = (order: OrderItem) => {
           url: '/pages/cart/cart?from=order',
           success: (res) => {
             uni.$emit('againBuy', { againBuyGoodsOrder: order })
-          }
+          },
         })
       }
     },
   })
-
 }
 
 // 取消订单
@@ -157,7 +156,16 @@ const cancelOrder = (orderId: string) => {
     content: '是否取消订单？',
     success: async (res) => {
       if (res.confirm) {
-
+        const res = await cancelOrderAPI({
+          orderId,
+        })
+        if (res.code === '1') {
+          uni.showToast({
+            title: '取消订单成功',
+            icon: 'success',
+          })
+          orderList.value = orderList.value.filter((item) => item.orderId !== orderId)
+        }
       }
     },
   })
@@ -172,17 +180,15 @@ const onOrderPay = async (orderId: string) => {
         const res = await orderPayAPI({ orderId })
         if (res.code === '1') {
           uni.showToast({ icon: 'success', title: '支付成功' })
+          uni.reLaunch({
+            url: '/PagesOrder/list/list',
+          })
         } else {
           uni.showToast({ icon: 'error', title: res.msg })
         }
-
-        // 更新订单状态为代发货
-        const order = orderList.value.find((v) => v.orderId === orderId)
-        order!.status = OrderState.DaiFaHuo
       }
-    }
+    },
   })
-
 }
 // 跳转商品详情
 const goToOrderDetail = (order: OrderItem) => {
@@ -196,35 +202,45 @@ const copy = (orderNo: string) => {
     success: function () {
       uni.showToast({
         icon: 'success',
-        title: '已复制到剪贴板'
+        title: '已复制到剪贴板',
       })
-    }
-  });
-
+    },
+  })
 }
 </script>
 <template>
   <scroll-view scroll-y class="orders" @scrolltolower="getMemberOrderData" enable-back-to-top>
-    <view class="card" @tap="$event => goToOrderDetail(order)" v-for="order in orderList" :key="order.orderId">
+    <view
+      class="card"
+      @tap="($event) => goToOrderDetail(order)"
+      v-for="order in orderList"
+      :key="order.orderId"
+    >
       <view class="top">
-        <view class="order-id">{{ order.orderNo }} <text @tap="$event => copy(order.orderNo)" class="copy">复制</text>
+        <view class="order-id"
+          >{{ order.orderNo }} <text @tap="($event) => copy(order.orderNo)" class="copy">复制</text>
         </view>
-        <view :class="orderState === '1' ? 'wait' : 'other'"><text class="w-desc">等待付款</text> <text
-            class="w-minuate">30分钟</text> </view>
+        <view :class="orderState === '1' ? 'wait' : 'other'"
+          ><text class="w-desc">等待付款</text> <text class="w-minuate">30分钟</text>
+        </view>
       </view>
       <view class="mid">
-        <image class="image"
-          src="https://img.js.design/assets/img/6691ec1357bbf24e7d84d155.png#d1470ccbdcf1e16c04752d2922557bae" />
+        <image class="image" :src="order.detail[0].goodsImage[0]" />
         <view class="name">{{ order.detail[0].goodsName }}</view>
         <view class="info">
           <view class="price">￥{{ order.detail[0].unitPrice }}</view>
           <view class="num">共 {{ order.detail[0].num }} {{ order.detail[0].units }}</view>
         </view>
       </view>
-      <view class="bottom">
-        <view @tap="$event => onTapBottom(order, btn.id)" class="btn" :class="btn.id === 'pay' ? 'pay-btn' : ''"
-          v-for="btn in createButtons()" :key="btn.id">{{
-            btn.name }}</view>
+      <view class="bottom" @tap.stop.prevent>
+        <view
+          @tap="($event) => onTapBottom(order, btn.id)"
+          class="btn"
+          :class="btn.id === 'pay' ? 'pay-btn' : ''"
+          v-for="btn in createButtons()"
+          :key="btn.id"
+          >{{ btn.name }}</view
+        >
       </view>
     </view>
     <!-- 底部提示文字 -->
@@ -274,7 +290,7 @@ const copy = (orderNo: string) => {
           text-align: center;
           background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
           line-height: 40rpx;
-          color: #fff
+          color: #fff;
         }
 
         .w-minuate {

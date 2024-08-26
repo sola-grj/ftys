@@ -4,13 +4,14 @@ import OrderList from './components/OrderList.vue'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
-// tabs 数据 1:待支付;2:已支付(待发货);3:已发货(待收货);4:待售后(已提交售后申请);5:已取消
+// tabs 数据 1:待支付;2:已支付(待发货);3:已发货(待收货);4:待售后(已提交售后申请):5:售后处理完毕;6:已收货;
 const orderTabs = ref([
   { orderState: '0', title: '全部' },
   { orderState: '1', title: '待支付' },
   { orderState: '2', title: '待发货' },
   { orderState: '3', title: '待收货' },
-  { orderState: '4', title: '待售后' }
+  { orderState: '4', title: '待售后' },
+  { orderState: '6', title: '已完成' },
 ])
 
 // 获取页面参数
@@ -19,21 +20,32 @@ const query = defineProps<{
 }>()
 
 // 高亮下标
-const activeIndex = ref(orderTabs.value.findIndex((v) => v.orderState === Number(query.type)))
+const activeIndex = ref(
+  orderTabs.value.findIndex((v) => Number(v.orderState) === Number(query.type)),
+)
 </script>
 
 <template>
   <view class="viewport">
     <!-- tabs -->
     <view class="tabs">
-      <text @tap="($event) => (activeIndex = index)" class="item" v-for="(item, index) in orderTabs" :key="item.title">
+      <text
+        @tap="($event) => (activeIndex = index)"
+        class="item"
+        v-for="(item, index) in orderTabs"
+        :key="item.title"
+      >
         {{ item.title }}
       </text>
       <!-- 游标 -->
-      <view class="cursor" :style="{ left: activeIndex * 20 + '%' }"></view>
+      <view class="cursor" :style="{ left: activeIndex * 16.6 + '%' }"></view>
     </view>
     <!-- 滑动容器 -->
-    <swiper class="swiper" :current="activeIndex" @change="($event) => (activeIndex = $event.detail.current)">
+    <swiper
+      class="swiper"
+      :current="activeIndex"
+      @change="($event) => (activeIndex = $event.detail.current)"
+    >
       <!-- 滑动项 -->
       <swiper-item v-for="item in orderTabs" :key="item.title">
         <!-- 订单列表 -->
@@ -59,7 +71,8 @@ page {
 // tabs
 .tabs {
   display: flex;
-  justify-content: space-around;
+  // justify-content: space-around;
+  width: 100%;
   line-height: 60rpx;
   margin: 0 10rpx;
   background-color: #fff;
@@ -79,7 +92,7 @@ page {
     position: absolute;
     left: 0;
     bottom: 0;
-    width: 20%;
+    width: 16.6%;
     height: 6rpx;
     padding: 0 50rpx;
     background-color: #27ba9b;

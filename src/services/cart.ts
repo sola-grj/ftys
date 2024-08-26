@@ -71,6 +71,7 @@ export type AddShoppingCartDataType = {
   num: number
   units: string
   unitPrice: string
+  remark?: string
 }
 
 export type UpdateShoppingCartDataType = {
@@ -122,6 +123,18 @@ export const removeShoppingCartAPI = (data: { cartId: string }) => {
   return http({
     method: 'POST',
     url: '/shopping_cart/removeShoppingCart',
+    data,
+  })
+}
+
+/**
+ * 批量添加购物车
+ * @param data selected 是否选中
+ */
+export const batchAddShoppingCartAPI = (data: { goodsList: AddShoppingCartDataType[] }) => {
+  return http<{ cartId: string; goodsNum: number }>({
+    method: 'POST',
+    url: '/shopping_cart/batchAddShoppingCart',
     data,
   })
 }
