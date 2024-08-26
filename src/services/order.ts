@@ -1,7 +1,9 @@
 import type { CartItem } from '@/types/cart'
 import type {
+  DetailItem,
   OrderCreateParams,
   OrderListParams,
+  OrderListReqData,
   OrderListResult,
   OrderLogisticResult,
   OrderPreResult,
@@ -148,7 +150,7 @@ export const getMemberOrderAPI = (data: OrderListParams) => {
  * 获取订单信息
  * @param data 请求参数
  */
-export const getOrderListAPI = (data: { status: number; page: number; pageSize: number }) => {
+export const getOrderListAPI = (data: OrderListReqData) => {
   return http<OrderListResult>({
     method: 'POST',
     url: '/order/getOrderList',
@@ -257,3 +259,54 @@ export const creditRepayAPI = (data: { capitalIds: string; repayMoney: string })
     data,
   })
 }
+
+
+/**
+ * 订单支付
+ * @param data 请求参数
+ */
+export const orderPayAPI = (data: { orderId: string }) => {
+  return http({
+    method: 'POST',
+    url: '/order/orderPay',
+    data,
+  })
+}
+
+
+export type OrderDetailResult = {
+  couponInfo: {
+    userCouponId: number
+    couponName: string
+     couponType: string
+    }
+  createTime: string
+  deliveryInfo: {
+    receiveWay: string
+    shippingAddr: string
+    mobile: string
+    username: string
+  }
+  orderDetail: DetailItem[]
+  orderNo: string
+  orderPayPrice: string
+  orderPrice: string
+  status: string
+  useCoupon: number
+  userCouponId: number
+}
+
+/**
+ * 订单详情
+ * @param data 请求参数
+ */
+export const orderDetailAPI = (data: { orderId: string }) => {
+  return http<OrderDetailResult>({
+    method: 'POST',
+    url: '/order/orderDetail',
+    data,
+  })
+}
+
+
+

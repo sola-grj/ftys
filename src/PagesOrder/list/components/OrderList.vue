@@ -1,23 +1,23 @@
 <script setup lang="ts">
 import { OrderState, orderStateList } from '@/services/constants'
-import { getMemberOrderAPI, getOrderListAPI } from '@/services/order'
+import { getMemberOrderAPI, getOrderListAPI, orderPayAPI } from '@/services/order'
 import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
-import type { OrderItem, OrderListParams } from '@/types/order'
+import type { OrderItem, OrderListParams, OrderListReqData } from '@/types/order'
 import { onMounted, ref } from 'vue'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 // 定义props
 const props = defineProps<{
-  orderState: number
+  orderState: string
 }>()
-
+const isFinish = ref(false)
 // 全部 请求参数
-const allQueryParams = {
+const allQueryParams = ref<OrderListReqData>({
   page: 1,
   pageSize: 5,
-  status: props.orderState,
-}
+  status: props.orderState
+})
 // 待支付
 const dzfQueryParams = {
   page: 1,
@@ -48,46 +48,173 @@ const isDfhFinish = ref(false)
 const isDshFinish = ref(false)
 const isDpjFinish = ref(false)
 
+// 根据订单状态生成底部buttons
+const createButtons = () => {
+  switch (props.orderState) {
+    case '0':
+      // 全部
+      return [
+        { id: 'cancel', name: '取消订单' },
+        { id: 'edit', name: '编辑' },
+        { id: 'again', name: '再来一单' },
+        { id: 'pay', name: '去支付' }
+      ]
+    case '1':
+      // 待支付
+      return [
+        { id: 'cancel', name: '取消订单' },
+        { id: 'pay', name: '去支付' }
+      ]
+    case '2':
+      // 代发货
+      return [
+        { id: 'cancel', name: '取消订单' },
+        { id: 'edit', name: '编辑' },
+        { id: 'again', name: '再来一单' }
+      ]
+    case '3':
+      // 待收货
+      return [
+        { id: 'again', name: '再来一单' },
+        { id: 'cancel', name: '确认收货' }
+      ]
+    case '4':
+      // 待售后
+      return [
+        { id: 'again', name: '再来一单' },
+        { id: 'after-sales', name: '申请售后' }
+      ]
+
+    default:
+      break;
+  }
+}
+
 // 获取订单列表
 const orderList = ref<OrderItem[]>([])
 const getMemberOrderData = async () => {
-  const res = await getOrderListAPI(allQueryParams)
+  if (props.orderState === '0') {
+    delete allQueryParams.value.status
+  }
+  // 退出判断
+  if (isFinish.value === true) {
+    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
+  }
+  const res = await getOrderListAPI(allQueryParams.value)
 
-  orderList.value = res.result.list
+  orderList.value.push(...res.result.list)
+  if (allQueryParams.value.page < res.result.total) {
+    // 页码累加
+    allQueryParams.value.page++
+  } else {
+    isFinish.value = true
+  }
 }
 
 onMounted(() => {
   getMemberOrderData()
 })
 
-// 去支付
-const onOrderPay = async (id: string) => {
-  if (import.meta.env.DEV) {
-    await getPayMockAPI({ orderId: id })
-  } else {
-    // #ifdef MP-WEIXIN
-    const res = await getPayWxPayMiniPayAPI({ orderId: id })
-    wx.requestPayment(res.result)
-    // #endif
+const onTapBottom = (order: OrderItem, id: string) => {
+  if (id === 'cancel') {
+    cancelOrder(order.orderId)
   }
-  uni.showToast({ title: '支付成功' })
-  // 更新订单状态
-  const order = orderList.value.find((v) => v.id === id)
-  order!.orderState = OrderState.DaiFaHuo
+  if (id === 'edit') {
+
+  }
+  if (id === 'again') {
+    againBuy(order)
+  }
+  if (id === 'pay') {
+    onOrderPay(order.orderId)
+  }
+  if (id === 'after-sales') {
+
+  }
+}
+
+// 再来一单
+const againBuy = (order: OrderItem) => {
+  uni.showModal({
+    content: '确定再来一单吗',
+    success: async (res) => {
+      if (res.confirm) {
+        uni.switchTab({
+          url: '/pages/cart/cart?from=order',
+          success: (res) => {
+            uni.$emit('againBuy', { againBuyGoodsOrder: order })
+          }
+        })
+      }
+    },
+  })
+
+}
+
+// 取消订单
+const cancelOrder = (orderId: string) => {
+  uni.showModal({
+    content: '是否取消订单？',
+    success: async (res) => {
+      if (res.confirm) {
+
+      }
+    },
+  })
+}
+
+// 去支付
+const onOrderPay = async (orderId: string) => {
+  uni.showModal({
+    content: '确定要支付吗？',
+    success: async (res) => {
+      if (res.confirm) {
+        const res = await orderPayAPI({ orderId })
+        if (res.code === '1') {
+          uni.showToast({ icon: 'success', title: '支付成功' })
+        } else {
+          uni.showToast({ icon: 'error', title: res.msg })
+        }
+
+        // 更新订单状态为代发货
+        const order = orderList.value.find((v) => v.orderId === orderId)
+        order!.status = OrderState.DaiFaHuo
+      }
+    }
+  })
+
+}
+// 跳转商品详情
+const goToOrderDetail = (order: OrderItem) => {
+  uni.navigateTo({ url: `/PagesOrder/detail/detail?orderId=${order.orderId}` })
+}
+
+// 复制功能
+const copy = (orderNo: string) => {
+  uni.setClipboardData({
+    data: orderNo,
+    success: function () {
+      uni.showToast({
+        icon: 'success',
+        title: '已复制到剪贴板'
+      })
+    }
+  });
+
 }
 </script>
 <template>
-  <scroll-view scroll-y class="orders">
-    <view class="card" v-for="order in orderList" :key="order.orderId">
+  <scroll-view scroll-y class="orders" @scrolltolower="getMemberOrderData" enable-back-to-top>
+    <view class="card" @tap="$event => goToOrderDetail(order)" v-for="order in orderList" :key="order.orderId">
       <view class="top">
-        <view class="order-id">{{ order.orderNo }} <text class="copy">复制</text> </view>
-        <view class="wait">等待付款30分钟 </view>
+        <view class="order-id">{{ order.orderNo }} <text @tap="$event => copy(order.orderNo)" class="copy">复制</text>
+        </view>
+        <view :class="orderState === '1' ? 'wait' : 'other'"><text class="w-desc">等待付款</text> <text
+            class="w-minuate">30分钟</text> </view>
       </view>
       <view class="mid">
-        <image
-          class="image"
-          src="https://img.js.design/assets/img/6691ec1357bbf24e7d84d155.png#d1470ccbdcf1e16c04752d2922557bae"
-        />
+        <image class="image"
+          src="https://img.js.design/assets/img/6691ec1357bbf24e7d84d155.png#d1470ccbdcf1e16c04752d2922557bae" />
         <view class="name">{{ order.detail[0].goodsName }}</view>
         <view class="info">
           <view class="price">￥{{ order.detail[0].unitPrice }}</view>
@@ -95,10 +222,9 @@ const onOrderPay = async (id: string) => {
         </view>
       </view>
       <view class="bottom">
-        <view class="btn">取消订单</view>
-        <view class="btn">编辑</view>
-        <view class="btn">再来一单</view>
-        <view class="btn pay-btn">去支付</view>
+        <view @tap="$event => onTapBottom(order, btn.id)" class="btn" :class="btn.id === 'pay' ? 'pay-btn' : ''"
+          v-for="btn in createButtons()" :key="btn.id">{{
+            btn.name }}</view>
       </view>
     </view>
     <!-- 底部提示文字 -->
@@ -122,12 +248,44 @@ const onOrderPay = async (id: string) => {
 
     .top {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
 
       .order-id {
         .copy {
           color: rgba(255, 80, 64, 1);
         }
+      }
+
+      .wait {
+        display: flex;
+        width: 200rpx;
+        height: 40rpx;
+        background-color: rgba(255, 231, 228, 1);
+        border-radius: 20rpx;
+        font-size: 22rpx;
+        align-items: center;
+
+        .w-desc {
+          width: 50%;
+          height: 100%;
+          text-align: center;
+          border-radius: 20rpx 0 20rpx 20rpx;
+          width: 50%;
+          text-align: center;
+          background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
+          line-height: 40rpx;
+          color: #fff
+        }
+
+        .w-minuate {
+          width: 50%;
+          text-align: center;
+          color: rgba(255, 80, 64, 1);
+        }
+      }
+
+      .other {
+        display: none;
       }
     }
 
@@ -173,7 +331,7 @@ const onOrderPay = async (id: string) => {
 
     .bottom {
       display: flex;
-      justify-content: space-around;
+      justify-content: flex-end;
 
       .btn {
         width: 140rpx;
@@ -182,10 +340,12 @@ const onOrderPay = async (id: string) => {
         border-radius: 40rpx;
         line-height: 60rpx;
         text-align: center;
+        margin-right: 20rpx;
       }
 
       .pay-btn {
-        border: 1rpx solid rgba(255, 80, 64, 1);
+        color: #ff5040;
+        border: 1rpx solid #ff5040;
       }
     }
 

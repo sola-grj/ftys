@@ -7,7 +7,9 @@ import {
   getMemberOrderCancelByIdAPI,
   getMemberOrderConsignmentByIdAPI,
   getMemberOrderLogisticsByIdAPI,
+  orderDetailAPI,
   putMemberOrderReceiptByIdAPI,
+  type OrderDetailResult,
 } from '@/services/order'
 import type { LogisticItem, OrderResult } from '@/types/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
@@ -40,7 +42,7 @@ const onCopy = (id: string) => {
 }
 // 获取页面参数
 const query = defineProps<{
-  id: string
+  orderId: string
 }>()
 
 // 获取页面栈
@@ -79,17 +81,10 @@ onReady(() => {
 })
 
 // 获取订单详情
-const order = ref<OrderResult>()
+const order = ref<OrderDetailResult>({} as OrderDetailResult)
 const getMemberOrderByIdData = async () => {
-  const res = await getMemberOrderByIdAPI(query.id)
+  const res = await orderDetailAPI({ orderId: query.orderId })
   order.value = res.result
-  if (
-    [OrderState.DaiShouHuo, OrderState.DaiPingJia, OrderState.YiWanCheng].includes(
-      order.value.orderState,
-    )
-  ) {
-    getMemberOrderLogisticsByIdData()
-  }
 }
 
 // 是否加载中
@@ -173,181 +168,124 @@ const orderCancel = async () => {
     popup.value?.close()
   }
 }
+// 复制功能
+const copy = (orderNo: string) => {
+  uni.setClipboardData({
+    data: orderNo,
+    success: function () {
+      uni.showToast({
+        icon: 'success',
+        title: '已复制到剪贴板'
+      })
+    }
+  });
+
+}
+
+// 根据订单状态生成底部buttons
+const createButtons = () => {
+  switch (order.value.status) {
+    case '1':
+      // 待支付
+      return [
+        { id: 'cancel', name: '取消订单' },
+        { id: 'pay', name: '去支付' }
+      ]
+    case '2':
+      // 代发货
+      return [
+        { id: 'cancel', name: '取消订单' },
+        { id: 'edit', name: '编辑' },
+        { id: 'again', name: '再来一单' }
+      ]
+    case '3':
+      // 待收货
+      return [
+        { id: 'again', name: '再来一单' },
+        { id: 'cancel', name: '确认收货' }
+      ]
+    case '4':
+      // 待售后
+      return [
+        { id: 'again', name: '再来一单' },
+        { id: 'after-sales', name: '申请售后' }
+      ]
+
+    default:
+      break;
+  }
+}
+
 </script>
 
 <template>
   <!-- 自定义导航栏: 默认透明不可见, scroll-view 滚动到 50 时展示 -->
-  <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
+  <!-- <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
     <view class="wrap">
-      <navigator
-        v-if="pages.length > 1"
-        open-type="navigateBack"
-        class="back icon-left"
-      ></navigator>
+      <navigator v-if="pages.length > 1" open-type="navigateBack" class="back icon-left"></navigator>
       <navigator v-else url="/pages/index/index" open-type="switchTab" class="back icon-home">
       </navigator>
       <view class="title">订单详情</view>
     </view>
-  </view>
+  </view> -->
   <scroll-view scroll-y class="viewport" id="scroller" @scrolltolower="onScrolltolower">
-    <template v-if="order">
-      <!-- 订单状态 -->
-      <view class="overview" :style="{ paddingTop: safeAreaInsets!.top + 20 + 'px' }">
-        <!-- 待付款状态:展示去支付按钮和倒计时 -->
-        <template v-if="order?.orderState === OrderState.DaiFuKuan">
-          <view class="status icon-clock">等待付款</view>
-          <view class="tips">
-            <text class="money">应付金额: ¥ {{ order.payMoney }}</text>
-            <text class="time">支付剩余</text>
-            <uni-countdown
-              :second="order.countdown"
-              @timeup="onTimeUp"
-              color="#fff"
-              :show-day="false"
-              :show-colon="false"
-              splitor-color="#fff"
-            />
-          </view>
-          <view @tap="onOrderPay" class="button">去支付</view>
-        </template>
-        <!-- 其他订单状态:展示再次购买按钮 -->
-        <template v-else>
-          <!-- 订单状态文字 -->
-          <view class="status"> {{ orderStateList[order?.orderState].text }} </view>
-          <view class="button-group">
-            <navigator
-              class="button"
-              :url="`/PagesOrder/create/create?orderId=${query.id}`"
-              hover-class="none"
-            >
-              再次购买
-            </navigator>
-            <!-- 待发货状态：模拟发货,开发期间使用,用于修改订单状态为已发货 -->
-            <view
-              @tap="onOrderSend"
-              v-if="isDev && order.orderState == OrderState.DaiFaHuo"
-              class="button"
-            >
-              模拟发货
-            </view>
-            <view
-              @tap="onOrderConfirm"
-              v-if="order.orderState === OrderState.DaiShouHuo"
-              class="button"
-            >
-              确认收货
-            </view>
-          </view>
-        </template>
+    <template v-if="order.orderNo">
+      <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
+        <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
+        <text class="text">订单详情</text>
       </view>
-      <!-- 配送状态 -->
-      <view class="shipment">
-        <!-- 订单物流信息 -->
-        <view v-for="item in logisticList" :key="item.id" class="item">
-          <view class="message">
-            {{ item.text }}
-          </view>
-          <view class="date"> {{ item.time }} </view>
-        </view>
-        <!-- 用户收货地址 -->
-        <view class="locate">
-          <view class="user"> {{ order.receiverContact }} {{ order.receiverMobile }} </view>
-          <view class="address"> {{ order.receiverAddress }} </view>
-        </view>
-      </view>
-
-      <!-- 商品信息 -->
-      <view class="goods">
-        <view class="item">
-          <navigator
-            class="navigator"
-            v-for="item in order.skus"
-            :key="item.id"
-            :url="`/pages/goods/goods?id=${item.spuId}`"
-            hover-class="none"
-          >
-            <image class="cover" :src="item.image"></image>
-            <view class="meta">
-              <view class="name ellipsis">{{ item.name }}</view>
-              <view class="type">{{ item.attrsText }}</view>
-              <view class="price">
-                <view class="actual">
-                  <text class="symbol">¥</text>
-                  <text>{{ item.curPrice }}</text>
-                </view>
+      <view class="container">
+        <view class="list-container">
+          <view class="item" v-for="item in order.orderDetail" :key="item.orderId">
+            <image src="https://img.js.design/assets/img/6691ec1357bbf24e7d84d155.png#d1470ccbdcf1e16c04752d2922557bae"
+              mode="scaleToFill" />
+            <view class="info">
+              <view class="infotitle">{{ item.goodsName }}</view>
+              <view class="right">
+                <view class="price">￥{{ item.unitPrice }}/{{ item.units }}</view>
+                <view class="num"> X{{ item.num }}</view>
               </view>
-              <view class="quantity">x{{ item.quantity }}</view>
             </view>
-          </navigator>
-          <!-- 待评价状态:展示按钮 -->
-          <view class="action" v-if="order.orderState === OrderState.DaiPingJia">
-            <view class="button primary">申请售后</view>
-            <navigator url="" class="button"> 去评价 </navigator>
+          </view>
+          <view class="remark">
+            <view class="rtitle">备注</view>
+            <uni-easyinput placeholder="建议备注前先与商家沟通确认" class="question" type="textarea"></uni-easyinput>
           </view>
         </view>
-        <!-- 合计 -->
-        <view class="total">
-          <view class="row">
-            <view class="text">商品总价: </view>
-            <view class="symbol">{{ order.totalMoney }}</view>
+        <view class="detail-container">
+          <view class="detail-item">
+            <text class="label">商品总价</text>
+            <text class="value">{{ order.orderPrice }}</text>
           </view>
-          <view class="row">
-            <view class="text">运费: </view>
-            <view class="symbol">{{ order.postFee }}</view>
+          <view class="detail-item">
+            <text class="label">运费</text>
+            <text class="value">0.00</text>
           </view>
-          <view class="row">
-            <view class="text">应付金额: </view>
-            <view class="symbol primary">{{ order.payMoney }}</view>
+          <view class="detail-item">
+            <text class="label">优惠券 <text class="coupon-info">{{ order.couponInfo.couponName }}</text> </text>
+            <text class="value">{{ 0.00 }}</text>
+          </view>
+          <view class="detail-item">
+            <text class="label">实付款</text>
+            <text class="value red">￥{{ order.orderPayPrice }}</text>
           </view>
         </view>
-      </view>
-
-      <!-- 订单信息 -->
-      <view class="detail">
-        <view class="title">订单信息</view>
-        <view class="row">
-          <view class="item">
-            订单编号: {{ query.id }} <text class="copy" @tap="onCopy(query.id)">复制</text>
+        <view class="detail-container">
+          <view class="detail-item">
+            <text class="label">订单编号</text>
+            <text class="value">{{ order.orderNo }} <text class="m">|</text> <text class="copy"
+                @tap="$event => copy(order.orderNo)"> 复制</text>
+            </text>
           </view>
-          <view class="item">下单时间: {{ order.createTime }}</view>
+          <view class="detail-item">
+            <text class="label">下单时间</text>
+            <text class="value">{{ order.createTime }}</text>
+          </view>
+          <view class="detail-item">
+            <text class="label">收货地址</text>
+            <text class="value">{{ order.deliveryInfo.shippingAddr }}</text>
+          </view>
         </view>
-      </view>
-
-      <!-- 猜你喜欢 -->
-      <SolaShopGuess ref="guessRef" />
-
-      <!-- 底部操作栏 -->
-      <view class="toolbar-height" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }"></view>
-      <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
-        <!-- 待付款状态:展示支付按钮 -->
-        <template v-if="order.orderState === OrderState.DaiFuKuan">
-          <view class="button primary" @tap="onOrderPay"> 去支付 </view>
-          <view class="button" @tap="popup?.open?.()"> 取消订单 </view>
-        </template>
-        <!-- 其他订单状态:按需展示按钮 -->
-        <template v-else>
-          <navigator
-            class="button secondary"
-            :url="`/PagesOrder/create/create?orderId=${query.id}`"
-            hover-class="none"
-          >
-            再次购买
-          </navigator>
-          <!-- 待收货状态: 展示确认收货 -->
-          <view class="button primary" v-if="order.orderState === OrderState.DaiShouHuo">
-            确认收货
-          </view>
-          <!-- 待评价状态: 展示去评价 -->
-          <view class="button" v-if="order.orderState === OrderState.DaiPingJia"> 去评价 </view>
-          <!-- 待评价/已完成/已取消 状态: 展示删除订单 -->
-          <view
-            @tap="onOrderDelete"
-            class="button delete"
-            v-if="order.orderState >= OrderState.DaiPingJia"
-          >
-            删除订单
-          </view>
-        </template>
       </view>
     </template>
     <template v-else>
@@ -355,23 +293,7 @@ const orderCancel = async () => {
       <PageSkeleton />
     </template>
   </scroll-view>
-  <!-- 取消订单弹窗 -->
-  <uni-popup ref="popup" type="bottom" background-color="#fff">
-    <view class="popup-root">
-      <view class="title">订单取消</view>
-      <view class="description">
-        <view class="tips">请选择取消订单的原因：</view>
-        <view class="cell" v-for="item in reasonList" :key="item" @tap="reason = item">
-          <text class="text">{{ item }}</text>
-          <text class="icon" :class="{ checked: item === reason }"></text>
-        </view>
-      </view>
-      <view class="footer">
-        <view class="button" @tap="popup?.close?.()">取消</view>
-        <view class="button primary" @tap="orderCancel">确认</view>
-      </view>
-    </view>
-  </uni-popup>
+
 </template>
 
 <style lang="scss">
@@ -421,7 +343,141 @@ page {
 }
 
 .viewport {
-  background-color: #f7f7f8;
+  background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
+
+
+  .title {
+    position: relative;
+    text-align: center;
+    color: #fff;
+    width: 100%;
+    height: 130rpx;
+
+    .text {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 20rpx;
+    }
+
+    .icon-xiangzuojiantou {
+      position: absolute;
+      left: 20rpx;
+      bottom: 20rpx;
+    }
+  }
+
+  .container {
+    height: 100%;
+    background: #fff;
+    border-radius: 30rpx 30rpx 0 0;
+    overflow: scroll;
+    padding: 30rpx;
+
+    .list-container {
+      padding: 20rpx 20rpx;
+      // border-radius: 10rpx;
+      background-color: #fff;
+      border-bottom: 1px solid rgba(236, 236, 236, 1);
+
+      .item {
+        display: flex;
+        margin-top: 10rpx;
+
+        image {
+          height: 160rpx;
+          width: 160rpx;
+        }
+
+        .info {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          width: 90%;
+          padding-left: 20rpx;
+
+          .infotitle {
+            flex: 1;
+          }
+
+          .price {
+            margin-top: 10rpx;
+            color: #ff5040;
+          }
+        }
+
+        .right {
+          display: flex;
+          // flex: 1;
+          justify-content: space-between;
+          align-items: flex-end;
+          color: #ff5040;
+
+          .shoucang {
+            height: 50%;
+          }
+
+          .jiagou {
+            flex: 1;
+          }
+
+          .num {
+            font-weight: bold;
+          }
+        }
+      }
+
+      .remark {
+        margin-top: 30rpx;
+        display: flex;
+
+        .rtitle {
+          font-size: 30rpx;
+          margin-right: 40rpx;
+          color: rgba(50, 50, 51, 1);
+        }
+      }
+    }
+
+    .detail-container {
+      padding: 20rpx 20rpx;
+      // border-radius: 10rpx;
+      background-color: #fff;
+      border-bottom: 1px solid rgba(236, 236, 236, 1);
+
+      .detail-item {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10rpx;
+        font-size: 26rpx;
+
+        .label {
+          color: rgba(175, 176, 178, 1);
+
+          .coupon-info {
+            color: rgba(255, 148, 26, 1);
+          }
+        }
+
+        .value {
+          .copy {
+            color: rgba(255, 148, 26, 1);
+          }
+
+          .m {
+            color: rgba(175, 176, 178, 1);
+          }
+        }
+
+        .red {
+          font-size: 30rpx;
+          font-weight: bold;
+          color: rgba(255, 80, 64, 1);
+        }
+
+      }
+    }
+  }
 }
 
 .overview {

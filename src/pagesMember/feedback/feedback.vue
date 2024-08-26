@@ -24,40 +24,40 @@ const getSuggestListData = async () => {
   const res = await getMySuggestAPI({ ...pageParams })
   // 分页数据增加
   // suggestList.value.push(...res.result.list)
-  const mockList = [
-    {
-      id: '1',
-      user_id: '1',
-      title: '标题',
-      content: '建议内容',
-      images: '1,2,3,4,5,6,7,8',
-      status: '1',
-      create_time: '2024-08-04 23:52:54',
-      update_time: 'null',
-    },
-    {
-      id: '2',
-      user_id: '1',
-      title: '标题2',
-      content: '建议内容',
-      images: '1,2,3,4,5,6,7,8',
-      status: '1',
-      create_time: '2024-08-04 23:52:54',
-      update_time: 'null',
-    },
-    {
-      id: '3',
-      user_id: '1',
-      title: '标题3',
-      content: '建议内容',
-      images: '1,2,3,4,5,6,7,8',
-      status: '1',
-      create_time: '2024-08-04 23:52:54',
-      update_time: 'null',
-    },
-  ]
-  // suggestList.value.push(...res.result.list)
-  suggestList.value.push(...mockList)
+  // const mockList = [
+  //   {
+  //     id: '1',
+  //     user_id: '1',
+  //     title: '标题',
+  //     content: '建议内容',
+  //     images: '1,2,3,4,5,6,7,8',
+  //     status: '1',
+  //     create_time: '2024-08-04 23:52:54',
+  //     update_time: 'null',
+  //   },
+  //   {
+  //     id: '2',
+  //     user_id: '1',
+  //     title: '标题2',
+  //     content: '建议内容',
+  //     images: '1,2,3,4,5,6,7,8',
+  //     status: '1',
+  //     create_time: '2024-08-04 23:52:54',
+  //     update_time: 'null',
+  //   },
+  //   {
+  //     id: '3',
+  //     user_id: '1',
+  //     title: '标题3',
+  //     content: '建议内容',
+  //     images: '1,2,3,4,5,6,7,8',
+  //     status: '1',
+  //     create_time: '2024-08-04 23:52:54',
+  //     update_time: 'null',
+  //   },
+  // ]
+  suggestList.value.push(...res.result.list)
+  // suggestList.value.push(...mockList)
   if (pageParams.page < res.result.total) {
     // 页码累加
     pageParams.page++
@@ -89,12 +89,8 @@ const addFeedback = () => {
         </view>
         <view class="content">{{ item.content }}</view>
         <view class="images-container" v-if="item.images">
-          <image
-            class="images"
-            :key="img"
-            v-for="img in item.images.split(',')"
-            :src="'//img.js.design/assets/img/6690dc2515275e6eaeb2e9ab.png#65ae707b4e6dae0ff083f534f478cc2a'"
-          />
+          <image class="images" :key="img" v-for="img in item.images.split(',')"
+            :src="'//img.js.design/assets/img/6690dc2515275e6eaeb2e9ab.png#65ae707b4e6dae0ff083f534f478cc2a'" />
         </view>
       </view>
     </view>
@@ -158,8 +154,7 @@ page {
       border-bottom: 1px solid #f2f4f7;
 
       .f-title {
-        .f-text {
-        }
+        .f-text {}
 
         .f-time {
           margin-left: 15rpx;
