@@ -322,7 +322,7 @@ page {
 
   .nickname {
     margin-bottom: 16rpx;
-    font-size: 50rpx;
+    font-size: 36rpx;
 
     overflow: hidden;
     text-overflow: ellipsis;

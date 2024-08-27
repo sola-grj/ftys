@@ -81,7 +81,13 @@ const createButtons = () => {
     case '4':
       // 待售后
       return [
-        { id: 'again', name: '再来一单' },
+        // { id: 'again', name: '再来一单' },
+        // { id: 'after-sales', name: '申请售后' },
+      ]
+    case '6':
+      // 已完成
+      return [
+        { id: 'finish', name: '再来一单' },
         { id: 'after-sales', name: '申请售后' },
       ]
 
@@ -116,6 +122,9 @@ onMounted(() => {
 })
 
 const onTapBottom = (order: OrderItem, id: string) => {
+  if (id === 'finish') {
+    goToOrderDetail(order)
+  }
   if (id === 'cancel') {
     cancelOrder(order.orderId)
   }

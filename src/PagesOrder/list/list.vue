@@ -74,7 +74,6 @@ page {
   // justify-content: space-around;
   width: 100%;
   line-height: 60rpx;
-  margin: 0 10rpx;
   background-color: #fff;
   box-shadow: 0 4rpx 6rpx rgba(240, 240, 240, 0.6);
   position: relative;

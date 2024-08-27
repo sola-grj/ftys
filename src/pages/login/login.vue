@@ -93,8 +93,12 @@ const goToLogin = async () => {
   uni.showToast({ icon: 'success', title: '登录成功' })
   setTimeout(() => {
     // 页面跳转
-    // uni.switchTab({ url: '/pages/index/index' })
-    uni.reLaunch({ url: '/pages/index/index' })
+    // @ts-ignore
+    if (res.result.userinfo.type_id.toString() === '2') {
+      uni.reLaunch({ url: '/pages/my/my' })
+    } else {
+      uni.reLaunch({ url: '/pages/index/index' })
+    }
   }, 500)
 }
 const goToRegister = () => {

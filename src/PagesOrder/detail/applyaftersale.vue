@@ -139,6 +139,9 @@ const addShoppingCart = async (data: DetailItem, num: number, type: string) => {
     })
   }
 }
+const goback = () => {
+  uni.navigateBack()
+}
 </script>
 
 <template>
@@ -274,7 +277,6 @@ page {
       padding: 20rpx 20rpx;
       // border-radius: 10rpx;
       background-color: #fff;
-      border-bottom: 1px solid rgba(236, 236, 236, 1);
 
       .item {
         display: flex;
