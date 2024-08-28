@@ -392,3 +392,34 @@ export const createAfterSalesAPI = (data: AfterSaleReqData) => {
     data,
   })
 }
+
+export type UnShipCustomerItem = {
+  orderCount: string
+  userId: string
+  username: string
+  mobile: string
+  shippingArea: string
+  shippingAddr: string
+}
+
+export type UnShipCustomerResult = {
+  total: number
+  page: number
+  list: UnShipCustomerItem[]
+}
+
+/**
+ * 待发货客户列表
+ * @param data 请求参数
+ */
+export const getUnShipCustomerAPI = (data: {
+  page: number
+  pageSize: number
+  account?: string
+}) => {
+  return http<UnShipCustomerResult>({
+    method: 'POST',
+    url: '/driver/getUnShipCustomer',
+    data,
+  })
+}

@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import { useGuessList } from '@/composables'
+import { getUnShipCustomerAPI, type UnShipCustomerItem } from '@/services/order'
 import { useMemberStore } from '@/stores'
 import type { SolaShopGuessInstance } from '@/types/component'
+import type { PageParams } from '@/types/global'
 import { onShow } from '@dcloudio/uni-app'
 import { ref } from 'vue'
+import unshipcustomer from './components/unshipcustomer.vue'
 
 // 获取会员信息
 const memberStore = useMemberStore()
 
+const activeIndex = ref('1')
+const onChangeIndex = (val: string) => {
+  activeIndex.value = val
+}
 // 查看当前账号是主账号还是子账号 1:主账号 2:子账号
 let user_role = memberStore.profile?.userinfo.user_role
 // 用户type_id
@@ -20,6 +27,7 @@ const type_id = memberStore.profile?.userinfo.type_id
 
 // 子账号是否展示欠款信息 1 0
 let credit_price = memberStore.profile?.userinfo.credit_price
+console.log('memberStore====', memberStore)
 
 // user_role = '2'
 // credit_price = '0'
@@ -28,9 +36,13 @@ let credit_price = memberStore.profile?.userinfo.credit_price
 // 我的页面判断用户权限
 onShow(() => {
   // 司机角色，不显示底部tabbar  	1:业务员 2:司机 3:生鲜 4:干货 5:生鲜&干货
-  if (memberStore.profile?.userinfo.type_id === '2') {
+  if (type_id === 2) {
     uni.hideTabBar({
-      animation: false,
+      animation: true,
+    })
+  } else {
+    uni.showTabBar({
+      animation: true,
     })
   }
   // 子账号 查看 欠款权限
@@ -137,10 +149,12 @@ const onJump = (data: any) => {
       break
   }
 }
+// 司机相关
+const keyword = ref('')
 </script>
 
 <template>
-  <scroll-view @scrolltolower="onScrollToLower" class="viewport" scroll-y enable-back-to-top>
+  <view class="viewport" scroll-y enable-back-to-top>
     <!-- 个人资料 -->
     <view class="profile" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
       <!-- 情况1：已登录 -->
@@ -186,89 +200,124 @@ const onJump = (data: any) => {
         <text class="ftysIcon icon-xiaoxi1"></text>
       </navigator>
     </view>
-    <!-- 我的订单 -->
-    <view class="orders">
-      <view class="title">
-        我的订单
-        <navigator class="navigator" url="/PagesOrder/list/list?type=0" hover-class="none">
-          查看全部订单<text class="icon-right"></text>
-        </navigator>
-      </view>
-      <view class="section">
-        <!-- 订单 -->
-        <navigator
-          v-for="item in orderTypes"
-          :key="item.type"
-          :class="`ftysIcon ${item.icon}`"
-          :url="`/PagesOrder/list/list?type=${item.type}`"
-          class="navigator"
-          hover-class="none"
-        >
-          <text class="text">{{ item.text }}</text>
-        </navigator>
-      </view>
-    </view>
-    <!-- 优惠券、欠款、账户余额 -->
-    <view
-      v-if="
-        type_id?.toString() === '3' || type_id?.toString() === '4' || type_id?.toString() === '5'
-      "
-      class="coupons"
-    >
-      <view class="coupons-item">
-        <!-- 订单 -->
-        <navigator
-          @tap="($event) => onJump(item)"
-          v-for="item in CouponTypes"
-          :key="item.name"
-          class="navigator"
-          hover-class="none"
-        >
-          <view class="data"
-            >{{ item.data }}{{ item.name === '欠款' || item.name === '账户余额' ? '元' : '' }}</view
+    <view class="container" v-if="type_id !== 2">
+      <!-- 我的订单 -->
+      <view class="orders">
+        <view class="title">
+          我的订单
+          <navigator class="navigator" url="/PagesOrder/list/list?type=0" hover-class="none">
+            查看全部订单<text class="icon-right"></text>
+          </navigator>
+        </view>
+        <view class="section">
+          <!-- 订单 -->
+          <navigator
+            v-for="item in orderTypes"
+            :key="item.type"
+            :class="`ftysIcon ${item.icon}`"
+            :url="`/PagesOrder/list/list?type=${item.type}`"
+            class="navigator"
+            hover-class="none"
           >
-          <view class="name">{{ item.name }}</view>
-          <view class="desc">{{ item.desc }}</view>
-        </navigator>
+            <text class="text">{{ item.text }}</text>
+          </navigator>
+        </view>
       </view>
-    </view>
-    <!-- 常用工具 -->
-    <view class="tools">
-      <view class="title"> 常用工具 </view>
+      <!-- 优惠券、欠款、账户余额 -->
       <view
-        class="tool-item"
-        @tap="($event) => onJump(item)"
-        v-for="item in ToolTypes"
-        :key="item.type"
+        v-if="
+          type_id?.toString() === '3' || type_id?.toString() === '4' || type_id?.toString() === '5'
+        "
+        class="coupons"
       >
-        <navigator :class="`ftysIcon ${item.icon}`" class="navigator" hover-class="none">
-          <text class="text">{{ item.name }}</text>
-        </navigator>
+        <view class="coupons-item">
+          <!-- 订单 -->
+          <navigator
+            @tap="($event) => onJump(item)"
+            v-for="item in CouponTypes"
+            :key="item.name"
+            class="navigator"
+            hover-class="none"
+          >
+            <view class="data"
+              >{{ item.data
+              }}{{ item.name === '欠款' || item.name === '账户余额' ? '元' : '' }}</view
+            >
+            <view class="name">{{ item.name }}</view>
+            <view class="desc">{{ item.desc }}</view>
+          </navigator>
+        </view>
       </view>
-    </view>
-    <!-- 帮助中心 -->
-    <view class="help-center">
-      <view class="title"> 帮助中心 </view>
-      <view class="help-center-item" v-for="item in HelpCenterTypes" :key="item.type">
-        <navigator
-          :class="`ftysIcon ${item.icon}`"
-          :url="`/PagesOrder/list/list?type=${item.type}`"
-          class="navigator"
-          hover-class="none"
+      <!-- 常用工具 -->
+      <view class="tools">
+        <view class="title"> 常用工具 </view>
+        <view
+          class="tool-item"
+          @tap="($event) => onJump(item)"
+          v-for="item in ToolTypes"
+          :key="item.type"
         >
-          <text class="text">{{ item.text }}</text>
-        </navigator>
+          <navigator :class="`ftysIcon ${item.icon}`" class="navigator" hover-class="none">
+            <text class="text">{{ item.name }}</text>
+          </navigator>
+        </view>
+      </view>
+      <!-- 帮助中心 -->
+      <view class="help-center">
+        <view class="title"> 帮助中心 </view>
+        <view class="help-center-item" v-for="item in HelpCenterTypes" :key="item.type">
+          <navigator
+            :class="`ftysIcon ${item.icon}`"
+            :url="`/PagesOrder/list/list?type=${item.type}`"
+            class="navigator"
+            hover-class="none"
+          >
+            <text class="text">{{ item.text }}</text>
+          </navigator>
+        </view>
+      </view>
+      <!-- 业务员图表 -->
+      <view v-if="type_id === '1'" class="charts-box">
+        <view class="title">
+          <text class="left">30天业绩变化（发货）</text>
+          <text class="right">更多</text>
+        </view>
+        <qiun-data-charts type="line" :opts="opts" :chartData="lineData" />
       </view>
     </view>
-    <!-- 业务员图表 -->
-    <view v-if="type_id === '1'" class="charts-box">
-      <view class="title">
-        <text class="left">30天业绩变化（发货）</text>
-        <text class="right">更多</text>
+    <view v-else class="driver-container">
+      <view class="login-container">
+        <view class="login-type">
+          <view
+            @tap="($event) => onChangeIndex('1')"
+            class="pwd-btn"
+            :class="activeIndex === '1' ? 'checked' : ''"
+          >
+            待发货客户
+          </view>
+          <view
+            @tap="($event) => onChangeIndex('2')"
+            class="code-btn"
+            :class="activeIndex === '2' ? 'checked' : ''"
+          >
+            已完成订单
+          </view>
+        </view>
       </view>
-      <qiun-data-charts type="line" :opts="opts" :chartData="lineData" />
+      <view class="search">
+        <uni-easyinput
+          placeholder="请输入客户名称/手机号"
+          class="search"
+          prefixIcon="search"
+          v-model="keyword"
+        >
+        </uni-easyinput>
+      </view>
+      <view class="comp-container">
+        <unshipcustomer :keyword="keyword" />
+      </view>
     </view>
-  </scroll-view>
+  </view>
 </template>
 
 <style lang="scss">
@@ -280,6 +329,57 @@ page {
 
 .viewport {
   height: 100%;
+}
+
+.driver-container {
+  height: 100%;
+  background: #fff;
+  border-radius: 30rpx 30rpx 0 0;
+
+  .login-container {
+    height: 140rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .login-type {
+      display: flex;
+      height: 80rpx;
+      width: 500rpx;
+      background: #f2f4f7;
+      border-radius: 50rpx;
+
+      .pwd-btn,
+      .code-btn {
+        width: 50%;
+        line-height: 80rpx;
+        text-align: center;
+        border-radius: 50rpx;
+      }
+
+      .checked {
+        color: #fff;
+        background-color: #ff5040;
+      }
+    }
+  }
+
+  .comp-container {
+    height: 100%;
+  }
+
+  .search {
+    .uni-easyinput {
+      width: 90%;
+      margin: auto;
+
+      .uni-easyinput__content {
+        border-color: rgba(255, 80, 64, 1) !important;
+        border-radius: 40rpx !important;
+        height: 70rpx;
+      }
+    }
+  }
 }
 
 /* 用户信息 */

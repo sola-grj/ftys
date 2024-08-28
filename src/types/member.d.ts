@@ -13,7 +13,7 @@ type BaseProfile = {
 /** 小程序登录 登录用户信息 */
 export type LoginResult = {
   userinfo: {
-    type_id: string // 1:业务员 2:司机 3:生鲜 4:干货 5:生鲜&干货
+    type_id: number // 1:业务员 2:司机 3:生鲜 4:干货 5:生鲜&干货
     user_role: string // 1:主账号 2:子账号
     sub_account_name: string // 子账号名称
     sub_account_level: string
