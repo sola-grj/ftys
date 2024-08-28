@@ -401,11 +401,24 @@ export type UnShipCustomerItem = {
   shippingArea: string
   shippingAddr: string
 }
+export type ShipedOrderItem = {
+  orderId: string
+  orderNo: string
+  userId: string
+  createTime: string
+  username: string
+  mobile: string
+}
 
 export type UnShipCustomerResult = {
   total: number
   page: number
   list: UnShipCustomerItem[]
+}
+export type ShipedOrderResult = {
+  total: number
+  page: number
+  list: ShipedOrderItem[]
 }
 
 /**
@@ -420,6 +433,46 @@ export const getUnShipCustomerAPI = (data: {
   return http<UnShipCustomerResult>({
     method: 'POST',
     url: '/driver/getUnShipCustomer',
+    data,
+  })
+}
+
+/**
+ * 司机已完成订单
+ * @param data 请求参数
+ */
+export const getShippedOrderListAPI = (data: {
+  page: number
+  pageSize: number
+  account?: string
+}) => {
+  return http<ShipedOrderResult>({
+    method: 'POST',
+    url: '/driver/getShippedOrderList',
+    data,
+  })
+}
+
+export type UnShipOrderListItem = {
+  orderId: string
+  orderNo: string
+  createTime: string
+  username: string
+  mobile: string
+}
+
+/**
+ *  待发货客户订单列表
+ * @param data 请求参数
+ */
+export const getUnShipOrderListAPI = (data: {
+  userId: string
+  username?: string
+  mobile?: string
+}) => {
+  return http<UnShipOrderListItem[]>({
+    method: 'POST',
+    url: '/driver/getUnShipOrderList',
     data,
   })
 }

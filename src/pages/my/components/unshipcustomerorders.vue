@@ -2,10 +2,11 @@
 import { getMyCouponListAPI, getCouponListAPI, receiveCouponAPI } from '@/services/coupon'
 import { getMySuggestAPI } from '@/services/my'
 import {
-  getShippedOrderListAPI,
+  getUnShipOrderListAPI,
   getUnShipCustomerAPI,
   type ShipedOrderItem,
   type UnShipCustomerItem,
+  type UnShipOrderListItem,
 } from '@/services/order'
 import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
@@ -17,53 +18,17 @@ const props = defineProps<{
   keyword: string
 }>()
 
-watch(
-  () => props.keyword,
-  (newValue, oldValue) => {
-    console.log('workOrder变化了', newValue, oldValue)
-    ShipedOrderPageParams.page = 1
-    isShipedOrderFinish.value = false
-    shipedOrderList.value = []
-    getShipedOrderListData()
-  },
-  { immediate: true, deep: true },
-)
-// 推荐分页参数
-const pageParams: Required<PageParams> = {
-  page: 1,
-  pageSize: 10,
-}
-const isShipedOrderFinish = ref(false)
-const ShipedOrderPageParams: Required<PageParams> = {
-  page: 1,
-  pageSize: 10,
-}
-const shipedOrderList = ref<ShipedOrderItem[]>([])
-const getShipedOrderListData = async () => {
-  // 退出判断
-  if (isShipedOrderFinish.value === true) {
-    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
-  }
-  const res = await getShippedOrderListAPI({ account: props.keyword, ...ShipedOrderPageParams })
+const unShipOrderList = ref<UnShipOrderListItem[]>([])
 
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  // suggestList.value.push(...mockList)
-  if (ShipedOrderPageParams.page < res.result.total) {
-    // 页码累加
-    ShipedOrderPageParams.page++
-  } else {
-    isShipedOrderFinish.value = true
-  }
-}
+const unshiporder = ref<UnShipCustomerItem>({} as UnShipCustomerItem)
 onMounted(() => {
-  getShipedOrderListData()
+  uni.$on('unshiporder', async (data) => {
+    unshiporder.value = data.unshiporder
+    const res = await getUnShipOrderListAPI({
+      userId: unshiporder.value.userId,
+    })
+    unShipOrderList.value = res.result
+  })
 })
 const addFeedback = () => {
   uni.navigateTo({ url: '/pagesMember/addfeedback/addfeedback' })
@@ -71,9 +36,9 @@ const addFeedback = () => {
 </script>
 
 <template>
-  <scroll-view @scrolltolower="getShipedOrderListData" class="viewport" scroll-y enable-back-to-top>
+  <scroll-view class="viewport" scroll-y enable-back-to-top>
     <view class="container">
-      <view v-for="item in shipedOrderList" :key="item.userId" class="item">
+      <view v-for="item in unShipOrderList" :key="item.orderId" class="item">
         <view class="top">
           <view class="customer-name">
             <view class="text">{{ item.orderNo }}</view>

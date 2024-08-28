@@ -6,10 +6,11 @@ import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
 import type { MySuggestItem } from '@/types/my'
 import { onLoad } from '@dcloudio/uni-app'
-import { computed, onMounted, ref, watchEffect } from 'vue'
+import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 
 const props = defineProps<{
   keyword: string
+  changeUnShipDetailStatus: (data: UnShipCustomerItem) => void
 }>()
 const debounce = (func: () => {}, wait = 500) => {
   // 定义定时器变量
@@ -21,15 +22,25 @@ const debounce = (func: () => {}, wait = 500) => {
     typeof func === 'function' && func()
   }, wait)
 }
-watchEffect(() => {
-  if (props.keyword) {
-    console.log(123)
+// watchEffect(() => {
+//   const k = props.keyword
+//   unShipCustomerPageParams.page = 1
+//   isUnShipCustomerFinish.value = false
+//   unShipCustomerList.value = []
+//   getUnShipListData()
+// })
+
+watch(
+  () => props.keyword,
+  (newValue, oldValue) => {
+    console.log('workOrder变化了', newValue, oldValue)
     unShipCustomerPageParams.page = 1
     isUnShipCustomerFinish.value = false
     unShipCustomerList.value = []
-    getSuggestListData()
-  }
-})
+    getUnShipListData()
+  },
+  { immediate: true, deep: true },
+)
 // 推荐分页参数
 const pageParams: Required<PageParams> = {
   page: 1,
@@ -41,7 +52,7 @@ const unShipCustomerPageParams: Required<PageParams> = {
   pageSize: 10,
 }
 const unShipCustomerList = ref<UnShipCustomerItem[]>([])
-const getSuggestListData = async () => {
+const getUnShipListData = async () => {
   // 退出判断
   if (isUnShipCustomerFinish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
@@ -65,17 +76,19 @@ const getSuggestListData = async () => {
   }
 }
 onMounted(() => {
-  getSuggestListData()
+  getUnShipListData()
 })
-const addFeedback = () => {
-  uni.navigateTo({ url: '/pagesMember/addfeedback/addfeedback' })
-}
 </script>
 
 <template>
-  <scroll-view @scrolltolower="getSuggestListData" class="viewport" scroll-y enable-back-to-top>
+  <scroll-view @scrolltolower="getUnShipListData" class="viewport" scroll-y enable-back-to-top>
     <view class="container">
-      <view v-for="item in unShipCustomerList" :key="item.userId" class="item">
+      <view
+        v-for="item in unShipCustomerList"
+        :key="item.userId"
+        class="item"
+        @tap="($event) => changeUnShipDetailStatus(item)"
+      >
         <view class="top">
           <view class="customer-name">
             <view class="text">{{ item.username }}</view>

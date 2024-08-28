@@ -7,9 +7,23 @@ import type { PageParams } from '@/types/global'
 import { onShow } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import unshipcustomer from './components/unshipcustomer.vue'
+import unshipcustomerorders from './components/unshipcustomerorders.vue'
+import completeorder from './components/completeorder.vue'
 
 // 获取会员信息
 const memberStore = useMemberStore()
+
+const isUnShipDetail = ref(false)
+const changeUnShipDetailStatus = (data: UnShipCustomerItem) => {
+  isUnShipDetail.value = !isUnShipDetail.value
+  uni.$emit('unshiporder', {
+    unshiporder: data,
+  })
+}
+const changeCompleteDetailStatus = () => {
+  isCompleteDetail.value = !isCompleteDetail.value
+}
+const isCompleteDetail = ref(false)
 
 const activeIndex = ref('1')
 const onChangeIndex = (val: string) => {
@@ -151,6 +165,7 @@ const onJump = (data: any) => {
 }
 // 司机相关
 const keyword = ref('')
+console.log('===========', activeIndex.value)
 </script>
 
 <template>
@@ -313,8 +328,20 @@ const keyword = ref('')
         >
         </uni-easyinput>
       </view>
-      <view class="comp-container">
-        <unshipcustomer :keyword="keyword" />
+      <view v-if="activeIndex === '1' && isUnShipDetail === false" class="comp-container">
+        <unshipcustomer :keyword="keyword" :changeUnShipDetailStatus="changeUnShipDetailStatus" />
+      </view>
+      <view v-else-if="activeIndex === '1' && isUnShipDetail === true" class="comp-container">
+        <unshipcustomerorders :keyword="keyword" />
+      </view>
+      <view v-else-if="activeIndex === '2' && isCompleteDetail === false" class="comp-container">
+        <completeorder
+          :keyword="keyword"
+          :changeCompleteDetailStatus="changeCompleteDetailStatus"
+        />
+      </view>
+      <view v-else class="comp-container">
+        <completeorder :keyword="keyword" />
       </view>
     </view>
   </view>
