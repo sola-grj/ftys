@@ -3,7 +3,6 @@ import { getMyCouponListAPI, getCouponListAPI, receiveCouponAPI } from '@/servic
 import { getMySuggestAPI } from '@/services/my'
 import {
   getUnShipOrderListAPI,
-  getUnShipCustomerAPI,
   type ShipedOrderItem,
   type UnShipCustomerItem,
   type UnShipOrderListItem,
@@ -12,26 +11,28 @@ import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
 import type { MySuggestItem } from '@/types/my'
 import { onLoad } from '@dcloudio/uni-app'
-import { computed, onMounted, ref, watch, watchEffect } from 'vue'
+import { computed, onMounted, ref, watch, watchEffect, onBeforeMount } from 'vue'
 
 const props = defineProps<{
   keyword: string
+  currentUnshipCustomer: UnShipCustomerItem
 }>()
 
 const unShipOrderList = ref<UnShipOrderListItem[]>([])
 
-const unshiporder = ref<UnShipCustomerItem>({} as UnShipCustomerItem)
-onMounted(() => {
-  uni.$on('unshiporder', async (data) => {
-    unshiporder.value = data.unshiporder
-    const res = await getUnShipOrderListAPI({
-      userId: unshiporder.value.userId,
-    })
-    unShipOrderList.value = res.result
+const getUnShipOrderList = async (data: UnShipCustomerItem) => {
+  const res = await getUnShipOrderListAPI({
+    userId: data.userId,
   })
+  unShipOrderList.value = res.result
+}
+onMounted(async () => {
+  await getUnShipOrderList(props.currentUnshipCustomer)
+  console.log('unShipOrderList==', unShipOrderList.value, props.currentUnshipCustomer)
 })
-const addFeedback = () => {
-  uni.navigateTo({ url: '/pagesMember/addfeedback/addfeedback' })
+
+const goToDeliver = (orderId: string) => {
+  uni.navigateTo({ url: `/PagesOrder/delivery/delivery?orderId=${orderId}` })
 }
 </script>
 
@@ -43,7 +44,7 @@ const addFeedback = () => {
           <view class="customer-name">
             <view class="text">{{ item.orderNo }}</view>
           </view>
-          <view class="more">去发货</view>
+          <view class="more" @tap="($event) => goToDeliver(item.orderId)">去发货></view>
         </view>
         <view class="bottom">
           <view class="b-item">
@@ -108,7 +109,14 @@ const addFeedback = () => {
         }
 
         .more {
-          color: rgba(175, 176, 178, 1);
+          width: 100rpx;
+          height: 40rpx;
+          color: #fff;
+          line-height: 40rpx;
+          text-align: center;
+          border-radius: 5px;
+          background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
+          font-size: 20rpx;
         }
       }
 

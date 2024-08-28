@@ -325,7 +325,14 @@
 						"navigationStyle": "custom",
 						"navigationBarTitleText": "申请售后"
 					}
-				}
+				},
+				{
+					"path": "delivery/delivery",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "司机发货"
+					}
+				},
 			]
 		}
 	],

@@ -15,19 +15,9 @@ import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 
 const props = defineProps<{
   keyword: string
+  changeCompleteDetailStatus: (data: ShipedOrderItem) => void
 }>()
 
-watch(
-  () => props.keyword,
-  (newValue, oldValue) => {
-    console.log('workOrder变化了', newValue, oldValue)
-    ShipedOrderPageParams.page = 1
-    isShipedOrderFinish.value = false
-    shipedOrderList.value = []
-    getShipedOrderListData()
-  },
-  { immediate: true, deep: true },
-)
 // 推荐分页参数
 const pageParams: Required<PageParams> = {
   page: 1,
@@ -47,13 +37,6 @@ const getShipedOrderListData = async () => {
   const res = await getShippedOrderListAPI({ account: props.keyword, ...ShipedOrderPageParams })
 
   shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
-  shipedOrderList.value.push(...res.result.list)
   // suggestList.value.push(...mockList)
   if (ShipedOrderPageParams.page < res.result.total) {
     // 页码累加
@@ -68,12 +51,29 @@ onMounted(() => {
 const addFeedback = () => {
   uni.navigateTo({ url: '/pagesMember/addfeedback/addfeedback' })
 }
+
+watch(
+  () => props.keyword,
+  (newValue, oldValue) => {
+    console.log('workOrder变化了', newValue, oldValue)
+    ShipedOrderPageParams.page = 1
+    isShipedOrderFinish.value = false
+    shipedOrderList.value = []
+    getShipedOrderListData()
+  },
+  { immediate: true, deep: true },
+)
 </script>
 
 <template>
   <scroll-view @scrolltolower="getShipedOrderListData" class="viewport" scroll-y enable-back-to-top>
     <view class="container">
-      <view v-for="item in shipedOrderList" :key="item.userId" class="item">
+      <view
+        v-for="item in shipedOrderList"
+        @tap="($event) => changeCompleteDetailStatus(item)"
+        :key="item.userId"
+        class="item"
+      >
         <view class="top">
           <view class="customer-name">
             <view class="text">{{ item.orderNo }}</view>

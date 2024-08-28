@@ -476,3 +476,74 @@ export const getUnShipOrderListAPI = (data: {
     data,
   })
 }
+
+export type ShipedOrderDetailResult = {
+  orderInfo: {
+    orderNo: string
+    status: string
+    createTime: string
+    payTime: string
+    shippedTime: string
+    signInTime: string
+    signInImages: string[]
+    shippingInfo: {
+      mobile: string
+      shippingAddr: string
+      username: string
+    }
+  }
+  orderDetail: ShipedOrderDetailItem[]
+}
+
+export type ShipedOrderDetailItem = {
+  goodsId: string
+  source: string
+  fGodsId: string
+  num: number
+  actNum: string
+  units: string
+  goodsName: string
+  goodsImages: string[]
+  detailId: string
+}
+/**
+ *  已完成订单详情
+ * @param data 请求参数
+ */
+export const getShippedOrderDetailAPI = (data: { orderId: string }) => {
+  return http<ShipedOrderDetailResult>({
+    method: 'POST',
+    url: '/driver/getShippedOrderDetail',
+    data,
+  })
+}
+
+export type ShipOrderItem = {
+  detailId: string
+  actNum: string
+  unitPrice: string
+}
+
+/**
+ *  订单发货
+ * @param data 请求参数
+ */
+export const shipOrderAPI = (data: { orderId: string; orderDetail: ShipOrderItem[] }) => {
+  return http<ShipedOrderDetailResult>({
+    method: 'POST',
+    url: '/driver/shipOrder',
+    data,
+  })
+}
+
+/**
+ *  订单签收
+ * @param data 请求参数
+ */
+export const signInOrderAPI = (data: { orderId: string; signInImages: string }) => {
+  return http<ShipedOrderDetailResult>({
+    method: 'POST',
+    url: '/driver/signInOrder',
+    data,
+  })
+}

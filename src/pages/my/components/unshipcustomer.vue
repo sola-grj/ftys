@@ -29,28 +29,18 @@ const debounce = (func: () => {}, wait = 500) => {
 //   unShipCustomerList.value = []
 //   getUnShipListData()
 // })
+const unShipCustomerPageParams: Required<PageParams> = {
+  page: 1,
+  pageSize: 10,
+}
 
-watch(
-  () => props.keyword,
-  (newValue, oldValue) => {
-    console.log('workOrder变化了', newValue, oldValue)
-    unShipCustomerPageParams.page = 1
-    isUnShipCustomerFinish.value = false
-    unShipCustomerList.value = []
-    getUnShipListData()
-  },
-  { immediate: true, deep: true },
-)
 // 推荐分页参数
 const pageParams: Required<PageParams> = {
   page: 1,
   pageSize: 10,
 }
 const isUnShipCustomerFinish = ref(false)
-const unShipCustomerPageParams: Required<PageParams> = {
-  page: 1,
-  pageSize: 10,
-}
+
 const unShipCustomerList = ref<UnShipCustomerItem[]>([])
 const getUnShipListData = async () => {
   // 退出判断
@@ -78,6 +68,17 @@ const getUnShipListData = async () => {
 onMounted(() => {
   getUnShipListData()
 })
+watch(
+  () => props.keyword,
+  (newValue, oldValue) => {
+    console.log('workOrder变化了', newValue, oldValue)
+    unShipCustomerPageParams.page = 1
+    isUnShipCustomerFinish.value = false
+    unShipCustomerList.value = []
+    getUnShipListData()
+  },
+  { immediate: true, deep: true },
+)
 </script>
 
 <template>

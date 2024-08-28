@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useGuessList } from '@/composables'
-import { getUnShipCustomerAPI, type UnShipCustomerItem } from '@/services/order'
+import {
+  getUnShipCustomerAPI,
+  type ShipedOrderItem,
+  type UnShipCustomerItem,
+} from '@/services/order'
 import { useMemberStore } from '@/stores'
 import type { SolaShopGuessInstance } from '@/types/component'
 import type { PageParams } from '@/types/global'
@@ -9,19 +13,20 @@ import { ref } from 'vue'
 import unshipcustomer from './components/unshipcustomer.vue'
 import unshipcustomerorders from './components/unshipcustomerorders.vue'
 import completeorder from './components/completeorder.vue'
+import completeorderdetail from './components/completeorderdetail.vue'
 
 // 获取会员信息
 const memberStore = useMemberStore()
-
+const currentUnshipCustomer = ref<UnShipCustomerItem>({} as UnShipCustomerItem)
 const isUnShipDetail = ref(false)
 const changeUnShipDetailStatus = (data: UnShipCustomerItem) => {
   isUnShipDetail.value = !isUnShipDetail.value
-  uni.$emit('unshiporder', {
-    unshiporder: data,
-  })
+  currentUnshipCustomer.value = data
 }
-const changeCompleteDetailStatus = () => {
+const currentCompleteOrder = ref<ShipedOrderItem>({} as ShipedOrderItem)
+const changeCompleteDetailStatus = (data: ShipedOrderItem) => {
   isCompleteDetail.value = !isCompleteDetail.value
+  currentCompleteOrder.value = data
 }
 const isCompleteDetail = ref(false)
 
@@ -303,6 +308,11 @@ console.log('===========', activeIndex.value)
     <view v-else class="driver-container">
       <view class="login-container">
         <view class="login-type">
+          <text
+            v-if="isUnShipDetail || isCompleteDetail"
+            @tap="activeIndex === '1' ? (isUnShipDetail = false) : (isCompleteDetail = false)"
+            class="ftysIcon icon-xiangzuojiantou"
+          />
           <view
             @tap="($event) => onChangeIndex('1')"
             class="pwd-btn"
@@ -332,7 +342,7 @@ console.log('===========', activeIndex.value)
         <unshipcustomer :keyword="keyword" :changeUnShipDetailStatus="changeUnShipDetailStatus" />
       </view>
       <view v-else-if="activeIndex === '1' && isUnShipDetail === true" class="comp-container">
-        <unshipcustomerorders :keyword="keyword" />
+        <unshipcustomerorders :keyword="keyword" :currentUnshipCustomer="currentUnshipCustomer" />
       </view>
       <view v-else-if="activeIndex === '2' && isCompleteDetail === false" class="comp-container">
         <completeorder
@@ -341,7 +351,7 @@ console.log('===========', activeIndex.value)
         />
       </view>
       <view v-else class="comp-container">
-        <completeorder :keyword="keyword" />
+        <completeorderdetail :keyword="keyword" :currentCompleteOrder="currentCompleteOrder" />
       </view>
     </view>
   </view>
@@ -354,6 +364,16 @@ page {
   background-color: #f7f7f8;
 }
 
+::v-deep .uni-steps {
+  .uni-steps__column {
+    .uni-steps__column-text-container {
+      .uni-steps__column-text:last-child {
+        padding-bottom: 80rpx;
+      }
+    }
+  }
+}
+
 .viewport {
   height: 100%;
 }
@@ -364,6 +384,7 @@ page {
   border-radius: 30rpx 30rpx 0 0;
 
   .login-container {
+    position: relative;
     height: 140rpx;
     display: flex;
     justify-content: center;
@@ -375,6 +396,13 @@ page {
       width: 500rpx;
       background: #f2f4f7;
       border-radius: 50rpx;
+
+      .icon-xiangzuojiantou {
+        position: absolute;
+        left: 50rpx;
+        top: 50%;
+        transform: translateY(-50%);
+      }
 
       .pwd-btn,
       .code-btn {
