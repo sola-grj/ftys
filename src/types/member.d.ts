@@ -30,9 +30,12 @@ export type LoginResult = {
     credit_price: string // 权限判断（是否显示欠款情况）
     shipping_addr: string
     shipping_area: string
+    company: string
+    driver_id: string
+    id: string
+    user_id: string
   }
 }
-
 /** 个人信息 用户详情信息 */
 export type ProfileDetail = BaseProfile & {
   /** 性别 */

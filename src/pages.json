@@ -287,6 +287,13 @@
 						"navigationStyle": "custom",
 						"navigationBarTitleText": ""
 					}
+				},
+				{
+					"path": "setpaypwd/setpaypwd",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "设置支付密码"
+					}
 				}
 			]
 		},
