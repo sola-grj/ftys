@@ -1,9 +1,8 @@
 @font-face {
-  font-family: "iconfont";
-  /* Project id 4654653 */
-  src: url('https://at.alicdn.com/t/c/font_4654653_uqsnr0dlwp.woff2?t=1724487014729') format('woff2'),
-    url('https://at.alicdn.com/t/c/font_4654653_uqsnr0dlwp.woff?t=1724487014729') format('woff'),
-    url('https://at.alicdn.com/t/c/font_4654653_uqsnr0dlwp.ttf?t=1724487014729') format('truetype');
+  font-family: "iconfont"; /* Project id 4654653 */
+  src: url('https://at.alicdn.com/t/c/font_4654653_8p1i30e29mf.woff2?t=1725008068221') format('woff2'),
+       url('https://at.alicdn.com/t/c/font_4654653_8p1i30e29mf.woff?t=1725008068221') format('woff'),
+       url('https://at.alicdn.com/t/c/font_4654653_8p1i30e29mf.ttf?t=1725008068221') format('truetype');
 }
 
 .iconfont {
@@ -12,6 +11,10 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-gengduo1:before {
+  content: "\e641";
 }
 
 .icon-weixin:before {

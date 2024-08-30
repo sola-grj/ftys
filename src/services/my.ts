@@ -184,3 +184,90 @@ export const setpaypwdAPI = (data: { paypwd: string }) => {
     data,
   })
 }
+export type CustomerItem = {
+  userId: string
+  username: string
+}
+export type CustomerResult = {
+  page: number
+  total: number
+  list: CustomerItem[]
+}
+/**
+ * 获取客户列表
+ * @param data 请求参数
+ */
+export const getCustomerListAPI = (data: { page: number; pageSize: number; filter?: string }) => {
+  return http<CustomerResult>({
+    method: 'POST',
+    url: '/sales/getCustomerList',
+    data,
+  })
+}
+
+export type CutAccountResult = {
+  type_id: number // 1:业务员 2:司机 3:生鲜 4:干货 5:生鲜&干货
+  user_role: string // 1:主账号 2:子账号
+  sub_account_name: string // 子账号名称
+  sub_account_level: string
+  username: string
+  mobile: string
+  receive_way: string // 	收货方式:deliver:送货上门,pick_up:用户自提
+  pay_way: string // 支付方式:credit:赊账,online:在线支付
+  avatar: string
+  money: string // 账户余额
+  credit_money: string // 欠款余额
+  token: string // 唯一标识
+  account_status: string // 权限判断（未知位置权限）
+  goods_price: string // 权限判断（商品价格，不用处理）
+  credit_price: string // 权限判断（是否显示欠款情况）
+  shipping_addr: string
+  shipping_area: string
+  company: string
+  driver_id: string
+  id: string
+  user_id: string
+}
+
+/**
+ * 切换账号
+ * @param data 请求参数
+ */
+export const cutAccountAPI = (data: { userId: string }) => {
+  return http<LoginResult>({
+    method: 'POST',
+    url: '/user/cutAccount',
+    data,
+  })
+}
+
+export type MyMerchantItem = {
+  company: string
+  createTime: string
+  lastOrderTime: string
+  mobile: string
+  orderMoney: string
+  shippingAddr: string
+  shippingArea: string
+  status: string
+  userId: number
+  username: string
+}
+
+export type MyMerchantResult = {
+  list: MyMerchantItem[]
+  page: number
+  total: number
+  totalOrderMoney: string
+}
+/**
+ * 我的商户列表
+ * @param data 请求参数
+ */
+export const getMyMerchantListAPI = (data: { page: number; pageSize: number; filter?: string }) => {
+  return http<MyMerchantResult>({
+    method: 'POST',
+    url: '/sales/getMyMerchantList',
+    data,
+  })
+}

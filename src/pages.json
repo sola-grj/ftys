@@ -308,6 +308,27 @@
 						"navigationStyle": "custom",
 						"navigationBarTitleText": "设置支付密码"
 					}
+				},
+				{
+					"path": "changeaccount/changeaccount",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "切换账号"
+					}
+				},
+				{
+					"path": "mycustomer/mycustomer",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "我的商户"
+					}
+				},
+				{
+					"path": "mycustomer/customerinfo",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "商户信息"
+					}
 				}
 			]
 		},

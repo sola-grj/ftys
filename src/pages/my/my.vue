@@ -173,7 +173,9 @@ const onJump = (data: any) => {
 }
 // 司机相关
 const keyword = ref('')
-console.log('===========', activeIndex.value)
+const onChangeAccount = () => {
+  uni.navigateTo({ url: '/pagesMember/changeaccount/changeaccount' })
+}
 </script>
 
 <template>
@@ -189,12 +191,12 @@ console.log('===========', activeIndex.value)
             :src="memberStore.profile.userinfo.avatar"
           ></image>
         </navigator>
-        <view class="meta">
+        <view class="meta" @tap="onChangeAccount">
           <view class="nickname">
             {{ memberStore.profile.userinfo.username }}
             <text class="ftysIcon icon-qiehuanzhanghao">切换账号</text>
           </view>
-          <navigator class="extra" url="/pagesMember/profile/profile" hover-class="none">
+          <navigator class="extra" hover-class="none">
             <text class="update">{{ memberStore.profile.userinfo.mobile }}</text>
           </navigator>
         </view>
