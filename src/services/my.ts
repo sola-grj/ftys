@@ -271,3 +271,35 @@ export const getMyMerchantListAPI = (data: { page: number; pageSize: number; fil
     data,
   })
 }
+
+export type MyMerchantOrderItem = {
+  createTime: string
+  orderId: number
+  orderNo: string
+  orderPrice: string
+  shippedOrderPrice: string
+  shippedTime: string
+  status: string
+}
+
+export type MyMerchantOrderResult = {
+  page: number
+  total: number
+  list: MyMerchantOrderItem[]
+}
+
+/**
+ * 我的商户订单列表
+ * @param data 请求参数
+ */
+export const getMyMerchantOrderListAPI = (data: {
+  page: number
+  pageSize: number
+  userId: string
+}) => {
+  return http<MyMerchantOrderResult>({
+    method: 'POST',
+    url: '/sales/getMyMerchantOrderList',
+    data,
+  })
+}

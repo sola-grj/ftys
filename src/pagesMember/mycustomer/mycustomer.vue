@@ -87,15 +87,28 @@ const items = [
     name: '被禁用',
   },
 ]
+const goToDetail = (data: MyMerchantItem) => {
+  uni.navigateTo({
+    url: '/pagesMember/mycustomer/customerinfo',
+    success: (success) => {
+      uni.$emit('customerinfo', { customerinfo: data })
+    },
+  })
+}
 </script>
 
 <template>
-  <scroll-view class="viewport" @scrolltolower="getMyMerchantData" scroll-y enable-back-to-top>
+  <scroll-view class="viewport">
     <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
       <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
       <text class="text">我的商户</text>
     </view>
-    <view class="container form-content">
+    <scroll-view
+      @scrolltolower="getMyMerchantData"
+      scroll-y
+      enable-back-to-top
+      class="container form-content"
+    >
       <view class="search">
         <uni-easyinput
           placeholder="请输入客户名称/手机号"
@@ -114,12 +127,11 @@ const items = [
         v-for="item in myMerchant"
         :key="item.userId"
         class="customer-item"
-        @tap="($event) => changeUnShipDetailStatus(item)"
+        @tap="($event) => goToDetail(item)"
       >
         <view class="top">
           <view class="customer-name">
             <view class="text">{{ item.username }}</view>
-            <view class="num">{{ 3 }}</view>
           </view>
           <view class="more">查看更多</view>
         </view>
@@ -150,7 +162,7 @@ const items = [
           </view>
         </view>
       </view>
-    </view>
+    </scroll-view>
     <uni-popup ref="typepopup" background-color="#fff">
       <view
         class="customer-popup-content"
@@ -177,8 +189,13 @@ const items = [
 <style lang="scss">
 page {
   height: 100%;
-  overflow: hidden;
+  overflow: scroll;
   background-color: #f7f7f8;
+}
+
+::-webkit-scrollbar {
+  display: none;
+  /* 隐藏滚动条 */
 }
 
 .customer-popup-content {
@@ -234,7 +251,7 @@ page {
   }
 
   .container {
-    height: 100%;
+    height: calc(100vh - 130rpx);
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;
@@ -270,27 +287,36 @@ page {
 
     .customer-item {
       display: flex;
-      align-items: center;
-      height: 160rpx;
-      border-bottom: 1px solid #f2f4f7;
+      flex-direction: column;
+      width: 100%;
+      padding: 0 30rpx;
+      font-size: 28rpx;
+      border-bottom: 1px solid rgba(242, 244, 247, 1);
+      margin-top: 20rpx;
 
-      .check-container {
-        position: relative;
+      .top {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 80rpx;
-        // height: 100%;
+        justify-content: space-between;
+        margin-bottom: 30rpx;
 
-        .icon-xuanzhong {
-          font-size: 40rpx;
+        .customer-name {
+          display: flex;
         }
 
-        .checked-all-text {
-          position: absolute;
-          left: 80rpx;
-          font-size: 30rpx;
-          white-space: nowrap;
+        .more {
+          color: rgba(175, 176, 178, 1);
+        }
+      }
+
+      .bottom {
+        .b-item {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 20rpx;
+
+          .label {
+            color: rgba(175, 176, 178, 1);
+          }
         }
       }
     }

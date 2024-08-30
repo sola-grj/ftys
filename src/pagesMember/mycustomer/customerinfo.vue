@@ -4,8 +4,11 @@ import {
   addSuggestAPI,
   cutAccountAPI,
   getCustomerListAPI,
+  getMyMerchantOrderListAPI,
   getMySuggestAPI,
   type CustomerItem,
+  type MyMerchantItem,
+  type MyMerchantOrderItem,
 } from '@/services/my'
 import { useMemberStore } from '@/stores'
 import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
@@ -15,7 +18,11 @@ import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
-
+const activeIndex = ref(0)
+// 点击一级分类
+const onChangeIndex = (index: number) => {
+  activeIndex.value = index
+}
 const memberStore = useMemberStore()
 
 // 推荐分页参数
@@ -24,14 +31,14 @@ const pageParams: Required<PageParams> = {
   pageSize: 10,
 }
 const isFinish = ref(false)
-const customerList = ref<CustomerItem[]>([])
-const getCustomerData = async () => {
+const myMerchantOrderList = ref<MyMerchantOrderItem[]>([])
+const getMyMerchantOrderListData = async (userId: string) => {
   // 退出判断
   if (isFinish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
   }
-  const res = await getCustomerListAPI({ ...pageParams })
-  customerList.value.push(...res.result.list)
+  const res = await getMyMerchantOrderListAPI({ userId, ...pageParams })
+  myMerchantOrderList.value.push(...res.result.list)
   if (pageParams.page < res.result.total) {
     // 页码累加
     pageParams.page++
@@ -39,8 +46,12 @@ const getCustomerData = async () => {
     isFinish.value = true
   }
 }
+const customerinfo = ref<MyMerchantItem>()
 onLoad(() => {
-  getCustomerData()
+  uni.$on('customerinfo', async (data) => {
+    customerinfo.value = data.customerinfo
+    await getMyMerchantOrderListData(customerinfo.value?.userId.toString() as string)
+  })
 })
 const onChangeCustomer = async (data: CustomerItem) => {
   const res = await cutAccountAPI({ userId: data.userId })
@@ -59,35 +70,86 @@ const goback = () => {
   <scroll-view class="viewport" @scrolltolower="getCustomerData" scroll-y enable-back-to-top>
     <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
       <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">我的商户</text>
+      <text class="text">商户信息</text>
     </view>
     <view class="container form-content">
-      <view class="search">
-        <uni-easyinput
-          placeholder="请输入客户名称/手机号"
-          class="search"
-          prefixIcon="search"
-          v-model="keyword"
-        >
-        </uni-easyinput>
-      </view>
-      <view
-        class="customer-item"
-        v-for="item in customerList"
-        :key="item.userId"
-        @tap="($event) => onChangeCustomer(item)"
-      >
-        <view class="check-container">
-          <text
-            @tap="($event) => onChangeSelected(item)"
-            :class="`ftysIcon ${
-              item.userId.toString() === memberStore.profile?.userinfo.user_id
-                ? 'icon-xuanzhong1-copy'
-                : 'icon-xuanzhong1'
-            }`"
-          ></text>
+      <view class="login-container">
+        <view class="login-type">
+          <view
+            @tap="($event) => onChangeIndex(0)"
+            class="pwd-btn"
+            :class="activeIndex === 0 ? 'checked' : ''"
+            >商户资料
+          </view>
+          <view
+            @tap="($event) => onChangeIndex(1)"
+            class="code-btn"
+            :class="activeIndex === 1 ? 'checked' : ''"
+            >商户订单
+          </view>
         </view>
-        <view>{{ item.username }}</view>
+      </view>
+      <view v-if="activeIndex === 0" class="info-container">
+        <view class="info-item">
+          <view class="label">联系人</view>
+          <view class="value">{{ customerinfo?.username }}</view>
+        </view>
+        <view class="info-item">
+          <view class="label">客户名称</view>
+          <view class="value">{{ customerinfo?.username }}</view>
+        </view>
+        <view class="info-item">
+          <view class="label">详细地址</view>
+          <view class="value">{{ customerinfo?.shippingAddr }}</view>
+        </view>
+        <view class="info-item">
+          <view class="label">客户账号</view>
+          <view class="value">{{ customerinfo?.mobile }}</view>
+        </view>
+        <view class="info-item">
+          <view class="label">收货手机</view>
+          <view class="value">{{ customerinfo?.mobile }}</view>
+        </view>
+        <view class="info-item">
+          <view class="label">状态</view>
+          <view class="value">{{ customerinfo?.status }}</view>
+        </view>
+        <view class="info-item">
+          <view class="label">所属集团</view>
+          <view class="value">{{ customerinfo?.company }}</view>
+        </view>
+        <view class="info-item">
+          <view class="label">客户类型</view>
+          <view class="value">{{ '客户类型' }}</view>
+        </view>
+        <view class="info-item">
+          <view class="label">创建时间</view>
+          <view class="value">{{ customerinfo?.createTime }}</view>
+        </view>
+      </view>
+      <view v-if="activeIndex === 1" class="other-container">
+        <view v-for="item in myMerchantOrderList" :key="item.orderId" class="other-item">
+          <view class="top">
+            <view class="customer-name">
+              <view class="text">{{ item.orderNo }}</view>
+            </view>
+            <view class="more">￥{{ item.orderPrice }}</view>
+          </view>
+          <view class="bottom">
+            <view class="b-item">
+              <view class="label">下单时间</view>
+              <view class="value">{{ item.createTime }}</view>
+            </view>
+            <view class="b-item">
+              <view class="label">发货日期</view>
+              <view class="value">{{ item.shippedTime }}</view>
+            </view>
+            <view class="b-item">
+              <view class="label">发货金额</view>
+              <view class="value">{{ item.shippedOrderPrice }}</view>
+            </view>
+          </view>
+        </view>
       </view>
     </view>
   </scroll-view>
@@ -96,7 +158,7 @@ const goback = () => {
 <style lang="scss">
 page {
   height: 100%;
-  overflow: hidden;
+  // overflow: hidden;
   background-color: #f7f7f8;
 }
 
@@ -126,48 +188,91 @@ page {
   }
 
   .container {
-    height: 100%;
+    height: calc(100vh - 130rpx);
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;
     padding: 30rpx;
 
-    .search {
-      .uni-easyinput {
-        width: 90%;
-        margin: auto;
+    .login-container {
+      position: relative;
+      height: 80rpx;
+      margin-top: 20rpx;
 
-        .uni-easyinput__content {
-          border-color: rgba(255, 80, 64, 1) !important;
-          border-radius: 40rpx !important;
-          height: 70rpx;
+      .login-type {
+        display: flex;
+        height: 80rpx;
+        width: 500rpx;
+        background: #f2f4f7;
+        border-radius: 50rpx;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+
+        .pwd-btn,
+        .code-btn {
+          width: 50%;
+          line-height: 80rpx;
+          text-align: center;
+          border-radius: 50rpx;
+        }
+
+        .checked {
+          color: #fff;
+          background-color: #ff5040;
         }
       }
     }
 
-    .customer-item {
-      display: flex;
-      align-items: center;
-      height: 160rpx;
-      border-bottom: 1px solid #f2f4f7;
-
-      .check-container {
-        position: relative;
+    .info-container {
+      .info-item {
         display: flex;
+        height: 100rpx;
         align-items: center;
-        justify-content: center;
-        width: 80rpx;
-        // height: 100%;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(242, 244, 247, 1);
+        font-size: 28rpx;
 
-        .icon-xuanzhong {
-          font-size: 40rpx;
+        .label {
+          color: rgba(175, 176, 178, 1);
+        }
+      }
+    }
+
+    .other-container {
+      .other-item {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        padding: 0 30rpx;
+        font-size: 28rpx;
+        border-bottom: 1px solid rgba(242, 244, 247, 1);
+        margin-top: 20rpx;
+
+        .top {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 30rpx;
+
+          .customer-name {
+            display: flex;
+          }
+
+          .more {
+            color: rgba(255, 80, 64, 1);
+          }
         }
 
-        .checked-all-text {
-          position: absolute;
-          left: 80rpx;
-          font-size: 30rpx;
-          white-space: nowrap;
+        .bottom {
+          .b-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20rpx;
+
+            .label {
+              color: rgba(175, 176, 178, 1);
+            }
+          }
         }
       }
     }
