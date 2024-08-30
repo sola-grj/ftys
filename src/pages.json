@@ -301,6 +301,13 @@
 						"navigationStyle": "custom",
 						"navigationBarTitleText": "添加子账号"
 					}
+				},
+				{
+					"path": "setpaypwd/setpaypwd",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "设置支付密码"
+					}
 				}
 			]
 		},

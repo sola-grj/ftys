@@ -313,149 +313,181 @@ const onDelete = (event: any) => {
   // @ts-ignore
   imageList.value = [...imageList.value.filter((item) => item.uuid !== event.tempFile.uuid)]
 }
+const goback = () => {
+  uni.navigateBack()
+}
 </script>
 
 <template>
   <view class="viewport">
     <!-- 导航栏 -->
-    <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
-      <navigator open-type="navigateBack" class="back icon-left" hover-class="none"></navigator>
-      <view class="title">{{ type === 'register' ? '注册账号' : '找回密码' }}</view>
+    <view class="title" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
+      <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
+      <view class="text">{{
+        type === 'register' ? '注册账号' : type === 'resetPwd' ? '重置密码' : '找回密码'
+      }}</view>
     </view>
     <!-- 表单 -->
-    <uni-forms
-      class="form"
-      ref="formRef"
-      :rules="type === 'register' ? rules : findPwdrules"
-      :modelValue="type === 'register' ? form : findPwdForm"
-    >
-      <!-- 第一页表单内容 -->
-      <view v-show="page === 0" class="form-content">
-        <uni-forms-item class="form-item" name="phone">
-          <text class="label">手机号码</text>
-          <input type="tel" v-model="phone" class="input" placeholder="请输入手机号码" />
-        </uni-forms-item>
-        <uni-forms-item class="form-item" name="imgCode">
-          <text class="label">图片验证码</text>
-          <input type="text" v-model="imgCode" class="input" placeholder="请输入图片验证码" />
-        </uni-forms-item>
-        <uni-forms-item class="form-item" name="smsCode">
-          <text class="label">手机验证码</text>
-          <input type="tel" v-model="smsCode" class="input" placeholder="请输入手机验证码" />
-          <view @tap="onGetSmsTap" class="getcode-btn" :class="checked ? 'checked' : ''">{{
-            checked ? `获取中(${countDown})` : '获取验证码'
-          }}</view>
-        </uni-forms-item>
-        <uni-forms-item class="form-item" name="pwd">
-          <text class="label">账号密码</text>
-          <!-- <input
-            v-model="pwd"
-            class="input"
-            type="text"
-            :password="showPassword"
-            placeholder="请输入密码"
-          />
-          <icon type="warn" @tap="changePassword" /> -->
-          <uni-easyinput
-            ref="password"
-            :inputBorder="false"
-            type="password"
-            v-model="pwd"
-            :clearable="false"
-            placeholder="请输入内容"
-          ></uni-easyinput>
-        </uni-forms-item>
-        <uni-forms-item class="form-item" v-if="type === 'register'">
-          <text class="label">采购类型</text>
-          <radio-group class="radio-group" @change="onTypeChange">
-            <label class="radio">
-              <radio value="3" color="#27ba9b" :checked="buyType === '3'" />
-              生鲜
-            </label>
-            <label class="radio">
-              <radio value="4" color="#27ba9b" :checked="buyType === '4'" />
-              干货
-            </label>
-          </radio-group>
-        </uni-forms-item>
-      </view>
-      <!-- 下一步按钮 -->
-      <button v-show="page === 0" @tap="goToNext" class="form-button">
-        {{ type === 'register' ? '下一步' : '确定' }}
-      </button>
-      <!-- 第二页表单内容 -->
-      <view v-show="page === 1" class="form-content">
-        <uni-forms-item class="form-item" name="contactPerson">
-          <text class="label">联系人</text>
-          <input type="text" v-model="contactPerson" class="input" placeholder="请输入联系人" />
-        </uni-forms-item>
-        <uni-forms-item class="form-item" name="company">
-          <text class="label">公司名称</text>
-          <input type="tel" v-model="company" class="input" placeholder="请输入公司名称" />
-        </uni-forms-item>
-        <uni-forms-item
-          name="companyLocationStr"
-          class="form-item"
-          @tap="($event) => chooseAddress('company')"
-        >
-          <text class="label">地址定位</text>
-          <text class="content">{{
-            companyLocation!.address ? companyLocation!.address : '请点击右边图标选择定位'
-          }}</text>
-        </uni-forms-item>
-        <uni-forms-item
-          name="deliverLocationStr"
-          class="form-item"
-          @tap="($event) => chooseAddress('deliver')"
-        >
-          <text class="label">送货地址</text>
-          <text class="content">{{
-            deliverLocation!.address ? deliverLocation!.address : '请点击右边图标选择定位'
-          }}</text>
-        </uni-forms-item>
-        <uni-forms-item class="form-item" name="detailLocation">
-          <text class="label">详细地址</text>
-          <input type="text" v-model="detailLocation" class="input" placeholder="请输入详细地址" />
-        </uni-forms-item>
-        <uni-forms-item class="form-item" name="inviteCode">
-          <text class="label">邀请码</text>
-          <input type="text" v-model="inviteCode" class="input" placeholder="请输入邀请码" />
-        </uni-forms-item>
-        <uni-forms-item class="form-item" name="images">
-          <!-- <text class="label">营业执照或门头照</text> -->
-          <!-- <view @tap="onAvatarChange" class="choose-img"></view> -->
-          <uni-file-picker
-            @delete="onDelete"
-            @select="onSelect"
-            class="choose-img"
-            limit="3"
-            :title="`营业执照或门头照`"
-          ></uni-file-picker>
-        </uni-forms-item>
-      </view>
-      <!-- 注册按钮 -->
-      <view class="bottom-btns" v-show="page === 1">
-        <button @tap="page--" class="form-button">上一步</button>
-        <button @tap="onSubmit" class="form-button">提交</button>
-        <!-- <u-button type="primary" text="确定"></u-button>
+    <view class="container">
+      <uni-forms
+        class="form"
+        ref="formRef"
+        :rules="type === 'register' ? rules : findPwdrules"
+        :modelValue="type === 'register' ? form : findPwdForm"
+      >
+        <!-- 第一页表单内容 -->
+        <view v-show="page === 0" class="form-content">
+          <uni-forms-item class="form-item" name="phone">
+            <text class="label">手机号码</text>
+            <input type="tel" v-model="phone" class="input" placeholder="请输入手机号码" />
+          </uni-forms-item>
+          <uni-forms-item class="form-item" name="imgCode">
+            <text class="label">图片验证码</text>
+            <input type="text" v-model="imgCode" class="input" placeholder="请输入图片验证码" />
+          </uni-forms-item>
+          <uni-forms-item class="form-item" name="smsCode">
+            <text class="label">手机验证码</text>
+            <input type="tel" v-model="smsCode" class="input" placeholder="请输入手机验证码" />
+            <view @tap="onGetSmsTap" class="getcode-btn" :class="checked ? 'checked' : ''">{{
+              checked ? `获取中(${countDown})` : '获取验证码'
+            }}</view>
+          </uni-forms-item>
+          <uni-forms-item class="form-item" name="pwd">
+            <text class="label">账号密码</text>
+            <uni-easyinput
+              ref="password"
+              :inputBorder="false"
+              type="password"
+              v-model="pwd"
+              :clearable="false"
+              placeholder="请输入内容"
+            ></uni-easyinput>
+          </uni-forms-item>
+          <uni-forms-item class="form-item" v-if="type === 'register'">
+            <text class="label">采购类型</text>
+            <radio-group class="radio-group" @change="onTypeChange">
+              <label class="radio">
+                <radio value="3" color="#27ba9b" :checked="buyType === '3'" />
+                生鲜
+              </label>
+              <label class="radio">
+                <radio value="4" color="#27ba9b" :checked="buyType === '4'" />
+                干货
+              </label>
+            </radio-group>
+          </uni-forms-item>
+        </view>
+        <!-- 下一步按钮 -->
+        <button v-show="page === 0" @tap="goToNext" class="form-button">
+          {{ type === 'register' ? '下一步' : '确定' }}
+        </button>
+        <!-- 第二页表单内容 -->
+        <view v-show="page === 1" class="form-content">
+          <uni-forms-item class="form-item" name="contactPerson">
+            <text class="label">联系人</text>
+            <input type="text" v-model="contactPerson" class="input" placeholder="请输入联系人" />
+          </uni-forms-item>
+          <uni-forms-item class="form-item" name="company">
+            <text class="label">公司名称</text>
+            <input type="tel" v-model="company" class="input" placeholder="请输入公司名称" />
+          </uni-forms-item>
+          <uni-forms-item
+            name="companyLocationStr"
+            class="form-item"
+            @tap="($event) => chooseAddress('company')"
+          >
+            <text class="label">地址定位</text>
+            <text class="content">{{
+              companyLocation!.address ? companyLocation!.address : '请点击右边图标选择定位'
+            }}</text>
+          </uni-forms-item>
+          <uni-forms-item
+            name="deliverLocationStr"
+            class="form-item"
+            @tap="($event) => chooseAddress('deliver')"
+          >
+            <text class="label">送货地址</text>
+            <text class="content">{{
+              deliverLocation!.address ? deliverLocation!.address : '请点击右边图标选择定位'
+            }}</text>
+          </uni-forms-item>
+          <uni-forms-item class="form-item" name="detailLocation">
+            <text class="label">详细地址</text>
+            <input
+              type="text"
+              v-model="detailLocation"
+              class="input"
+              placeholder="请输入详细地址"
+            />
+          </uni-forms-item>
+          <uni-forms-item class="form-item" name="inviteCode">
+            <text class="label">邀请码</text>
+            <input type="text" v-model="inviteCode" class="input" placeholder="请输入邀请码" />
+          </uni-forms-item>
+          <uni-forms-item class="form-item" name="images">
+            <!-- <text class="label">营业执照或门头照</text> -->
+            <!-- <view @tap="onAvatarChange" class="choose-img"></view> -->
+            <uni-file-picker
+              @delete="onDelete"
+              @select="onSelect"
+              class="choose-img"
+              limit="3"
+              :title="`营业执照或门头照`"
+            ></uni-file-picker>
+          </uni-forms-item>
+        </view>
+        <!-- 注册按钮 -->
+        <view class="bottom-btns" v-show="page === 1">
+          <button @tap="page--" class="form-button">上一步</button>
+          <button @tap="onSubmit" class="form-button">提交</button>
+          <!-- <u-button type="primary" text="确定"></u-button>
         <u-button type="primary" :plain="true" text="镂空"></u-button> -->
-      </view>
-    </uni-forms>
+        </view>
+      </uni-forms>
+    </view>
   </view>
 </template>
 
 <style lang="scss">
 page {
-  background-color: #f4f4f4;
+  height: 100%;
+  overflow: hidden;
+  background-color: #f7f7f8;
 }
 
 .viewport {
-  display: flex;
-  flex-direction: column;
+  // display: flex;
+  // flex-direction: column;
   height: 100%;
-  background-image: url(https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/images/order_bg.png);
-  background-size: auto 420rpx;
-  background-repeat: no-repeat;
+  background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
+
+  .title {
+    position: relative;
+    text-align: center;
+    color: #fff;
+    width: 100%;
+    height: 130rpx;
+
+    .text {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 20rpx;
+    }
+
+    .icon-xiangzuojiantou {
+      position: absolute;
+      left: 20rpx;
+      bottom: 20rpx;
+    }
+  }
+
+  .container {
+    height: 100%;
+    background: #fff;
+    border-radius: 30rpx 30rpx 0 0;
+    overflow: scroll;
+  }
 }
 
 .choose-img {
@@ -536,6 +568,7 @@ input {
 }
 
 .form-content {
+  height: 100%;
   margin: 20rpx 20rpx 0;
   padding: 0 20rpx;
   border-radius: 10rpx;
@@ -667,7 +700,7 @@ input {
     color: #fff;
     border-radius: 80rpx;
     font-size: 30rpx;
-    background-color: #27ba9b;
+    background-color: rgba(255, 95, 77, 1);
   }
 }
 

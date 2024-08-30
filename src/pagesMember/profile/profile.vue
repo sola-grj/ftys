@@ -1,93 +1,113 @@
 <script setup lang="ts">
+import { updateUserInfoAPI } from '@/services/my'
 import { getMemberProfileAPI, putMemberProfileAPI } from '@/services/profile'
 import { useMemberStore } from '@/stores'
-import type { Gender, ProfileDetail } from '@/types/member'
+import type { Gender, LoginResult, ProfileDetail } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
+// 表单更新数据
 
-// 获取个人信息接口
-const profile = ref<ProfileDetail>({} as ProfileDetail)
-const getMemberProfileData = async () => {
-  const res = await getMemberProfileAPI()
-  profile.value = res.result
-}
 const memberStore = useMemberStore()
-// 修改头像
-const onAvatarChange = () => {
-  // 调用拍照
-  uni.chooseMedia({
-    // 文件个数
-    count: 1,
-    // 文件类型
-    mediaType: ['image'],
-    success: (res) => {
-      console.log(res)
-      // 本地路径
-      const { tempFilePath } = res.tempFiles[0]
-      // 文件上传
-      uni.uploadFile({
-        url: '/member/profile/avatar',
-        name: 'file',
-        filePath: tempFilePath,
-        success: (res) => {
-          if (res.statusCode === 200) {
-            const avatar = JSON.parse(res.data).result.avatar
-            // 非空断言 个人信息数据更新
-            profile.value!.avatar = avatar
-            // store头像更新
-            memberStore.profile!.avatar = avatar
-            uni.showToast({ icon: 'success', title: '更新成功' })
-          } else {
-            uni.showToast({ icon: 'error', title: '更新失败' })
-          }
-        },
-      })
+const form = ref({
+  mobile: memberStore.profile?.userinfo.mobile,
+  username: memberStore.profile?.userinfo.username,
+  company: memberStore.profile?.userinfo.company,
+  shipping_addr: memberStore.profile?.userinfo.shipping_addr,
+  deliverLocationStr: '',
+  images: '',
+})
+type Location = {
+  address: string
+  name: string
+  latitude: number
+  longitude: number
+}
+const deliverLocation = ref<Location>({
+  address: '',
+  name: '',
+  latitude: 0,
+  longitude: 0,
+})
+const imageList = ref([])
+// 选择位置
+const chooseAddress = (type: string) => {
+  uni.chooseLocation({
+    success: function (res) {
+      console.log('位置名称：' + res.name)
+      console.log('详细地址：' + res.address)
+      console.log('纬度：' + res.latitude)
+      console.log('经度：' + res.longitude)
+      deliverLocation.value = {
+        address: res.address,
+        name: res.name,
+        latitude: res.latitude,
+        longitude: res.longitude,
+      }
+      form.value.deliverLocationStr = res.address
     },
   })
 }
-
-onLoad(() => {
-  getMemberProfileData()
-})
-
-// 修改性别
-const onGenderChange: UniHelper.RadioGroupOnChange = (ev) => {
-  profile.value.gender = ev.detail.value as Gender
-}
-
-// 修改生日
-const onBirthdayChange: UniHelper.DatePickerOnChange = (ev) => {
-  profile.value.birthday = ev.detail.value
-}
-
-// 修改城市
-let fullLocationCode: [string, string, string] = ['', '', '']
-const onFullLocationChange: UniHelper.RegionPickerOnChange = (ev) => {
-  profile.value.fullLocation = ev.detail.value.join(' ')
-  // 提交后端更新用的
-  fullLocationCode = ev.detail.code!
-}
-
 // 点击保存
 const onSubmit = async () => {
-  const res = await putMemberProfileAPI({
-    nickname: profile.value?.nickname,
-    gender: profile.value?.gender,
-    birthday: profile.value?.birthday,
-    provinceCode: fullLocationCode[0],
-    cityCode: fullLocationCode[1],
-    countyCode: fullLocationCode[2],
-    profession: profile.value?.profession,
+  const images: any = []
+  if (imageList.value.length > 0) {
+    imageList.value.forEach((item: any) => {
+      images.push(item.url)
+    })
+  }
+
+  const res = await updateUserInfoAPI({
+    mobile: form.value.mobile,
+    username: form.value.username,
+    company: form.value.company,
+    shipping_lon: deliverLocation.value.longitude.toString() || 'xxx',
+    shipping_lat: deliverLocation.value.latitude.toString() || 'xxx',
+    shipping_province: deliverLocation.value.address || 'xxx',
+    shipping_city: deliverLocation.value.address || 'xxx',
+    shipping_area: deliverLocation.value.address || 'xxx',
+    shipping_addr: deliverLocation.value.address || 'xxx',
+    images: images.join(','),
   })
-  // 更新store中的昵称
-  memberStore.profile!.nickname = res.result.nickname
-  uni.showToast({ icon: 'success', title: '保存成功' })
-  setTimeout(() => {
-    uni.navigateBack()
-  }, 300)
+  if (res.code === '1') {
+    // 更新store中的昵称
+    memberStore.profile!.userinfo.username = res.result.username
+    memberStore.profile!.userinfo.mobile = res.result.mobile
+    memberStore.profile!.userinfo.shipping_addr = res.result.shipping_addr
+    memberStore.profile!.userinfo.company = res.result.company
+    uni.showToast({ icon: 'success', title: '保存成功' })
+    setTimeout(() => {
+      uni.reLaunch({ url: '/pages/my/my' })
+    }, 300)
+  } else {
+    uni.showToast({ icon: 'error', title: res.msg })
+  }
+}
+const onDelete = (event: any) => {
+  console.log(event)
+  // @ts-ignore
+  imageList.value = [...imageList.value.filter((item) => item.uuid !== event.tempFile.uuid)]
+}
+const onSelect = (event: any) => {
+  uni.uploadFile({
+    url: '/common/upload', //仅为示例，非真实的接口地址
+    filePath: event.tempFilePaths[0],
+    name: 'file',
+    success: (res) => {
+      let { data } = res
+      data = JSON.parse(data)
+      // @ts-ignore
+      imageList.value.push({
+        // @ts-ignore
+        url: data!.result.url,
+        uuid: event.tempFiles[0].uuid,
+      })
+      // @ts-ignore
+      form.value.images = data!.result.url
+    },
+  })
 }
 </script>
 
@@ -95,71 +115,56 @@ const onSubmit = async () => {
   <view class="viewport">
     <!-- 导航栏 -->
     <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
-      <navigator open-type="navigateBack" class="back icon-left" hover-class="none"></navigator>
+      <navigator
+        open-type="navigateBack"
+        class="back ftysIcon icon-xiangzuojiantou"
+        hover-class="none"
+      ></navigator>
       <view class="title">个人信息</view>
     </view>
     <!-- 头像 -->
     <view class="avatar">
-      <view @tap="onAvatarChange" class="avatar-content">
-        <image class="image" :src="profile?.avatar" mode="aspectFill" />
-        <text class="text">点击修改头像</text>
+      <view class="avatar-content">
+        <image class="image" :src="memberStore.profile?.userinfo.avatar" mode="aspectFill" />
       </view>
     </view>
-    <!-- 表单 -->
     <view class="form">
       <!-- 表单内容 -->
       <view class="form-content">
-        <view class="form-item">
-          <text class="label">账号</text>
-          <text class="account">{{ profile?.account }}</text>
-        </view>
-        <view class="form-item">
-          <text class="label">昵称</text>
-          <input class="input" type="text" placeholder="请填写昵称" v-model="profile.nickname" />
-        </view>
-        <view class="form-item">
-          <text class="label">性别</text>
-          <radio-group @change="onGenderChange">
-            <label class="radio">
-              <radio value="男" color="#27ba9b" :checked="profile?.gender === '男'" />
-              男
-            </label>
-            <label class="radio">
-              <radio value="女" color="#27ba9b" :checked="profile?.gender === '女'" />
-              女
-            </label>
-          </radio-group>
-        </view>
-        <view class="form-item">
-          <text class="label">生日</text>
-          <picker
-            @change="onBirthdayChange"
-            class="picker"
-            mode="date"
-            start="1900-01-01"
-            :end="new Date()"
-            :value="profile?.birthday"
+        <uni-forms>
+          <uni-forms-item class="form-item" name="mobile">
+            <text class="label">电话</text>
+            <input type="text" v-model="form.mobile" class="input" placeholder="请输入电话" />
+          </uni-forms-item>
+          <uni-forms-item class="form-item" name="username">
+            <text class="label">姓名</text>
+            <input type="text" v-model="form.username" class="input" placeholder="请输入姓名" />
+          </uni-forms-item>
+          <uni-forms-item class="form-item" name="company">
+            <text class="label">公司名称</text>
+            <input type="tel" v-model="form.company" class="input" placeholder="请输入公司名称" />
+          </uni-forms-item>
+
+          <uni-forms-item
+            name="deliverLocationStr"
+            class="form-item"
+            @tap="($event) => chooseAddress('deliver')"
           >
-            <view v-if="profile?.birthday">{{ profile?.birthday }}</view>
-            <view class="placeholder" v-else>请选择日期</view>
-          </picker>
-        </view>
-        <view class="form-item">
-          <text class="label">城市</text>
-          <picker
-            @change="onFullLocationChange"
-            class="picker"
-            mode="region"
-            :value="profile?.fullLocation?.split(' ')"
-          >
-            <view v-if="profile?.fullLocation">{{ profile?.fullLocation }}</view>
-            <view class="placeholder" v-else>请选择城市</view>
-          </picker>
-        </view>
-        <view class="form-item">
-          <text class="label">职业</text>
-          <input class="input" type="text" placeholder="请填写职业" v-model="profile.profession" />
-        </view>
+            <text class="label">送货地址</text>
+            <text class="content">{{
+              form.shipping_addr ? form.shipping_addr : '请点击右边图标选择定位'
+            }}</text>
+          </uni-forms-item>
+          <uni-forms-item class="form-item" name="images">
+            <uni-file-picker
+              @delete="onDelete"
+              @select="onSelect"
+              class="choose-img"
+              limit="3"
+              :title="`营业执照或门头照`"
+            ></uni-file-picker>
+          </uni-forms-item>
+        </uni-forms>
       </view>
       <!-- 提交按钮 -->
       <button @tap="onSubmit" class="form-button">保 存</button>
@@ -238,9 +243,26 @@ page {
 .form {
   background-color: #f4f4f4;
 
+  .uni-forms-item__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1rpx solid rgba(242, 244, 247, 1);
+
+    input {
+      text-align: right;
+    }
+
+    .content {
+      flex: 1;
+      text-align: right;
+      color: #999999;
+    }
+  }
+
   &-content {
     margin: 20rpx 20rpx 0;
-    padding: 0 20rpx;
+    padding: 20rpx;
     border-radius: 10rpx;
     background-color: #fff;
   }
@@ -280,6 +302,7 @@ page {
     .picker {
       flex: 1;
     }
+
     .placeholder {
       color: #808080;
     }
