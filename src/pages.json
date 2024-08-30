@@ -287,6 +287,20 @@
 						"navigationStyle": "custom",
 						"navigationBarTitleText": ""
 					}
+				},
+				{
+					"path": "subaccount/subaccount",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "子账号"
+					}
+				},
+				{
+					"path": "subaccount/addaccount",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "添加子账号"
+					}
 				}
 			]
 		},

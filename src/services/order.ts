@@ -479,6 +479,7 @@ export const getUnShipOrderListAPI = (data: {
 
 export type ShipedOrderDetailResult = {
   orderInfo: {
+    orderId: string
     orderNo: string
     status: string
     createTime: string
@@ -505,6 +506,8 @@ export type ShipedOrderDetailItem = {
   goodsName: string
   goodsImages: string[]
   detailId: string
+  unitPrice: string
+  orderId: string
 }
 /**
  *  已完成订单详情

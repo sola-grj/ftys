@@ -163,6 +163,9 @@ const onJump = (data: any) => {
     case '意见反馈':
       uni.navigateTo({ url: '/pagesMember/feedback/feedback' })
       break
+    case '子账号':
+      uni.navigateTo({ url: '/pagesMember/subaccount/subaccount' })
+      break
 
     default:
       break

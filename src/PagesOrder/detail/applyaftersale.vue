@@ -56,7 +56,6 @@ const afterSalesReason = ref([['货物变质/损坏', '多发/错发', '订单�
 const currentType = ref('')
 const currentReason = ref('')
 const currentTypeId = ref('1')
-const currentReasonId = ref('')
 
 // 注册表单数据
 const form = ref({
@@ -88,8 +87,8 @@ const onSave = async () => {
   const res = await createAfterSalesAPI({
     orderId: order.value.orderId,
     afterSalesType: currentTypeId.value,
-    afterSalesReason: currentReasonId.value,
-    remark: '',
+    afterSalesReason: currentReason.value,
+    remark: order.value.remark,
     goodsList,
   })
   if (res.code === '1') {

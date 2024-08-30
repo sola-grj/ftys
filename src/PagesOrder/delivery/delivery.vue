@@ -97,7 +97,7 @@ const onSave = async () => {
       orderDetail.push({
         detailId: item.detailId,
         actNum: item.actNum,
-        unitPrice: '1.11' || item.ununitPrice,
+        unitPrice: item.unitPrice,
       })
     })
     const res = await shipOrderAPI({

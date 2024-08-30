@@ -71,3 +71,47 @@ export const getcustomerBillAPI = () => {
     url: '/sales/customerBill',
   })
 }
+
+export type SubAccountItem = {
+  mobile: string
+  userId: string
+  username: string
+  sub_account_name: string
+  sub_account_level: string
+}
+
+export type SubAccountResult = {
+  page: number
+  total: number
+  list: SubAccountItem[]
+}
+/**
+ * 子账号
+ * @param data 请求参数
+ */
+export const getSubAccountAPI = (data: { page: number; pageSize: number }) => {
+  return http<SubAccountResult>({
+    method: 'POST',
+    url: '/user/getSubAccount',
+  })
+}
+
+export type RegisterSubUserData = {
+  mobile: string
+  username: string
+  sub_account_name: string
+  password: string
+  sub_account_level: string
+}
+
+/**
+ * 注册子账号
+ * @param data 请求参数
+ */
+export const registerSubUserAPI = (data: RegisterSubUserData) => {
+  return http({
+    method: 'POST',
+    url: '/user/registerSubUser',
+    data,
+  })
+}

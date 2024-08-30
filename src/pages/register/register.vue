@@ -348,16 +348,22 @@ const onDelete = (event: any) => {
         </uni-forms-item>
         <uni-forms-item class="form-item" name="pwd">
           <text class="label">账号密码</text>
-          <input
+          <!-- <input
             v-model="pwd"
             class="input"
             type="text"
             :password="showPassword"
             placeholder="请输入密码"
           />
-          <icon type="warn" @tap="changePassword" />
-          <!-- <text class="uni-icon" :class="[!showPassword ? 'uni-eye-active' : '']"
-						@click="changePassword">&#xe568;</text> -->
+          <icon type="warn" @tap="changePassword" /> -->
+          <uni-easyinput
+            ref="password"
+            :inputBorder="false"
+            type="password"
+            v-model="pwd"
+            :clearable="false"
+            placeholder="请输入内容"
+          ></uni-easyinput>
         </uni-forms-item>
         <uni-forms-item class="form-item" v-if="type === 'register'">
           <text class="label">采购类型</text>
@@ -550,6 +556,7 @@ input {
     // 调整 uni-forms 样式
     .uni-forms-item__content {
       display: flex;
+      align-items: center;
 
       .content {
         flex: 1;

@@ -167,6 +167,7 @@ export type OrderItem = {
   orderPrice: string
   orderPayPrice: string
   detail: DetailItem[]
+  afterSalesDetail: DetailItem[]
   fGoodsId: string
 }
 

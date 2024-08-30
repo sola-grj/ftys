@@ -233,12 +233,22 @@ const copy = (orderNo: string) => {
           ><text class="w-desc">等待付款</text> <text class="w-minuate">30分钟</text>
         </view>
       </view>
-      <view class="mid">
+      <view v-if="order.status !== '4'" class="mid">
         <image class="image" :src="order.detail[0].goodsImage[0]" />
         <view class="name">{{ order.detail[0].goodsName }}</view>
         <view class="info">
           <view class="price">￥{{ order.detail[0].unitPrice }}</view>
           <view class="num">共 {{ order.detail[0].num }} {{ order.detail[0].units }}</view>
+        </view>
+      </view>
+      <view v-else class="mid">
+        <image class="image" :src="order.afterSalesDetail[0].goodsImage[0]" />
+        <view class="name">{{ order.afterSalesDetail[0].goodsName }}</view>
+        <view class="info">
+          <view class="price">￥{{ order.afterSalesDetail[0].unitPrice }}</view>
+          <view class="num"
+            >共 {{ order.afterSalesDetail[0].num }} {{ order.afterSalesDetail[0].units }}</view
+          >
         </view>
       </view>
       <view class="bottom" @tap.stop.prevent>
