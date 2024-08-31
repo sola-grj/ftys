@@ -87,6 +87,9 @@ const onDelete = (event: any) => {
   // @ts-ignore
   imageList.value = [...imageList.value.filter((item) => item.uuid !== event.tempFile.uuid)]
 }
+const goback = () => {
+  uni.navigateBack()
+}
 </script>
 
 <template>

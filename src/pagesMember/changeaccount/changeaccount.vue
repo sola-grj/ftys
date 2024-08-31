@@ -4,6 +4,7 @@ import {
   addSuggestAPI,
   cutAccountAPI,
   getCustomerListAPI,
+  getCutAccountListAPI,
   getMySuggestAPI,
   type CustomerItem,
 } from '@/services/my'
@@ -25,12 +26,12 @@ const pageParams: Required<PageParams> = {
 }
 const isFinish = ref(false)
 const customerList = ref<CustomerItem[]>([])
-const getCustomerData = async () => {
+const getCutAccountListData = async () => {
   // 退出判断
   if (isFinish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
   }
-  const res = await getCustomerListAPI({ filter: keyword.value, ...pageParams })
+  const res = await getCutAccountListAPI({ filter: keyword.value, ...pageParams })
   customerList.value.push(...res.result.list)
   if (pageParams.page < res.result.total) {
     // 页码累加
@@ -40,7 +41,7 @@ const getCustomerData = async () => {
   }
 }
 onLoad(() => {
-  getCustomerData()
+  getCutAccountListData()
 })
 const onChangeCustomer = async (data: CustomerItem) => {
   const res = await cutAccountAPI({ userId: data.userId })
@@ -59,19 +60,25 @@ watch(
     pageParams.page = 1
     isFinish.value = false
     customerList.value = []
-    getCustomerData()
+    getCutAccountListData()
   },
-  { immediate: true, deep: true },
+  { immediate: false, deep: true },
 )
+console.log('memberStore.profile?.userinfo.user_id', memberStore.profile?.userinfo.user_id)
 </script>
 
 <template>
-  <scroll-view class="viewport" @scrolltolower="getCustomerData" scroll-y enable-back-to-top>
+  <scroll-view class="viewport">
     <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
       <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
       <text class="text">切换账户</text>
     </view>
-    <view class="container form-content">
+    <scroll-view
+      class="container form-content"
+      @scrolltolower="getCutAccountListAPI"
+      scroll-y
+      enable-back-to-top
+    >
       <view class="search">
         <uni-easyinput placeholder="搜索客户" class="search" prefixIcon="search" v-model="keyword">
         </uni-easyinput>
@@ -84,9 +91,8 @@ watch(
       >
         <view class="check-container">
           <text
-            @tap="($event) => onChangeSelected(item)"
             :class="`ftysIcon ${
-              item.userId.toString() === memberStore.profile?.userinfo.user_id
+              item.userId === memberStore.profile?.userinfo.id.toString()
                 ? 'icon-xuanzhong1-copy'
                 : 'icon-xuanzhong1'
             }`"
@@ -94,15 +100,20 @@ watch(
         </view>
         <view>{{ item.username }}</view>
       </view>
-    </view>
+    </scroll-view>
   </scroll-view>
 </template>
 
 <style lang="scss">
 page {
   height: 100%;
-  overflow: hidden;
+  // overflow: hidden;
   background-color: #f7f7f8;
+}
+
+::-webkit-scrollbar {
+  display: none;
+  /* 隐藏滚动条 */
 }
 
 .viewport {
@@ -131,7 +142,7 @@ page {
   }
 
   .container {
-    height: 100%;
+    height: calc(100vh - 130rpx);
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;

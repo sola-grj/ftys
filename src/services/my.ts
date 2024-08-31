@@ -63,7 +63,7 @@ export const getOrderPerformanceAPI = (data: { dateFilter: string }) => {
 }
 
 /**
- * 下单情况
+ * 客户账款
  * @param data 请求参数
  */
 export const getcustomerBillAPI = () => {
@@ -201,6 +201,18 @@ export const getCustomerListAPI = (data: { page: number; pageSize: number; filte
   return http<CustomerResult>({
     method: 'POST',
     url: '/sales/getCustomerList',
+    data,
+  })
+}
+
+/**
+ * 获取切换客户列表
+ * @param data 请求参数
+ */
+export const getCutAccountListAPI = (data: { page: number; pageSize: number; filter?: string }) => {
+  return http<CustomerResult>({
+    method: 'POST',
+    url: '/user/getCutAccountList',
     data,
   })
 }

@@ -24,6 +24,9 @@ import { onShow } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { cal } from '@/utils/cal'
 import type { OrderItem } from '@/types/order'
+import type { RecommendItem } from '@/types/home'
+import { getRecommendGoodsAPI } from '@/services/home'
+import type { PageParams } from '@/types/global'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -46,6 +49,7 @@ const getMemberCartData = async () => {
 // 初始化调用
 const againBuyGoodsOrder = ref<OrderItem>({} as OrderItem)
 onShow(() => {
+  getRecommendData()
   uni.$on('againBuy', async (data) => {
     // 再次购买
     againBuyGoodsOrder.value = data.againBuyGoodsOrder
@@ -184,7 +188,7 @@ const goToPayment = () => {
 // 更新购物车
 // 添加购物车
 const currentCartId = ref('')
-const addShoppingCart = async (data: CartItem, num: number, type: string) => {
+const addShoppingCart = async (data: CartItem & RecommendItem, num: number, type: string) => {
   if (type === 'first') {
     const res = await useAddShoppingCart(
       {
@@ -192,8 +196,8 @@ const addShoppingCart = async (data: CartItem, num: number, type: string) => {
         goodsId: data.goodsId,
         fGoodsId: data.fGoodsId,
         num,
-        units: data.units,
-        unitPrice: data.unit_price,
+        units: data.units || data.unit,
+        unitPrice: data.unit_price || data.price,
       },
       num,
     )
@@ -209,9 +213,11 @@ const addShoppingCart = async (data: CartItem, num: number, type: string) => {
         success: async (res) => {
           if (res.confirm) {
             // 后端删除单品
-            const res = await removeShoppingCart(currentCartId.value || data.id)
+            const res = await removeShoppingCart(currentCartId.value || data.id || data.cartId)
             if (res.code === '1') {
               data.num = 0
+            } else {
+              uni.showToast({ icon: 'error', title: res.msg })
             }
             // 重新获取列表
             getMemberCartData()
@@ -226,10 +232,10 @@ const addShoppingCart = async (data: CartItem, num: number, type: string) => {
     } else {
       const res = await useUpdateShoppingCart(
         {
-          cartId: currentCartId.value || data.id,
+          cartId: currentCartId.value || data.id || data.cartId,
           num,
-          unitPrice: data.unit_price,
-          units: data.units,
+          units: data.units || data.unit,
+          unitPrice: data.unit_price || data.price,
         },
         num,
       )
@@ -238,11 +244,38 @@ const addShoppingCart = async (data: CartItem, num: number, type: string) => {
       }
     }
   }
+  getMemberCartData()
 }
 
 const isShowManage = ref(false)
 const onTapManage = () => {
   isShowManage.value = !isShowManage.value
+}
+// 底部推荐数据
+// 获取底部推荐数据
+const recommendPageParams: Required<PageParams> = {
+  page: 1,
+  pageSize: 10,
+}
+const recommendFinish = ref(false)
+const recommendList = ref<RecommendItem[]>([])
+const getRecommendData = async () => {
+  // 退出判断
+  if (recommendFinish.value === true) {
+    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
+  }
+  const res = await getRecommendGoodsAPI({ ...recommendPageParams })
+  // 分页数据增加
+  recommendList.value.push(...res.result.list)
+  if (recommendPageParams.page < res.result.total) {
+    // 页码累加
+    recommendPageParams.page++
+  } else {
+    recommendFinish.value = true
+  }
+}
+const goToDetail = (data: RecommendItem) => {
+  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
 }
 </script>
 
@@ -252,9 +285,9 @@ const onTapManage = () => {
       <view class="title-container">
         <view class="text">购物车</view>
         <view class="position">
-          <text class="ftysIcon icon-dingwei"
-            >大数据大数据大数据大数据大数据大数据大数据大数据大数据大数据大数据</text
-          >
+          <text class="ftysIcon icon-dingwei">{{
+            memberStore.profile?.userinfo.shipping_addr
+          }}</text>
         </view>
         <view v-if="!isShowManage" @tap="onTapManage" class="manage">管理</view>
         <view v-else class="manage manage-btns">
@@ -330,6 +363,36 @@ const onTapManage = () => {
         <navigator open-type="switchTab" url="/pages/index/index" hover-class="none">
           <button class="button">去首页看看</button>
         </navigator>
+      </view>
+      <view class="recommand-list-container">
+        <view class="recommand-title"
+          ><text class="ftysIcon icon-jingxuantuijian"></text> 精选推荐</view
+        >
+        <view
+          @tap="($event) => goToDetail(item)"
+          class="item"
+          v-for="item in recommendList"
+          :key="item.goodsId"
+        >
+          <view class="item-container">
+            <image :src="item.images[0]" />
+            <view class="name">{{ item.name }}</view>
+            <view class="info" @tap.stop.prevent>
+              <view class="price">￥{{ item.price }}</view>
+              <uni-number-box
+                class="number-box"
+                v-if="item.cartGoodsNum"
+                @change.stop="($event) => addShoppingCart(item, $event, '')"
+                v-model="item.cartGoodsNum"
+              />
+              <view
+                v-else
+                @tap="($event) => addShoppingCart(item, 1, 'first')"
+                class="ftysIcon icon-a-jiagou2x"
+              ></view>
+            </view>
+          </view>
+        </view>
       </view>
       <!-- 吸底工具栏 -->
       <view class="toolbar">
@@ -429,7 +492,6 @@ const onTapManage = () => {
 .cart-list {
   margin: 0 20rpx;
   position: relative;
-  padding-bottom: 100rpx;
   background-color: #fff;
   top: -270rpx;
   border-radius: 20rpx;
@@ -626,14 +688,62 @@ const onTapManage = () => {
   }
 }
 
+.recommand-list-container {
+  position: relative;
+  top: -270rpx;
+  height: 100%;
+  margin: 20rpx 20rpx 0;
+
+  .recommand-title {
+    text-align: center;
+  }
+
+  .item {
+    width: 50%;
+    display: inline-block;
+
+    .item-container {
+      background-color: #fff;
+      margin: 10rpx;
+      padding: 10rpx;
+      border-radius: 10rpx;
+      min-height: 400rpx;
+      text-align: center;
+    }
+
+    image {
+      width: 300rpx;
+      height: 300rpx;
+    }
+
+    .name {
+      display: flex;
+    }
+
+    .info {
+      display: flex;
+      justify-content: space-between;
+
+      .price {
+        color: #ff5040;
+      }
+    }
+  }
+}
+
 // 空状态
+.cart-blank {
+  position: relative;
+  top: -270rpx;
+}
+
 .cart-blank,
 .login-blank {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  height: 60vh;
+  // height: 60vh;
 
   .image {
     width: 400rpx;
@@ -654,7 +764,7 @@ const onTapManage = () => {
     font-size: 26rpx;
     border-radius: 60rpx;
     color: #fff;
-    background-color: #27ba9b;
+    background-color: #ff704d;
   }
 }
 

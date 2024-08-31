@@ -1,8 +1,9 @@
 @font-face {
-  font-family: "iconfont"; /* Project id 4654653 */
-  src: url('https://at.alicdn.com/t/c/font_4654653_8p1i30e29mf.woff2?t=1725008068221') format('woff2'),
-       url('https://at.alicdn.com/t/c/font_4654653_8p1i30e29mf.woff?t=1725008068221') format('woff'),
-       url('https://at.alicdn.com/t/c/font_4654653_8p1i30e29mf.ttf?t=1725008068221') format('truetype');
+  font-family: "iconfont";
+  /* Project id 4654653 */
+  src: url('http://at.alicdn.com/t/c/font_4654653_flwi39a9umq.woff2?t=1725115221810') format('woff2'),
+    url('http://at.alicdn.com/t/c/font_4654653_flwi39a9umq.woff?t=1725115221810') format('woff'),
+    url('http://at.alicdn.com/t/c/font_4654653_flwi39a9umq.ttf?t=1725115221810') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +12,11 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-jingxuantuijian:before {
+  content: "\e69a";
+  color: rgba(255, 112, 64, 1);
 }
 
 .icon-gengduo1:before {

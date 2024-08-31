@@ -8,12 +8,14 @@ import {
 import { useMemberStore } from '@/stores'
 import type { SolaShopGuessInstance } from '@/types/component'
 import type { PageParams } from '@/types/global'
-import { onShow } from '@dcloudio/uni-app'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import unshipcustomer from './components/unshipcustomer.vue'
 import unshipcustomerorders from './components/unshipcustomerorders.vue'
 import completeorder from './components/completeorder.vue'
 import completeorderdetail from './components/completeorderdetail.vue'
+import { getMyCouponListAPI } from '@/services/coupon'
+import { getFullPerformanceAPI } from '@/services/my'
 
 // 获取会员信息
 const memberStore = useMemberStore()
@@ -33,6 +35,12 @@ const isCompleteDetail = ref(false)
 const activeIndex = ref('1')
 const onChangeIndex = (val: string) => {
   activeIndex.value = val
+}
+// 获取优惠券总数
+const couponNum = ref('')
+const getCouponNum = async () => {
+  const res = await getMyCouponListAPI()
+  couponNum.value = res.result.total
 }
 // 查看当前账号是主账号还是子账号 1:主账号 2:子账号
 let user_role = memberStore.profile?.userinfo.user_role
@@ -81,12 +89,17 @@ const orderTypes = [
 ]
 // 优惠券、欠款、余额
 const CouponTypes = ref([
-  { name: '优惠券', data: '38', desc: '下单立省' },
-  { name: '欠款', data: '2677.00', desc: '当前欠款' },
-  { name: '账户余额', data: '0.00', desc: '在线充值' },
+  { name: '优惠券', data: couponNum.value || '0', desc: '下单立省' },
+  {
+    name: '欠款',
+    data: memberStore.profile?.userinfo.credit_money || '暂无欠款',
+    desc: '当前欠款',
+  },
+  { name: '账户余额', data: memberStore.profile?.userinfo.money || '0.00', desc: '在线充值' },
 ])
-// 常用工具
-const ToolTypes = [
+// 客户常用工具
+let CustomerToolTypes: any = []
+let CustomerMainToolTypes = [
   { type: 1, name: '子账号', icon: 'icon-touxiang' },
   { type: 2, name: '我的报表', icon: 'icon-baobiao' },
   { type: 3, name: '导出对账单', icon: 'icon-shujuguanli-daohang-daorushuju' },
@@ -94,16 +107,71 @@ const ToolTypes = [
   { type: 5, name: '意见反馈', icon: 'icon-yijianfankui' },
   { type: 6, name: '在线客服', icon: 'icon-kefu' },
 ]
+let CustomerSubToolTypes = [
+  { type: 3, name: '导出对账单', icon: 'icon-shujuguanli-daohang-daorushuju' },
+  { type: 4, name: '新品需求', icon: 'icon-xinpin' },
+  { type: 5, name: '意见反馈', icon: 'icon-yijianfankui' },
+  { type: 6, name: '在线客服', icon: 'icon-kefu' },
+]
+if (user_role?.toString() === '1') {
+  CustomerToolTypes = CustomerMainToolTypes
+}
+if (user_role?.toString() === '2') {
+  CustomerToolTypes = CustomerSubToolTypes
+}
 
+// 业务员常用工具
+const SalesmanToolTypes = [
+  { type: 1, name: '我的商户', icon: 'icon-wodeshanghu', userRole: user_role },
+  { type: 2, name: '客户账款', icon: 'icon-shouzhangben', userRole: user_role },
+  { type: 3, name: '渠道订单', icon: 'icon-dingwei1', userRole: user_role },
+  { type: 4, name: '下单情况', icon: 'icon-xiadanqingkuang', userRole: user_role },
+  { type: 5, name: '意见反馈', icon: 'icon-yijianfankui', userRole: user_role },
+  { type: 6, name: '在线客服', icon: 'icon-kefu', userRole: user_role },
+]
+// 最终展示的常用工具
+let showToolTypes: any = []
+if (type_id?.toString() === '3' || type_id?.toString() === '4' || type_id?.toString() === '5') {
+  showToolTypes = CustomerToolTypes
+} else if (type_id?.toString() === '1') {
+  showToolTypes = SalesmanToolTypes
+} else {
+  showToolTypes = []
+}
 // 帮助中心
 const HelpCenterTypes = [
-  { type: 1, text: '售后规则', icon: 'icon-shouhou' },
-  { type: 2, text: '服务条款', icon: 'icon-fuwutiaokuan' },
-  { type: 3, text: '关于我们', icon: 'icon-guanyuwomen' },
+  { type: 1, name: '售后规则', icon: 'icon-shouhou' },
+  { type: 2, name: '服务条款', icon: 'icon-fuwutiaokuan' },
+  { type: 3, name: '关于我们', icon: 'icon-guanyuwomen' },
 ]
-
+const monthData = ref([
+  { value: 1, text: '01月' },
+  { value: 2, text: '02月' },
+  { value: 3, text: '03月' },
+  { value: 4, text: '04月' },
+  { value: 5, text: '05月' },
+  { value: 6, text: '06月' },
+  { value: 7, text: '07月' },
+  { value: 8, text: '08月' },
+  { value: 9, text: '09月' },
+  { value: 10, text: '10月' },
+  { value: 11, text: '11月' },
+  { value: 12, text: '12月' },
+])
+const currentMonth = ref('')
+const now = new Date()
+const month = (now.getMonth() + 1).toString().padStart(2, '0')
+currentMonth.value = month + '月'
 const { guessRef, onScrollToLower } = useGuessList()
-
+const profitLineData = ref({
+  categories: [] as string[],
+  series: [
+    {
+      name: '业绩',
+      data: [] as number[],
+    },
+  ],
+})
 // 图表相关
 const opts = {
   color: [
@@ -118,10 +186,20 @@ const opts = {
     '#ea7ccc',
   ],
   padding: [15, 10, 0, 15],
+  dataLabel: false, //数据点上的文本显示
+  dataPointShape: false, //是否显示数据点的图形标识
   enableScroll: false,
   legend: {},
   xAxis: {
-    disableGrid: true,
+    disableGrid: true, //不绘制网格
+    labelCount: 5, //数据点文字（刻度点）单屏幕限制显示的数量
+    fontSize: 10,
+    rotateLabel: true,
+    marginTop: 5,
+    // rotateAngle: 10,
+    // rotateLabel: true,//【旋转】数据点（刻度点）文字
+    // itemCount: 5,//单屏数据密度即图表可视区域内显示的X轴数据点数量，仅在启用enableScroll时有效
+    // fontColor: "#999"
   },
   yAxis: {
     gridType: 'dash',
@@ -136,37 +214,72 @@ const opts = {
   },
 }
 
-const lineData = {
-  categories: ['2018', '2019', '2020', '2021', '2022', '2023'],
-  series: [
-    {
-      name: '成交量A',
-      lineType: 'dash',
-      data: [35, 8, 25, 37, 4, 20],
-    },
-    {
-      name: '成交量B',
-      data: [70, 40, 65, 100, 44, 68],
-    },
-    {
-      name: '成交量C',
-      data: [100, 80, 95, 150, 112, 132],
-    },
-  ],
+const getFullPerformanceData = async (month: string) => {
+  profitLineData.value.categories = []
+  profitLineData.value.series[0].data = []
+  const res = await getFullPerformanceAPI({
+    month: monthData.value.filter((item) => item.text === month)[0].value.toString(),
+  })
+  res.result.picData.profit.forEach((item) => {
+    profitLineData.value.categories.push(item.date)
+    profitLineData.value.series[0].data.push(parseInt(item.value))
+  })
 }
+
 // 跳转
 const onJump = (data: any) => {
   switch (data.name) {
     case '优惠券':
       uni.navigateTo({ url: '/pages/coupon/coupon?from=my' })
       break
-    case '意见反馈':
-      uni.navigateTo({ url: '/pagesMember/feedback/feedback' })
+    case '欠款':
+      uni.navigateTo({ url: '/pagesMember/mydebt/mydebt' })
+      break
+    case '账户余额':
+      uni.navigateTo({ url: '/pagesMember/recharge/recharge' })
       break
     case '子账号':
       uni.navigateTo({ url: '/pagesMember/subaccount/subaccount' })
       break
-
+    case '我的报表':
+      uni.navigateTo({ url: '/pagesMember/reports/reports' })
+      break
+    case '导出对账单':
+      uni.navigateTo({ url: '/pagesMember/statement/statement' })
+      break
+    case '新品需求':
+      uni.navigateTo({ url: '/pagesMember/newproductdemand/newproductdemand' })
+      break
+    case '意见反馈':
+      uni.navigateTo({ url: '/pagesMember/feedback/feedback' })
+      break
+    case '在线客服':
+      uni.navigateTo({ url: '/pagesMember/customerservice/customerservice' })
+      break
+    case '我的商户':
+      uni.navigateTo({ url: '/pagesMember/mycustomer/mycustomer' })
+      break
+    case '客户账款':
+      uni.navigateTo({ url: '/pagesMember/debtSituation/debtSituation' })
+      break
+    case '渠道订单':
+      uni.navigateTo({ url: '/PagesOrder/channelorders/channelorders' })
+      break
+    case '下单情况':
+      uni.navigateTo({ url: '/pagesMember/orderstatus/orderstatus' })
+      break
+    case '售后规则':
+      uni.navigateTo({ url: '/pagesMember/salerules/salerules' })
+      break
+    case '服务条款':
+      uni.navigateTo({ url: '/pagesMember/servicerules/servicerules' })
+      break
+    case '关于我们':
+      uni.navigateTo({ url: '/pagesMember/aboutus/aboutus' })
+      break
+    case '业绩查看':
+      uni.navigateTo({ url: '/pagesMember/performance/performance' })
+      break
     default:
       break
   }
@@ -176,6 +289,10 @@ const keyword = ref('')
 const onChangeAccount = () => {
   uni.navigateTo({ url: '/pagesMember/changeaccount/changeaccount' })
 }
+onLoad(() => {
+  getCouponNum()
+  getFullPerformanceData(currentMonth.value)
+})
 </script>
 
 <template>
@@ -264,7 +381,9 @@ const onChangeAccount = () => {
             class="navigator"
             hover-class="none"
           >
-            <view class="data"
+            <view
+              class="data"
+              :class="item.name === '欠款' || item.name === '账户余额' ? 'red' : ''"
               >{{ item.data
               }}{{ item.name === '欠款' || item.name === '账户余额' ? '元' : '' }}</view
             >
@@ -274,12 +393,12 @@ const onChangeAccount = () => {
         </view>
       </view>
       <!-- 常用工具 -->
-      <view class="tools">
+      <view class="tools" v-if="showToolTypes.length > 0">
         <view class="title"> 常用工具 </view>
         <view
           class="tool-item"
           @tap="($event) => onJump(item)"
-          v-for="item in ToolTypes"
+          v-for="item in showToolTypes"
           :key="item.type"
         >
           <navigator :class="`ftysIcon ${item.icon}`" class="navigator" hover-class="none">
@@ -288,26 +407,31 @@ const onChangeAccount = () => {
         </view>
       </view>
       <!-- 帮助中心 -->
-      <view class="help-center">
+      <view
+        class="help-center"
+        v-if="
+          type_id?.toString() === '3' || type_id?.toString() === '4' || type_id?.toString() === '5'
+        "
+      >
         <view class="title"> 帮助中心 </view>
-        <view class="help-center-item" v-for="item in HelpCenterTypes" :key="item.type">
-          <navigator
-            :class="`ftysIcon ${item.icon}`"
-            :url="`/PagesOrder/list/list?type=${item.type}`"
-            class="navigator"
-            hover-class="none"
-          >
-            <text class="text">{{ item.text }}</text>
-          </navigator>
+        <view
+          class="help-center-item"
+          @tap="($event) => onJump(item)"
+          v-for="item in HelpCenterTypes"
+          :key="item.type"
+        >
+          <view :class="`ftysIcon ${item.icon}`" class="navigator" hover-class="none">
+            <text class="text">{{ item.name }}</text>
+          </view>
         </view>
       </view>
       <!-- 业务员图表 -->
-      <view v-if="type_id === '1'" class="charts-box">
-        <view class="title">
+      <view v-if="type_id?.toString() === '1'" class="charts-box">
+        <view class="title" @tap="($event) => onJump({ name: '业绩查看' })">
           <text class="left">30天业绩变化（发货）</text>
           <text class="right">更多</text>
         </view>
-        <qiun-data-charts type="line" :opts="opts" :chartData="lineData" />
+        <qiun-data-charts type="line" :dataLabel="false" :opts="opts" :chartData="profitLineData" />
       </view>
     </view>
     <view v-else class="driver-container">
@@ -365,7 +489,7 @@ const onChangeAccount = () => {
 <style lang="scss">
 page {
   height: 100%;
-  overflow: hidden;
+  // overflow: hidden;
   background-color: #f7f7f8;
 }
 
@@ -381,6 +505,11 @@ page {
 
 .viewport {
   height: 100%;
+}
+
+.container {
+  height: calc(100vh - 200rpx);
+  overflow: scroll;
 }
 
 .driver-container {
@@ -444,6 +573,7 @@ page {
 
 /* 用户信息 */
 .profile {
+  height: 200rpx;
   margin-top: 20rpx;
   position: relative;
   // background-color: #cfdcfa;
@@ -626,6 +756,10 @@ page {
       .data {
         font-size: 34rpx;
         white-space: nowrap;
+      }
+
+      .red {
+        color: rgba(255, 80, 64, 1);
       }
 
       .name {

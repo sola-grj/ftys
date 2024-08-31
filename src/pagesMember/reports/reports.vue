@@ -137,6 +137,9 @@ const onChangeIndex = (index: string) => {
 onLoad(() => {
   getOrderListData('week')
 })
+const goback = () => {
+  uni.navigateBack()
+}
 </script>
 
 <template>

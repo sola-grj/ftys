@@ -89,6 +89,14 @@ const onChangeIndex = (index: string) => {
 onLoad(() => {
   getOrderPerformanceData('today')
 })
+const goback = () => {
+  uni.navigateBack()
+}
+const makePhoneCall = (phoneNumber: string) => {
+  uni.makePhoneCall({
+    phoneNumber, //仅为示例
+  })
+}
 </script>
 
 <template>
@@ -151,7 +159,7 @@ onLoad(() => {
       <view v-for="item in orderList" :key="item.userId" class="table-item">
         <text class="name">{{ item.username }}</text>
         <text class="time">{{ item.orderTime }}</text>
-        <text class="ftysIcon icon-dianhua"></text>
+        <text @tap="($event) => makePhoneCall(item.mobile)" class="ftysIcon icon-dianhua"></text>
       </view>
     </view>
   </scroll-view>

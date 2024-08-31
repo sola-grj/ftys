@@ -16,11 +16,11 @@ export type MySuggestResult = {
 }
 
 export type DeliverItem = {
-  data: string
+  date: string
   value: string
 }
 export type ProfitItem = {
-  data: string
+  date: string
   value: string
 }
 

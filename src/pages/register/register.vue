@@ -293,7 +293,7 @@ const goToNext = async () => {
   if (query.type === 'register') {
     page.value++
   }
-  if (query.type === 'findPwd') {
+  if (query.type === 'findPwd' || query.type === 'resetPwd') {
     // 找回密码逻辑
     await formRef.value?.validate?.()
     const res = await resetPwdAPI({
@@ -301,10 +301,14 @@ const goToNext = async () => {
       newpassword: pwd.value,
       captcha: smsCode.value,
     })
-    uni.showToast({ icon: 'success', title: '修改成功' })
-    setTimeout(() => {
-      uni.navigateBack()
-    }, 6000)
+    if (res.code.toString() === '1') {
+      uni.showToast({ icon: 'success', title: '修改成功' })
+      setTimeout(() => {
+        uni.navigateBack()
+      }, 600)
+    } else {
+      uni.showToast({ icon: 'error', title: res.msg })
+    }
   }
 }
 

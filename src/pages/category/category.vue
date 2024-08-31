@@ -408,26 +408,29 @@ const onCollect = async (data: SearchBasicCategoryItem) => {
         <!-- 内容区域 -->
         <view class="search-list">
           <view class="fourth-category">
-            <view
-              :class="{
-                active:
-                  activeIndex === 0
-                    ? FourthActiveFruitIndex === index
-                    : FourthActiveDryIndex === index,
-              }"
-              @tap="
-                ($event) =>
-                  activeIndex === 0
-                    ? onTapFourthFruitType(item, index)
-                    : onTapFourthDryType(item, index)
-              "
-              class="fourth-item"
-              v-for="(item, index) in activeIndex === 0
-                ? currentFourthFruitTypeCategory
-                : currentFourthDryTypeCategory"
-              :key="item.id"
-              >{{ item.name }}
+            <view class="spred-container">
+              <view
+                :class="{
+                  active:
+                    activeIndex === 0
+                      ? FourthActiveFruitIndex === index
+                      : FourthActiveDryIndex === index,
+                }"
+                @tap="
+                  ($event) =>
+                    activeIndex === 0
+                      ? onTapFourthFruitType(item, index)
+                      : onTapFourthDryType(item, index)
+                "
+                class="fourth-item"
+                v-for="(item, index) in activeIndex === 0
+                  ? currentFourthFruitTypeCategory
+                  : currentFourthDryTypeCategory"
+                :key="item.id"
+                >{{ item.name }}
+              </view>
             </view>
+
             <view class="spread" @tap="typepopup?.open?.('top')">
               <text class="ftysIcon icon-xiangxiajiantou" />
             </view>
@@ -719,10 +722,16 @@ page {
     .fourth-category {
       position: relative;
       height: 100rpx;
-      display: flex;
+      // display: flex;
       width: 100%;
-      overflow-x: scroll;
+      // overflow-x: scroll;
       padding-right: 60rpx;
+
+      .spred-container {
+        display: flex;
+        width: 100%;
+        overflow: scroll;
+      }
 
       .spread {
         position: absolute;
@@ -731,8 +740,6 @@ page {
         font-size: 26rpx;
         color: rgba(50, 50, 51, 1);
         font-weight: 400;
-        margin-top: 20rpx;
-        // margin-right: 20rpx;
         display: inline-block;
         height: 60rpx;
         width: 60rpx;
@@ -742,6 +749,8 @@ page {
         background: #fff;
         white-space: nowrap;
         text-align: center;
+        top: 50%;
+        transform: translateY(-50%);
       }
 
       .fourth-item {

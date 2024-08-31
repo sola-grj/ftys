@@ -91,12 +91,12 @@ export type RecommendItem = {
   name: string
   images: string[]
   source: string
-  price: string
+  unit_price: string
   isCollect: string
   cartGoodsNum: number
   cartId: string
   fGoodsId: string
-  unit: string
+  units: string
 }
 
 export type RecommendResult = {

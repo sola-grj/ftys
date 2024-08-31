@@ -11,7 +11,7 @@ const onLogout = () => {
         // 清理用户信息
         memberStore.clearProfile()
         // 返回上一页
-        uni.navigateBack()
+        uni.reLaunch({ url: '/pages/login/login' })
       }
     },
   })
@@ -41,13 +41,13 @@ const onChangeSwitch = (e: any) => {
           <text class="ftysIcon icon-xiangyoujiantou"></text>
         </view>
       </view>
-      <view class="list-item">
+      <view class="list-item" v-if="memberStore.profile?.userinfo.type_id.toString() !== '2'">
         <view hover-class="none" class="item arrow">余额支付使用密码</view>
         <switch :checked="true" @change="onChangeSwitch" />
       </view>
     </view>
     <!-- 操作按钮 -->
-    <view class="action" v-if="memberStore.profile">
+    <view class="action">
       <view class="button" @tap="onLogout">退出登录</view>
     </view>
   </view>

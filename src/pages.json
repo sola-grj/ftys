@@ -329,6 +329,24 @@
 						"navigationStyle": "custom",
 						"navigationBarTitleText": "商户信息"
 					}
+				},
+				{
+					"path": "salerules/salerules",
+					"style": {
+						"navigationBarTitleText": "售后条款"
+					}
+				},
+				{
+					"path": "servicerules/servicerules",
+					"style": {
+						"navigationBarTitleText": "服务规则"
+					}
+				},
+				{
+					"path": "aboutus/aboutus",
+					"style": {
+						"navigationBarTitleText": "关于我们"
+					}
 				}
 			]
 		},
@@ -375,6 +393,13 @@
 						"navigationBarTitleText": "司机发货"
 					}
 				},
+				{
+					"path": "channelorders/channelorders",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "渠道订单"
+					}
+				}
 			]
 		}
 	],

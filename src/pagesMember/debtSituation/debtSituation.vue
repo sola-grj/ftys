@@ -5,7 +5,7 @@ import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
 import type { CustomerBillItem, MySuggestItem } from '@/types/my'
 import { onLoad } from '@dcloudio/uni-app'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 // 推荐分页参数
 const pageParams: Required<PageParams> = {
   page: 1,
@@ -25,37 +25,7 @@ const getCustomerBillListData = async () => {
   }
   const res = await getcustomerBillAPI()
   // 分页数据增加
-  const mockList = [
-    {
-      orderId: '1',
-      userId: '1',
-      username: '标题1',
-      mobile: '12311112222',
-      SDebt: '123',
-      HDebt: '-100',
-      totalDebt: '223',
-    },
-    {
-      orderId: '2',
-      userId: '1',
-      username: '标题2',
-      mobile: '12311112222',
-      SDebt: '-123',
-      HDebt: '100',
-      totalDebt: '223',
-    },
-    {
-      orderId: '3',
-      userId: '1',
-      username: '标题3',
-      mobile: '12311112222',
-      SDebt: '123',
-      HDebt: '100',
-      totalDebt: '-223',
-    },
-  ]
-  // customerBillList.value.push(...res.result.list)
-  customerBillList.value.push(...mockList)
+  customerBillList.value.push(...res.result.list)
 
   if (pageParams.page < res.result.total) {
     // 页码累加
@@ -83,6 +53,16 @@ const judgeAmount = (money: string) => {
   }
   return true
 }
+const goback = () => {
+  uni.navigateBack()
+}
+watch(
+  () => customerInfo,
+  (newValue, oldValue) => {
+    getCustomerBillListData()
+  },
+  { immediate: false, deep: true },
+)
 </script>
 
 <template>
@@ -97,9 +77,15 @@ const judgeAmount = (money: string) => {
       <text class="text">客户账款</text>
     </view>
     <view class="container">
-      <view @tap="goToSearch" class="search">
-        <text class="ftysIcon icon-sousuo"></text>
-        <input v-model="customerInfo" />
+      <view class="search">
+        <uni-easyinput
+          :inputBorder="false"
+          placeholder="请输入客户名称/客户编码/客户账号"
+          class="search"
+          prefixIcon="search"
+          v-model="customerInfo"
+        >
+        </uni-easyinput>
       </view>
       <view class="debt-item" :key="item.orderId" v-for="item in customerBillList">
         <view class="debt-title">
@@ -186,26 +172,18 @@ page {
     padding: 30rpx;
 
     .search {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 4rpx 0 26rpx;
-      height: 64rpx;
-      margin: 16rpx 20rpx;
-      font-size: 28rpx;
-      border-radius: 32rpx;
-      background-color: rgba(255, 255, 255, 0.5);
-      border: 1px solid #ff5040;
+      border-radius: 40rpx;
+      border: 1px solid rgba(255, 80, 64, 1);
 
-      .search-btn {
-        color: #fff;
-        border-radius: 30rpx;
-        height: 54rpx;
-        line-height: 54rpx;
-        background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
-        font-size: 26rpx;
-        font-weight: 400;
-        margin: 0;
+      .uni-easyinput {
+        width: 90%;
+        margin: auto;
+
+        .uni-easyinput__content {
+          border-color: rgba(255, 80, 64, 1) !important;
+          border-radius: 40rpx !important;
+          height: 70rpx;
+        }
       }
     }
 

@@ -110,31 +110,36 @@ const goback = () => {
             @tap="($event) => onChangeIndex('100')"
             :class="activeIndex === '100' ? 'selected' : ''"
             class="item"
-            >￥100</view
+          >
+            ￥100</view
           >
           <view
             @tap="($event) => onChangeIndex('300')"
             :class="activeIndex === '300' ? 'selected' : ''"
             class="item"
-            >￥300</view
+          >
+            ￥300</view
           >
           <view
             @tap="($event) => onChangeIndex('500')"
             :class="activeIndex === '500' ? 'selected' : ''"
             class="item"
-            >￥500</view
+          >
+            ￥500</view
           >
           <view
             @tap="($event) => onChangeIndex('800')"
             :class="activeIndex === '800' ? 'selected' : ''"
             class="item"
-            >￥800</view
+          >
+            ￥800</view
           >
           <view
             @tap="($event) => onChangeIndex('1000')"
             :class="activeIndex === '1000' ? 'selected' : ''"
             class="item"
-            >￥1000</view
+          >
+            ￥1000</view
           >
           <view
             @tap="($event) => onChangeIndex('define')"
@@ -162,7 +167,7 @@ page {
 
 .viewport {
   height: 100%;
-  background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
+  background: rgba(39, 178, 86, 1);
 
   .title {
     position: relative;

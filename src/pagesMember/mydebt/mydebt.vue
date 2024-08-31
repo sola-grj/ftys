@@ -116,27 +116,32 @@ const selectedCardListMoney = computed(() => {
 
 // 立即支付
 const goToPayment = async () => {
-  let capitalIds: string[] = []
-  selectedCardList.value.forEach((item) => {
-    capitalIds.push(item.capitalId)
-  })
-  const res = await creditRepayAPI({
-    capitalIds: capitalIds.join(','),
-    repayMoney: selectedCardListMoney.value,
-  })
-  if (res.code === '1') {
-    uni.showToast({
-      icon: 'success',
-      title: '还款成功',
-    })
-    myDebtList.value = []
-    allPageParams.page = 1
-    await getMyDebtData()
+  if (seletedCardlistCount.value === 0) {
+    uni.showToast({ icon: 'error', title: '请选择需要支付的订单' })
+    return
   } else {
-    uni.showToast({
-      icon: 'fail',
-      title: res.msg,
+    let capitalIds: string[] = []
+    selectedCardList.value.forEach((item) => {
+      capitalIds.push(item.capitalId)
     })
+    const res = await creditRepayAPI({
+      capitalIds: capitalIds.join(','),
+      repayMoney: selectedCardListMoney.value,
+    })
+    if (res.code === '1') {
+      uni.showToast({
+        icon: 'success',
+        title: '还款成功',
+      })
+      myDebtList.value = []
+      allPageParams.page = 1
+      await getMyDebtData()
+    } else {
+      uni.showToast({
+        icon: 'fail',
+        title: res.msg,
+      })
+    }
   }
 }
 </script>

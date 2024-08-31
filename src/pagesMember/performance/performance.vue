@@ -67,11 +67,11 @@ const getFullPerformanceData = async (month: string) => {
   })
   performance.value = res.result
   res.result.picData.profit.forEach((item) => {
-    profitLineData.value.categories.push(item.data)
+    profitLineData.value.categories.push(item.date)
     profitLineData.value.series[0].data.push(parseInt(item.value))
   })
   res.result.picData.deliver.forEach((item) => {
-    deliverLineData.value.categories.push(item.data)
+    deliverLineData.value.categories.push(item.date)
     deliverLineData.value.series[0].data.push(parseInt(item.value))
   })
 }
@@ -105,10 +105,16 @@ const opts = {
     '#ea7ccc',
   ],
   padding: [15, 10, 0, 15],
+  dataLabel: false, //数据点上的文本显示
+  dataPointShape: false, //是否显示数据点的图形标识
   enableScroll: false,
   legend: {},
   xAxis: {
-    disableGrid: true,
+    disableGrid: true, //不绘制网格
+    labelCount: 5, //数据点文字（刻度点）单屏幕限制显示的数量
+    fontSize: 10,
+    rotateLabel: true,
+    marginTop: 5,
   },
   yAxis: {
     gridType: 'dash',
@@ -132,6 +138,9 @@ const lineData = {
       data: [35, 8, 25, 37, 4, 20],
     },
   ],
+}
+const goback = () => {
+  uni.navigateBack()
 }
 </script>
 

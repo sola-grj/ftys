@@ -52,6 +52,12 @@ const addFeedback = () => {
   uni.navigateTo({ url: '/pagesMember/addfeedback/addfeedback' })
 }
 
+const makePhoneCall = (phoneNumber: string) => {
+  uni.makePhoneCall({
+    phoneNumber, //仅为示例
+  })
+}
+
 watch(
   () => props.keyword,
   (newValue, oldValue) => {
@@ -61,7 +67,7 @@ watch(
     shipedOrderList.value = []
     getShipedOrderListData()
   },
-  { immediate: true, deep: true },
+  { immediate: false, deep: true },
 )
 </script>
 
@@ -88,7 +94,9 @@ watch(
           <view class="b-item">
             <view class="label">联系电话</view>
             <view class="value phone">
-              <text class="ftysIcon icon-dianhua">{{ item.mobile }}</text>
+              <text @tap="($event) => makePhoneCall(item.mobile)" class="ftysIcon icon-dianhua">{{
+                item.mobile
+              }}</text>
             </view>
           </view>
           <view class="b-item">

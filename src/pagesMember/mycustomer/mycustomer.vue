@@ -164,10 +164,7 @@ const goToDetail = (data: MyMerchantItem) => {
       </view>
     </scroll-view>
     <uni-popup ref="typepopup" background-color="#fff">
-      <view
-        class="customer-popup-content"
-        :class="{ 'popup-height': type === 'left' || type === 'right' }"
-      >
+      <view class="customer-popup-content">
         <radio-group @change="radioChange">
           <label
             class="uni-list-cell uni-list-cell-pd"

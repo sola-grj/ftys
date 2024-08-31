@@ -94,7 +94,6 @@ const switchDebtMoneyChange = (e: any) => {
 }
 const onSave = async () => {
   await formRef.value?.validate?.()
-  // debugger
   const sub_account_level = `${Number(form.value.accountstatus)}${Number(
     form.value.isShowPrice,
   )}${Number(form.value.isShowDebtAmount)}`

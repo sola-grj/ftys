@@ -72,6 +72,9 @@ onLoad(() => {
 const addFeedback = () => {
   uni.navigateTo({ url: '/pagesMember/addfeedback/addfeedback' })
 }
+const goback = () => {
+  uni.navigateBack()
+}
 </script>
 
 <template>
@@ -89,8 +92,12 @@ const addFeedback = () => {
         </view>
         <view class="content">{{ item.content }}</view>
         <view class="images-container" v-if="item.images">
-          <image class="images" :key="img" v-for="img in item.images.split(',')"
-            :src="'//img.js.design/assets/img/6690dc2515275e6eaeb2e9ab.png#65ae707b4e6dae0ff083f534f478cc2a'" />
+          <image
+            class="images"
+            :key="img"
+            v-for="img in item.images.split(',')"
+            :src="'//img.js.design/assets/img/6690dc2515275e6eaeb2e9ab.png#65ae707b4e6dae0ff083f534f478cc2a'"
+          />
         </view>
       </view>
     </view>
@@ -154,7 +161,8 @@ page {
       border-bottom: 1px solid #f2f4f7;
 
       .f-title {
-        .f-text {}
+        .f-text {
+        }
 
         .f-time {
           margin-left: 15rpx;

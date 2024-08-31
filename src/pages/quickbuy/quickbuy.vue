@@ -219,27 +219,33 @@ onLoad(() => {
         </view>
       </view>
       <view class="fourth-category">
-        <view
-          :class="{
-            active:
-              activeIndex === 0 ? commonlyCategoryIndex === index : recentlyCategoryIndex === index,
-          }"
-          @tap="
-            ($event) =>
-              activeIndex === 0
-                ? onTapCommonlyCategory(item, index)
-                : onTapRecentlyCategory(item, index)
-          "
-          class="fourth-item"
-          v-for="(item, index) in activeIndex === 0
-            ? commonlyUsedCategoryList
-            : recentlyBuyCategoryList"
-          :key="item.categoryId"
-          >{{ item.categoryName }}
+        <view class="spred-container">
+          <view
+            :class="{
+              active:
+                activeIndex === 0
+                  ? commonlyCategoryIndex === index
+                  : recentlyCategoryIndex === index,
+            }"
+            @tap="
+              ($event) =>
+                activeIndex === 0
+                  ? onTapCommonlyCategory(item, index)
+                  : onTapRecentlyCategory(item, index)
+            "
+            class="fourth-item"
+            v-for="(item, index) in activeIndex === 0
+              ? commonlyUsedCategoryList
+              : recentlyBuyCategoryList"
+            :key="item.categoryId"
+            >{{ item.categoryName }}
+          </view>
         </view>
+
         <view class="spread" @tap="typepopup?.open?.('top')">
           <text class="ftysIcon icon-xiangxiajiantou" />
         </view>
+
         <uni-popup ref="typepopup" background-color="#fff">
           <view class="popup-content" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
             <view class="text">分类</view>
@@ -398,8 +404,12 @@ page {
       height: 100rpx;
       display: flex;
       width: 100%;
-      overflow-x: scroll;
-      padding-right: 60rpx;
+
+      .spred-container {
+        display: flex;
+        width: 100%;
+        overflow: scroll;
+      }
 
       .spread {
         position: absolute;
@@ -408,8 +418,6 @@ page {
         font-size: 26rpx;
         color: rgba(50, 50, 51, 1);
         font-weight: 400;
-        // margin-top: 20rpx;
-        margin-right: 20rpx;
         display: inline-block;
         height: 60rpx;
         width: 60rpx;
@@ -419,6 +427,8 @@ page {
         background: #fff;
         white-space: nowrap;
         text-align: center;
+        top: 50%;
+        transform: translateY(-50%);
       }
 
       .fourth-item {

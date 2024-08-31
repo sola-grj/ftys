@@ -11,7 +11,7 @@ import type {
   SkuPopupLocaldata,
 } from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
 import { computed } from 'vue'
-import { addShoppingCartAPI, postMemberCartAPI } from '@/services/cart'
+import { addShoppingCartAPI, getShoppingCartAPI, postMemberCartAPI } from '@/services/cart'
 import { useAddressStore } from '@/stores/modules/address'
 import type { AddressItem } from '@/types/address'
 import { getMemberAddressAPI } from '@/services/address'
@@ -67,10 +67,16 @@ const getMemberAddressData = async () => {
   const res = await getMemberAddressAPI()
   addressList.value = res.result
 }
-
+// 实时获取购物车总数量
+const cartNum = ref(0)
+const getCartNum = async () => {
+  const res = await getShoppingCartAPI()
+  cartNum.value = res.result.length
+}
 onLoad(() => {
   getGoodsByIdData()
   goodsDetailPageRecommendGoodsData()
+  getCartNum()
 })
 // 轮播图变化的回调
 const currentIndex = ref(0)
@@ -184,10 +190,14 @@ const addShoppingCart = async (data: GoodsResult, num: number, type: string) => 
       }
     }
   }
+  await getCartNum()
 }
 
 const goToDetail = (data: RecommendItem) => {
   uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
+}
+const goToCart = () => {
+  uni.switchTab({ url: '/pages/cart/cart' })
 }
 </script>
 
@@ -326,8 +336,8 @@ const goToDetail = (data: RecommendItem) => {
       <button class="icons-button" open-type="contact">
         <text class="ftysIcon icon-kefu"></text>客服
       </button>
-      <navigator class="icons-button" url="/pages/cart/cart2" open-type="navigate">
-        <uni-badge class="uni-badge-left-margin" :text="8" absolute="rightTop" size="small">
+      <navigator class="icons-button" @tap="goToCart">
+        <uni-badge class="uni-badge-left-margin" :text="cartNum" absolute="rightTop" size="small">
           <view class="box"><text class="ftysIcon icon-gouwuche"></text></view>
         </uni-badge>
         <view class="text">购物车</view>
