@@ -8,13 +8,20 @@ defineProps<{
 
 const onTap = (item: BasicCategoryItem) => {
   console.log('====000', `/pages/category/category?type=${item.id}`)
-  uni.switchTab({ url: `/pages/category/category?type=${item.id}` })
+  uni.switchTab({
+    url: `/pages/category/category?type=${item.id}`,
+    success: (success) => {
+      uni.$emit('categoryInfo', {
+        categoryInfo: item,
+      })
+    },
+  })
 }
 </script>
 
 <template>
   <view class="category">
-    <navigator
+    <view
       class="category-item"
       hover-class="none"
       v-for="item in list"
@@ -23,7 +30,7 @@ const onTap = (item: BasicCategoryItem) => {
     >
       <image class="icon" :src="item.image"></image>
       <text class="text">{{ item.name }}</text>
-    </navigator>
+    </view>
   </view>
 </template>
 
@@ -48,6 +55,7 @@ const onTap = (item: BasicCategoryItem) => {
       width: 100rpx;
       height: 100rpx;
     }
+
     .text {
       font-size: 26rpx;
       color: #666;

@@ -3,7 +3,7 @@ import { getCategoryTopAPI } from '@/services/category'
 import { getCategoryAPI, getHomeBannerAPI } from '@/services/home'
 import type { CategoryTopItem } from '@/types/category'
 import type { BannerItem, BasicCategoryItem, SearchBasicCategoryItem } from '@/types/home'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import PageSkeleton from './components/PageSkeleton.vue'
 import { useMemberStore } from '@/stores'
@@ -20,7 +20,7 @@ import {
 const query = defineProps<{
   type: string
 }>()
-
+const tabId = ref('')
 // 弹出层组件
 const typepopup = ref<UniHelper.UniPopupInstance>()
 
@@ -137,14 +137,23 @@ const getTypeListData = async () => {
     dryCargoCategory.value[0].childlist[0].id,
   )
 }
-const scrollLeft = ref(300)
+const scrollLeft = ref(0)
+onShow(() => {
+  uni.$on('categoryInfo', async (data) => {
+    await getTypeListData()
+    const index = fruitCategory.value.findIndex((v) => v.id === data.categoryInfo.id)
+    console.log('index====', index)
+    if (activeIndex.value === 0) {
+      onTapTwoLevelFruit(data.categoryInfo, index)
+    } else {
+      onTapTwoLevelDry(data.categoryInfo, index)
+    }
+  })
+})
 
 // 页面加载
 onLoad(async () => {
-  await Promise.all([getTypeListData()])
-  setTimeout(() => {
-    scrollLeft.value = 800
-  }, 100)
+  await getTypeListData()
 })
 const goToSearch = () => {
   uni.navigateTo({ url: '/pages/search/search' })
@@ -158,6 +167,7 @@ const onChangeIndex = (index: number) => {
 
 // 点击二级分类
 const onTapTwoLevelFruit = (data: BasicCategoryItem, index: number) => {
+  tabId.value = data.id
   // 重置分页器
   fruitPageParams.page = 1
   fruitPageParams.pageSize = 10
@@ -336,8 +346,14 @@ const onCollect = async (data: SearchBasicCategoryItem) => {
       <button class="search-btn">搜索</button>
     </view>
     <view class="head-types">
-      <scroll-view scroll-x="true" :scroll-left="scrollLeft">
+      <scroll-view
+        scroll-x="true"
+        :scroll-left="scrollLeft"
+        scroll-with-animation
+        :scroll-into-view="'tab' + tabId"
+      >
         <view
+          :id="'tab' + item.id"
           class="head-types-item"
           @tap="
             ($event) =>
