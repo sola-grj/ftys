@@ -15,7 +15,7 @@ import CategoryPannel from './components/CategoryPannel.vue'
 import PageSkeleton from './components/PageSkeleton.vue'
 import TodayHasToBuy from './components/TodayHasToBuy.vue'
 import GuessLike from './components/GuessLike.vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import type {
   BannerItem,
   BasicCategoryItem,
@@ -132,6 +132,9 @@ const isLoading = ref(false)
 
 // uniapp 生命周期
 onLoad(async () => {
+  uni.showTabBar({
+    animation: true,
+  })
   isLoading.value = true
   await Promise.all([
     getTopListData(),
@@ -174,6 +177,11 @@ const onRefresherrefresh = async () => {
   // 关闭动画
   isTriggered.value = false
 }
+onShow(() => {
+  uni.showTabBar({
+    animation: true,
+  })
+})
 </script>
 
 <template>

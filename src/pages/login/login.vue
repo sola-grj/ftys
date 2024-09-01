@@ -90,16 +90,26 @@ const goToLogin = async () => {
   // 保存会员信息
   const memberStore = useMemberStore()
   memberStore.setProfile(res!.result)
-  uni.showToast({ icon: 'success', title: '登录成功' })
-  setTimeout(() => {
-    // 页面跳转
-    // @ts-ignore
-    if (res.result.userinfo.type_id.toString() === '2') {
-      uni.reLaunch({ url: '/pages/my/my' })
-    } else {
-      uni.reLaunch({ url: '/pages/index/index' })
-    }
-  }, 500)
+  if (res?.code.toString() === '1') {
+    uni.showToast({ icon: 'success', title: '登录成功' })
+    setTimeout(() => {
+      // 页面跳转
+      // @ts-ignore
+      if (res.result.userinfo.type_id.toString() === '2') {
+        uni.hideTabBar({
+          animation: true,
+        })
+        uni.reLaunch({ url: '/pages/my/my' })
+      } else {
+        uni.showTabBar({
+          animation: true,
+        })
+        uni.reLaunch({ url: '/pages/index/index' })
+      }
+    }, 500)
+  } else {
+    uni.showToast({ icon: 'error', title: res?.msg })
+  }
 }
 const goToRegister = () => {
   uni.navigateTo({
