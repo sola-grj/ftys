@@ -3,8 +3,6 @@ import { getGoodsByIdAPI, goodsDetailPageRecommendGoodsAPI } from '@/services/go
 import type { GoodsResult } from '@/types/goods'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
-import ServicePannel from './components/ServicePannel.vue'
-import AddressPannel from './components/AddressPannel.vue'
 import type {
   SkuPopupEvent,
   SkuPopupInstanceType,

@@ -5,7 +5,6 @@ import type { CategoryTopItem } from '@/types/category'
 import type { BannerItem, BasicCategoryItem, SearchBasicCategoryItem } from '@/types/home'
 import { onLoad, onShow } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
-import PageSkeleton from './components/PageSkeleton.vue'
 import { useMemberStore } from '@/stores'
 import { getGoodsListByIdAPI, goodsDetailPageRecommendGoodsAPI } from '@/services/goods'
 import type { PageParams } from '@/types/global'
@@ -515,7 +514,6 @@ const onCollect = async (data: SearchBasicCategoryItem) => {
       </scroll-view>
     </view>
   </view>
-  <!-- <PageSkeleton v-else /> -->
 </template>
 
 <style lang="scss">
