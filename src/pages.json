@@ -409,6 +409,12 @@
 			"packages": [
 				"pagesMember"
 			]
+		},
+		"pages/index/index": {
+			"network": "all",
+			"packages": [
+				"PagesOrder"
+			]
 		}
 	}
 }

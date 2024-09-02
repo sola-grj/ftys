@@ -196,8 +196,8 @@ const addShoppingCart = async (data: CartItem & RecommendItem, num: number, type
         goodsId: data.goodsId,
         fGoodsId: data.fGoodsId,
         num,
-        units: data.units || data.unit,
-        unitPrice: data.unit_price || data.price,
+        units: data.units || data.units,
+        unitPrice: data.unit_price || data.unit_price,
       },
       num,
     )
@@ -234,8 +234,8 @@ const addShoppingCart = async (data: CartItem & RecommendItem, num: number, type
         {
           cartId: currentCartId.value || data.id || data.cartId,
           num,
-          units: data.units || data.unit,
-          unitPrice: data.unit_price || data.price,
+          units: data.units || data.units,
+          unitPrice: data.unit_price || data.unit_price,
         },
         num,
       )
@@ -378,7 +378,7 @@ const goToDetail = (data: RecommendItem) => {
             <image :src="item.images[0]" />
             <view class="name">{{ item.name }}</view>
             <view class="info" @tap.stop.prevent>
-              <view class="price">￥{{ item.price }}</view>
+              <view class="price">￥{{ item.unit_price }}</view>
               <uni-number-box
                 class="number-box"
                 v-if="item.cartGoodsNum"

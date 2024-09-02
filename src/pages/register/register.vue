@@ -284,7 +284,12 @@ const onSubmit = async () => {
     images: imageList.value.join(','),
     sale_id: inviteCode.value,
   })
-  uni.navigateTo({ url: '/pages/login/login' })
+  if (res.code.toString() === '1') {
+    uni.showToast({ icon: 'success', title: '注册成功' })
+    uni.reLaunch({ url: '/pages/login/login' })
+  } else {
+    uni.showToast({ icon: 'success', title: res.msg })
+  }
 
   console.log('res======', res)
 }
