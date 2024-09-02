@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import { useGuessList } from '@/composables'
-import {
-  getUnShipCustomerAPI,
-  type ShipedOrderItem,
-  type UnShipCustomerItem,
-} from '@/services/order'
+import { type ShipedOrderItem, type UnShipCustomerItem } from '@/services/order'
 import { useMemberStore } from '@/stores'
-import type { SolaShopGuessInstance } from '@/types/component'
-import type { PageParams } from '@/types/global'
 import { onLoad, onShow } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import unshipcustomer from './components/unshipcustomer.vue'
@@ -230,7 +224,7 @@ const getFullPerformanceData = async (month: string) => {
 const onJump = (data: any) => {
   switch (data.name) {
     case '优惠券':
-      uni.navigateTo({ url: '/pages/coupon/coupon?from=my' })
+      uni.navigateTo({ url: '/PagesOrder/coupon/coupon?from=my' })
       break
     case '欠款':
       uni.navigateTo({ url: '/pagesMember/mydebt/mydebt' })
@@ -320,7 +314,7 @@ onLoad(() => {
       </view>
       <!-- 情况2：未登录 -->
       <view class="overview" v-else>
-        <navigator url="/pages/login/login" hover-class="none">
+        <navigator url="/PagesOrder/login/login" hover-class="none">
           <image
             class="avatar gray"
             mode="aspectFill"
@@ -329,7 +323,7 @@ onLoad(() => {
           </image>
         </navigator>
         <view class="meta">
-          <navigator url="/pages/login/login" hover-class="none" class="nickname">
+          <navigator url="/PagesOrder/login/login" hover-class="none" class="nickname">
             未登录
           </navigator>
           <view class="extra">

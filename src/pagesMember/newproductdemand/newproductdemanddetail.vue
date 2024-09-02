@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import type { GetMyGoodsApplyItem } from '@/services/goods'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onUnload } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const currentInfo = ref<GetMyGoodsApplyItem>({} as GetMyGoodsApplyItem)
+onUnload(() => {
+  uni.$off('detail')
+})
 onLoad(() => {
   uni.$on('detail', (data) => {
     currentInfo.value = data.currentInfo

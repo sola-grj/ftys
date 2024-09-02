@@ -4,13 +4,13 @@ import type { TopItem } from '@/types/home'
 // 获取屏幕边界到安全区域的距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const goToSearch = () => {
-  uni.navigateTo({ url: '/pages/search/search' })
+  uni.navigateTo({ url: '/PagesOrder/search/search' })
 }
 const query = defineProps<{
   topList: TopItem[]
 }>()
 const goToDetail = (data: TopItem) => {
-  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
+  uni.navigateTo({ url: `/PagesOrder/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
 }
 </script>
 

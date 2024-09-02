@@ -113,12 +113,12 @@ const goToLogin = async () => {
 }
 const goToRegister = () => {
   uni.navigateTo({
-    url: '/pages/register/register?type=register',
+    url: '/PagesOrder/register/register?type=register',
   })
 }
 const goToFindPwd = () => {
   uni.navigateTo({
-    url: '/pages/register/register?type=findPwd',
+    url: '/PagesOrder/register/register?type=findPwd',
   })
 }
 const disabled = computed(() => {

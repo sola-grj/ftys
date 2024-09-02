@@ -3,7 +3,7 @@ import { getCategoryTopAPI } from '@/services/category'
 import { getCategoryAPI, getHomeBannerAPI } from '@/services/home'
 import type { CategoryTopItem } from '@/types/category'
 import type { BannerItem, BasicCategoryItem, SearchBasicCategoryItem } from '@/types/home'
-import { onLoad, onShow } from '@dcloudio/uni-app'
+import { onLoad, onShow, onUnload } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { useMemberStore } from '@/stores'
 import { getGoodsListByIdAPI, goodsDetailPageRecommendGoodsAPI } from '@/services/goods'
@@ -137,6 +137,9 @@ const getTypeListData = async () => {
   )
 }
 const scrollLeft = ref(0)
+onUnload(() => {
+  uni.$off('categoryInfo')
+})
 onShow(() => {
   uni.$on('categoryInfo', async (data) => {
     await getTypeListData()
@@ -155,7 +158,7 @@ onLoad(async () => {
   await getTypeListData()
 })
 const goToSearch = () => {
-  uni.navigateTo({ url: '/pages/search/search' })
+  uni.navigateTo({ url: '/PagesOrder/search/search' })
 }
 
 // 点击一级分类

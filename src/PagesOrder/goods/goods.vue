@@ -3,11 +3,6 @@ import { getGoodsByIdAPI, goodsDetailPageRecommendGoodsAPI } from '@/services/go
 import type { GoodsResult } from '@/types/goods'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
-import type {
-  SkuPopupEvent,
-  SkuPopupInstanceType,
-  SkuPopupLocaldata,
-} from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
 import { computed } from 'vue'
 import { addShoppingCartAPI, getShoppingCartAPI, postMemberCartAPI } from '@/services/cart'
 import { useAddressStore } from '@/stores/modules/address'
@@ -107,8 +102,7 @@ const openPopup = () => {
 }
 // 是否显示SKU组件
 const isShowSku = ref(false)
-// 商品信息
-const localdata = ref({} as SkuPopupLocaldata)
+
 // 按钮模式
 enum SkuMode {
   Both = 1,
@@ -121,23 +115,6 @@ const openSkuPopup = (val: SkuMode) => {
   isShowSku.value = true
   // 修改按钮模式
   mode.value = val
-}
-// sku组件实例
-const skuPopupRef = ref<SkuPopupInstanceType>()
-// 计算被选中的值
-const selectArrText = computed(() => {
-  return skuPopupRef.value?.selectArr?.join(' ').trim() || '请选择商品规格'
-})
-
-// 加入购物车事件
-const onAddCart = async (ev: SkuPopupEvent) => {
-  await postMemberCartAPI({ skuId: ev._id, count: ev.buy_num })
-  uni.showToast({ title: '添加成功' })
-  isShowSku.value = false
-}
-// 立即购买
-const onBuyNow = (ev: SkuPopupEvent) => {
-  uni.navigateTo({ url: `/PagesOrder/create/create?skuId=${ev._id}&count=${ev.buy_num}` })
 }
 
 const onShowModal = (tip: { tipTitle: string; tipDetail: string }) => {
@@ -192,7 +169,7 @@ const addShoppingCart = async (data: GoodsResult, num: number, type: string) => 
 }
 
 const goToDetail = (data: RecommendItem) => {
-  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
+  uni.navigateTo({ url: `/PagesOrder/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
 }
 const goToCart = () => {
   uni.switchTab({ url: '/pages/cart/cart' })
@@ -200,22 +177,6 @@ const goToCart = () => {
 </script>
 
 <template>
-  <!-- sku弹窗组件 -->
-  <vk-data-goods-sku-popup
-    add-cart-background-color="#FFA868"
-    buy-now-background-color="#27BA9B"
-    :mode="mode"
-    v-model="isShowSku"
-    :localdata="localdata"
-    ref="skuPopupRef"
-    :actived-style="{
-      color: '#27BA9B',
-      borderColor: '#27BA9B',
-      backgroundColor: '#E9F8F5',
-    }"
-    @add-cart="onAddCart"
-    @buy-now="onBuyNow"
-  />
   <scroll-view scroll-y class="viewport">
     <!-- 基本信息 -->
     <view class="goods">

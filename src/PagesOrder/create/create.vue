@@ -14,7 +14,7 @@ import type { CartItem } from '@/types/cart'
 import type { CouponItem, MyCouponItem } from '@/types/coupon'
 import type { OrderPreResult } from '@/types/order'
 import { cal } from '@/utils/cal'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShow, onUnload } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 
 const couponpopup = ref()
@@ -130,7 +130,10 @@ const getMemberOrderPreData = async () => {
 const selectedCardList = ref<CartItem[]>([])
 const cartList = ref<CartItem[]>([])
 const selectedCardListMoney = ref('')
-onLoad(() => {
+onUnload(() => {
+  uni.$off('selectedCardList')
+})
+onShow(() => {
   uni.$on('selectedCardList', (data) => {
     selectedCardList.value = data.selectedCardList
     selectedCardListMoney.value = data.selectedCardListMoney
@@ -208,7 +211,7 @@ const showExpireText = (data: MyCouponItem) => {
 // 去选择优惠券
 const goToChooseCoupon = () => {
   uni.navigateTo({
-    url: '/pages/coupon/coupon?from=order',
+    url: '/PagesOrder/coupon/coupon?from=order',
     success: (res) => {
       uni.$emit('avalibleCouponList', {
         avalibleCouponList: avalibleCouponList.value,

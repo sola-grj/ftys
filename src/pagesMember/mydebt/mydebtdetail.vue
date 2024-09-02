@@ -2,7 +2,7 @@
 import type { GetMyGoodsApplyItem } from '@/services/goods'
 import type { CreditItem } from '@/services/order'
 import { getCapitalDetailAPI, type CapitalDetail } from '@/services/profile'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onUnload } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
 const query = defineProps<{
@@ -14,6 +14,9 @@ const query = defineProps<{
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const debtDetail = ref<CreditItem>({} as CreditItem)
+onUnload(() => {
+  uni.$off('debtDetail')
+})
 onLoad(() => {
   uni.$on('debtDetail', (data) => {
     debtDetail.value = data.debtDetail

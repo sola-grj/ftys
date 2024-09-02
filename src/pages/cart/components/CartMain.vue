@@ -1,26 +1,13 @@
 <script setup lang="ts">
-import type {
-  InputNumberBox,
-  InputNumberBoxEvent,
-} from '@/components/vk-data-input-number-box/vk-data-input-number-box'
-import {
-  removeShoppingCart,
-  useAddShoppingCart,
-  useGuessList,
-  useUpdateShoppingCart,
-} from '@/composables'
+import { removeShoppingCart, useAddShoppingCart, useUpdateShoppingCart } from '@/composables'
 import {
   batchAddShoppingCartAPI,
-  deleteMemberCartAPI,
-  getMemberCartAPI,
   getShoppingCartAPI,
-  putMemberCartBySkuIdAPI,
-  putMemberCartSelectedAPI,
   type AddShoppingCartDataType,
 } from '@/services/cart'
 import { useMemberStore } from '@/stores'
 import type { CartItem } from '@/types/cart'
-import { onShow } from '@dcloudio/uni-app'
+import { onLoad, onShow, onUnload } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { cal } from '@/utils/cal'
 import type { OrderItem } from '@/types/order'
@@ -48,8 +35,12 @@ const getMemberCartData = async () => {
 
 // 初始化调用
 const againBuyGoodsOrder = ref<OrderItem>({} as OrderItem)
-onShow(() => {
+onUnload(() => {
+  uni.$off('againBuy')
+})
+onLoad(() => {
   getRecommendData()
+  getMemberCartData()
   uni.$on('againBuy', async (data) => {
     // 再次购买
     againBuyGoodsOrder.value = data.againBuyGoodsOrder
@@ -71,9 +62,6 @@ onShow(() => {
     // 重新获取购物车数据
     await getMemberCartData()
   })
-  if (memberStore.profile) {
-    getMemberCartData()
-  }
 })
 
 // 点击删除按钮
@@ -114,11 +102,6 @@ const onDeleteCarts = (datas: CartItem[]) => {
       },
     })
   }
-}
-
-// 修改商品数量
-const onChangeCount = async (ev: InputNumberBoxEvent) => {
-  await putMemberCartBySkuIdAPI(ev.index, { count: ev.value })
 }
 
 // 修改选中状态
@@ -275,7 +258,7 @@ const getRecommendData = async () => {
   }
 }
 const goToDetail = (data: RecommendItem) => {
-  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
+  uni.navigateTo({ url: `/PagesOrder/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
 }
 </script>
 
@@ -326,7 +309,7 @@ const goToDetail = (data: RecommendItem) => {
                 ></text>
               </view>
               <navigator
-                :url="`/pages/goods/goods?id=${item.id}`"
+                :url="`/PagesOrder/goods/goods?id=${item.id}`"
                 hover-class="none"
                 class="navigator"
               >
@@ -420,7 +403,7 @@ const goToDetail = (data: RecommendItem) => {
     <!-- 未登录: 提示登录 -->
     <view class="login-blank" v-else>
       <text class="text">登录后可查看购物车中的商品</text>
-      <navigator url="/pages/login/login" hover-class="none">
+      <navigator url="/PagesOrder/login/login" hover-class="none">
         <button class="button">去登录</button>
       </navigator>
     </view>

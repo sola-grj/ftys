@@ -1,12 +1,7 @@
 <script setup lang="ts">
-import { getMyCouponListAPI, getCouponListAPI, receiveCouponAPI } from '@/services/coupon'
-import { getMySuggestAPI } from '@/services/my'
 import { getUnShipCustomerAPI, type UnShipCustomerItem } from '@/services/order'
-import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
-import type { MySuggestItem } from '@/types/my'
-import { onLoad } from '@dcloudio/uni-app'
-import { computed, onMounted, ref, watch, watchEffect } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 const props = defineProps<{
   keyword: string
@@ -48,14 +43,6 @@ const getUnShipListData = async () => {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
   }
   const res = await getUnShipCustomerAPI({ account: props.keyword, ...unShipCustomerPageParams })
-
-  unShipCustomerList.value.push(...res.result.list)
-  unShipCustomerList.value.push(...res.result.list)
-  unShipCustomerList.value.push(...res.result.list)
-  unShipCustomerList.value.push(...res.result.list)
-  unShipCustomerList.value.push(...res.result.list)
-  unShipCustomerList.value.push(...res.result.list)
-  unShipCustomerList.value.push(...res.result.list)
   unShipCustomerList.value.push(...res.result.list)
   // suggestList.value.push(...mockList)
   if (unShipCustomerPageParams.page < res.result.total) {

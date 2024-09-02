@@ -11,14 +11,14 @@ const onLogout = () => {
         // 清理用户信息
         memberStore.clearProfile()
         // 返回上一页
-        uni.reLaunch({ url: '/pages/login/login' })
+        uni.reLaunch({ url: '/PagesOrder/login/login' })
       }
     },
   })
 }
 const resetPwd = () => {
   uni.navigateTo({
-    url: '/pages/register/register?type=resetPwd',
+    url: '/PagesOrder/register/register?type=resetPwd',
   })
 }
 const onChangeSwitch = (e: any) => {

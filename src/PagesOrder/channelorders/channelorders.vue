@@ -14,7 +14,7 @@ import { useMemberStore } from '@/stores'
 import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
 import type { MySuggestItem } from '@/types/my'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onUnload } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -77,6 +77,9 @@ const getMyMerchantOrderListData = async (userId: string) => {
   }
 }
 const customerinfo = ref<MyMerchantItem>()
+onUnload(() => {
+  uni.$off('customerinfo')
+})
 onLoad(() => {
   uni.$on('customerinfo', async (data) => {
     customerinfo.value = data.customerinfo

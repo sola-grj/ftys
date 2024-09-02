@@ -3,9 +3,6 @@ import {
   getBannerListAPI,
   getCategoryAPI,
   getFootPrintGoodsAPI,
-  getHomeBannerAPI,
-  getHomeCategoryAPI,
-  getHomeHotAPI,
   getHomeTopListAPI,
   getMustBuyGoodsAPI,
   getRecommendGoodsAPI,
@@ -19,14 +16,11 @@ import { onLoad, onShow } from '@dcloudio/uni-app'
 import type {
   BannerItem,
   BasicCategoryItem,
-  CategoryItem,
-  HotItem,
   MustBuyItem,
   RecommendItem,
   TopItem,
 } from '@/types/home'
 import { ref } from 'vue'
-import { useGuessList } from '@/composables'
 import type { PageParams } from '@/types/global'
 // 选中Index
 const activeIndex = ref(0)
@@ -154,8 +148,6 @@ const onScrollToLower = async () => {
     await getHistoryData()
   }
 }
-// const { guessRef, onScrollToLower } = useGuessList()
-
 // 当前下拉刷新状态
 const isTriggered = ref(false)
 // 自定义下拉刷新被触发

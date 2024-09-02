@@ -1,16 +1,10 @@
 <script setup lang="ts">
-import { getMyCouponListAPI, getCouponListAPI, receiveCouponAPI } from '@/services/coupon'
-import { getMySuggestAPI } from '@/services/my'
 import {
   getShippedOrderDetailAPI,
-  getShippedOrderListAPI,
-  getUnShipCustomerAPI,
   type ShipedOrderDetailResult,
   type ShipedOrderItem,
-  type UnShipCustomerItem,
 } from '@/services/order'
-import { useMemberStore } from '@/stores'
-import { computed, onMounted, ref, watch, watchEffect } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const step = ref()
 const props = defineProps<{

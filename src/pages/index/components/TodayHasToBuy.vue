@@ -9,7 +9,7 @@ const query = defineProps<{
 }>()
 
 const goToDetail = (data: MustBuyItem) => {
-  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
+  uni.navigateTo({ url: `/PagesOrder/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
 }
 </script>
 
@@ -56,7 +56,7 @@ const goToDetail = (data: MustBuyItem) => {
                     <text class="title-text">{{ item.title }}</text>
                     <text class="title-desc">{{ item.alt }}</text>
                 </view>
-                <navigator hover-class="none" :url="`/pages/hot/hot?type=${item.type}`" class="cards">
+                <navigator hover-class="none" :url="`/PagesOrder/hot/hot?type=${item.type}`" class="cards">
                     <image v-for="src in item.pictures" :key="src" class="image" mode="aspectFit" :src="src"></image>
                 </navigator>
             </view> -->

@@ -148,7 +148,7 @@ const againBuy = (order: OrderItem) => {
     content: '确定再来一单吗',
     success: async (res) => {
       if (res.confirm) {
-        uni.switchTab({
+        uni.reLaunch({
           url: '/pages/cart/cart?from=order',
           success: (res) => {
             uni.$emit('againBuy', { againBuyGoodsOrder: order })
@@ -173,7 +173,13 @@ const cancelOrder = (orderId: string) => {
             title: '取消订单成功',
             icon: 'success',
           })
-          orderList.value = orderList.value.filter((item) => item.orderId !== orderId)
+          setTimeout(() => {
+            uni.reLaunch({
+              url: '/PagesOrder/list/list',
+            })
+          }, 500)
+        } else {
+          uni.showToast({ icon: 'error', title: res.msg })
         }
       }
     },

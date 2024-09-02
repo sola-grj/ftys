@@ -1,17 +1,10 @@
 <script setup lang="ts">
-import { getMyCouponListAPI, getCouponListAPI, receiveCouponAPI } from '@/services/coupon'
-import { getMySuggestAPI } from '@/services/my'
 import {
   getUnShipOrderListAPI,
-  type ShipedOrderItem,
   type UnShipCustomerItem,
   type UnShipOrderListItem,
 } from '@/services/order'
-import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
-import type { PageParams } from '@/types/global'
-import type { MySuggestItem } from '@/types/my'
-import { onLoad } from '@dcloudio/uni-app'
-import { computed, onMounted, ref, watch, watchEffect, onBeforeMount } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const props = defineProps<{
   keyword: string

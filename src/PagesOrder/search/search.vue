@@ -150,7 +150,7 @@ const addShoppingCart = async (data: SearchGoodsItem, num: number, type: string)
 }
 
 const goToDetail = (data: SearchGoodsItem) => {
-  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
+  uni.navigateTo({ url: `/PagesOrder/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
 }
 </script>
 

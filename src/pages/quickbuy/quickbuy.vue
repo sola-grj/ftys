@@ -104,7 +104,7 @@ const onTapRecentlyCategory = (data: QuickOrderCategoryItem, index: number) => {
 }
 
 const goToDetail = (data: QuickOrderListItem) => {
-  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
+  uni.navigateTo({ url: `/PagesOrder/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
 }
 // 商品收藏 取消收藏
 const onCollect = async (data: QuickOrderListItem) => {

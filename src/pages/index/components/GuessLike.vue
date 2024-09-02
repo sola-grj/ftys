@@ -11,7 +11,7 @@ defineProps<{
   onActiveChange: (activeIndex: number) => void
 }>()
 const goToCoupon = () => {
-  uni.navigateTo({ url: '/pages/coupon/coupon?from=home' })
+  uni.navigateTo({ url: '/PagesOrder/coupon/coupon?from=home' })
 }
 // 更新购物车
 // 添加购物车
@@ -50,7 +50,7 @@ const addShoppingCart = async (data: RecommendItem, num: number, type: string) =
 }
 
 const goToDetail = (data: RecommendItem) => {
-  uni.navigateTo({ url: `/pages/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
+  uni.navigateTo({ url: `/PagesOrder/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
 }
 </script>
 

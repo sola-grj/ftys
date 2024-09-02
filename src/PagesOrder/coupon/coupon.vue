@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getMyCouponListAPI, getCouponListAPI, receiveCouponAPI } from '@/services/coupon'
 import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onUnload } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 
 const query = defineProps<{
@@ -39,6 +39,9 @@ const chooseCoupon = ref()
 // 从下单页面过来的
 const avalibleCouponList = ref<MyCouponItem[]>([])
 const currentChooseCoupon = ref<MyCouponItem>({} as MyCouponItem)
+onUnload(() => {
+  uni.$off('avalibleCouponList')
+})
 onLoad(() => {
   if (query.from === 'home') {
     getCouponListData()
@@ -71,7 +74,7 @@ const goToUse = (data: MyCouponItem) => {
   }
 }
 const goToSearch = () => {
-  uni.navigateTo({ url: '/pages/search/search' })
+  uni.navigateTo({ url: '/PagesOrder/search/search' })
 }
 // 领取优惠券
 const getCoupon = async (data: CouponItem) => {

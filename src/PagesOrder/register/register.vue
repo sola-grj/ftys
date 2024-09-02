@@ -286,7 +286,7 @@ const onSubmit = async () => {
   })
   if (res.code.toString() === '1') {
     uni.showToast({ icon: 'success', title: '注册成功' })
-    uni.reLaunch({ url: '/pages/login/login' })
+    uni.reLaunch({ url: '/PagesOrder/login/login' })
   } else {
     uni.showToast({ icon: 'success', title: res.msg })
   }
