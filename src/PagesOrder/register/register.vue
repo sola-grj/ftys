@@ -112,7 +112,7 @@ const rules: UniHelper.UniFormsRules = {
 const findPwdrules: UniHelper.UniFormsRules = {
   phone: {
     rules: [
-      { required: true, errorMessage: '请输入手机号码' },
+      { required: query.type === 'resetPwd' ? false : true, errorMessage: '请输入手机号码' },
       { pattern: /^1[3-9]\d{9}$/, errorMessage: '手机号格式不正确' },
     ],
   },
@@ -302,7 +302,7 @@ const goToNext = async () => {
     // 找回密码逻辑
     await formRef.value?.validate?.()
     const res = await resetPwdAPI({
-      mobile: phone.value,
+      mobile: phone.value || (memberStore.profile?.userinfo.mobile as string),
       newpassword: pwd.value,
       captcha: smsCode.value,
     })
@@ -346,7 +346,17 @@ const goback = () => {
       >
         <!-- 第一页表单内容 -->
         <view v-show="page === 0" class="form-content">
-          <uni-forms-item class="form-item" name="phone">
+          <uni-forms-item v-if="type === 'resetPwd'" class="form-item" name="phone">
+            <text class="label">手机号码</text>
+            <input
+              type="tel"
+              disabled
+              :value="memberStore.profile?.userinfo.mobile"
+              class="input"
+              placeholder="请输入手机号码"
+            />
+          </uni-forms-item>
+          <uni-forms-item v-else class="form-item" name="phone">
             <text class="label">手机号码</text>
             <input type="tel" v-model="phone" class="input" placeholder="请输入手机号码" />
           </uni-forms-item>
