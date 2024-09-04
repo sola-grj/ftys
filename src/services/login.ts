@@ -56,6 +56,7 @@ type ResetPwdParams = {
   mobile: string
   newpassword: string
   captcha: string
+  picCode: string
 }
 /**
  * 小程序登录

@@ -3,7 +3,7 @@ import { getCategoryTopAPI } from '@/services/category'
 import { getCategoryAPI, getHomeBannerAPI } from '@/services/home'
 import type { CategoryTopItem } from '@/types/category'
 import type { BannerItem, BasicCategoryItem, SearchBasicCategoryItem } from '@/types/home'
-import { onLoad, onShow, onUnload } from '@dcloudio/uni-app'
+import { onLoad, onShow, onTabItemTap, onUnload } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { useMemberStore } from '@/stores'
 import { getGoodsListByIdAPI, goodsDetailPageRecommendGoodsAPI } from '@/services/goods'
@@ -104,6 +104,23 @@ const getFiveTypeDryCategoryData = async (source: string, category: string) => {
 
 // 首次初始化数据
 const getTypeListData = async () => {
+  // 重置分页器
+  fruitPageParams.page = 1
+  fruitPageParams.pageSize = 10
+  fruitIsFinish.value = false
+  thirdActiveFruitIndex.value = 0
+  currentThirdFruitTypeCategory.value = []
+  currentFourthFruitTypeCategory.value = []
+  fiveTypeFruitCategory.value = []
+
+  dryPageParams.page = 1
+  dryPageParams.pageSize = 10
+  dryIsFinish.value = false
+  thirdActiveDryIndex.value = 0
+  currentThirdDryTypeCategory.value = []
+  currentFourthDryTypeCategory.value = []
+  fiveTypeDryCategory.value = []
+
   const res = await getCategoryAPI()
   fruitCategory.value = res.result.fruitCategory.filter(
     (item: BasicCategoryItem) => item.childlist.length > 0,
@@ -140,22 +157,25 @@ const scrollLeft = ref(0)
 onUnload(() => {
   uni.$off('categoryInfo')
 })
-onShow(() => {
+
+// 页面加载
+onLoad(() => {
+  getTypeListData()
   uni.$on('categoryInfo', async (data) => {
     await getTypeListData()
-    const index = fruitCategory.value.findIndex((v) => v.id === data.categoryInfo.id)
+    const index = fruitCategory.value.findIndex(
+      (v) =>
+        v.id === (data.categoryInfo.pid === '0' ? data.categoryInfo.id : data.categoryInfo.pid),
+    )
     console.log('index====', index)
-    if (activeIndex.value === 0) {
+    if (data.categoryInfo.source === 'S') {
       onTapTwoLevelFruit(data.categoryInfo, index)
     } else {
+      // 跳转到干货分类下
+      onChangeIndex(1)
       onTapTwoLevelDry(data.categoryInfo, index)
     }
   })
-})
-
-// 页面加载
-onLoad(async () => {
-  await getTypeListData()
 })
 const goToSearch = () => {
   uni.navigateTo({ url: '/PagesOrder/search/search' })

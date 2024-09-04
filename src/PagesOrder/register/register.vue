@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getSmsAPI, userRegisterAPI, resetPwdAPI } from '@/services/login'
+import { phoneCaptchaAPI } from '@/services/my'
 import { getMemberProfileAPI, putMemberProfileAPI } from '@/services/profile'
 import { useMemberStore } from '@/stores'
 import type { Gender, ProfileDetail } from '@/types/member'
@@ -12,7 +13,7 @@ const query = defineProps<{
 
 // 第一页
 const page = ref(0)
-
+const verifyCodeImg = ref('https://ksshop.snooowball.cn/api/common/phoneCaptcha')
 // 表单数据
 // 第一页数据
 const phone = ref('')
@@ -171,9 +172,7 @@ const onAvatarChange = () => {
   })
 }
 
-onLoad(() => {
-  // getMemberProfileData()
-})
+onLoad(() => {})
 
 // 修改类型
 const onTypeChange: UniHelper.RadioGroupOnChange = (ev) => {
@@ -305,6 +304,7 @@ const goToNext = async () => {
       mobile: phone.value || (memberStore.profile?.userinfo.mobile as string),
       newpassword: pwd.value,
       captcha: smsCode.value,
+      picCode: imgCode.value,
     })
     if (res.code.toString() === '1') {
       uni.showToast({ icon: 'success', title: '修改成功' })
@@ -324,6 +324,9 @@ const onDelete = (event: any) => {
 }
 const goback = () => {
   uni.navigateBack()
+}
+const refreshVerifyCode = () => {
+  verifyCodeImg.value = `https://ksshop.snooowball.cn/api/common/phoneCaptcha?k=${Math.random()}`
 }
 </script>
 
@@ -361,8 +364,14 @@ const goback = () => {
             <input type="tel" v-model="phone" class="input" placeholder="请输入手机号码" />
           </uni-forms-item>
           <uni-forms-item class="form-item" name="imgCode">
-            <text class="label">图片验证码</text>
+            <text ref="verifyCodeImg" class="label">图片验证码</text>
             <input type="text" v-model="imgCode" class="input" placeholder="请输入图片验证码" />
+            <image
+              @tap="refreshVerifyCode"
+              class="verify-code"
+              :src="verifyCodeImg"
+              mode="aspectFit"
+            />
           </uni-forms-item>
           <uni-forms-item class="form-item" name="smsCode">
             <text class="label">手机验证码</text>
@@ -609,11 +618,18 @@ input {
     .uni-forms-item__content {
       display: flex;
       align-items: center;
+      height: 80rpx;
 
       .content {
         flex: 1;
         text-align: right;
         color: #999999;
+      }
+
+      .verify-code {
+        width: 160rpx;
+        height: 100%;
+        margin-left: 5rpx;
       }
     }
 

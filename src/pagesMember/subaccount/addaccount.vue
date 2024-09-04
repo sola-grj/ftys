@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { getMyCouponListAPI, getCouponListAPI, receiveCouponAPI } from '@/services/coupon'
-import { addSuggestAPI, getMySuggestAPI, registerSubUserAPI } from '@/services/my'
+import {
+  addSuggestAPI,
+  getMySuggestAPI,
+  modifySubUserAPI,
+  registerSubUserAPI,
+  type SubAccountItem,
+} from '@/services/my'
 import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
 import type { MySuggestItem } from '@/types/my'
@@ -24,6 +30,10 @@ const form = ref({
   isShowDebtAmount: true,
 })
 
+const query = defineProps<{
+  type: string
+}>()
+
 // 注册定义校验规则
 const rules: UniHelper.UniFormsRules = {
   sub_account_name: {
@@ -39,37 +49,23 @@ const rules: UniHelper.UniFormsRules = {
     ],
   },
   pwd: {
-    rules: [{ required: true, errorMessage: '请输入密码' }],
+    rules: [{ required: query.type === 'add' ? true : false, errorMessage: '请输入密码' }],
   },
 }
-
-const onSelect = (event: any) => {
-  uni.uploadFile({
-    url: '/common/upload', //仅为示例，非真实的接口地址
-    filePath: event.tempFilePaths[0],
-    name: 'file',
-    success: (res) => {
-      let { data } = res
-      data = JSON.parse(data)
-      // @ts-ignore
-      imageList.value.push({
-        // @ts-ignore
-        url: data!.result.url,
-        uuid: event.tempFiles[0].uuid,
-      })
-      // @ts-ignore
-      imageUrlList.value.push(data!.result.url)
-      // @ts-ignore
-      form.value.images = data!.result.url
-      console.log('event', event, data)
-    },
+const currentAccount = ref<SubAccountItem>({} as SubAccountItem)
+onLoad(() => {
+  uni.$on('editsubaccount', (data) => {
+    currentAccount.value = data.currentAccount
+    form.value.sub_account_name = currentAccount.value.sub_account_name
+    form.value.username = currentAccount.value.username
+    form.value.mobile = currentAccount.value.mobile
+    form.value.accountstatus = Boolean(Number(currentAccount.value.sub_account_level.slice(0, 1)))
+    form.value.isShowPrice = Boolean(Number(currentAccount.value.sub_account_level.slice(1, 2)))
+    form.value.isShowDebtAmount = Boolean(
+      Number(currentAccount.value.sub_account_level.slice(2, 3)),
+    )
   })
-}
-const onDelete = (event: any) => {
-  console.log(event)
-  // @ts-ignore
-  imageList.value = [...imageList.value.filter((item) => item.uuid !== event.tempFile.uuid)]
-}
+})
 const goback = () => {
   uni.navigateBack()
 }
@@ -93,27 +89,32 @@ const switchDebtMoneyChange = (e: any) => {
   form.value.isShowDebtAmount = e.detail.value
 }
 const onSave = async () => {
+  let res
   await formRef.value?.validate?.()
   const sub_account_level = `${Number(form.value.accountstatus)}${Number(
     form.value.isShowPrice,
   )}${Number(form.value.isShowDebtAmount)}`
-  console.log({
-    mobile: form.value.mobile,
-    username: form.value.username,
-    sub_account_name: form.value.sub_account_name,
-    password: form.value.pwd,
-    sub_account_level,
-  })
+  if (query.type === 'add') {
+    res = await registerSubUserAPI({
+      mobile: form.value.mobile,
+      username: form.value.username,
+      sub_account_name: form.value.sub_account_name,
+      password: form.value.pwd,
+      sub_account_level,
+    })
+  } else {
+    res = await modifySubUserAPI({
+      userId: currentAccount.value.userId,
+      mobile: form.value.mobile,
+      username: form.value.username,
+      sub_account_name: form.value.sub_account_name,
+      password: form.value.pwd,
+      sub_account_level,
+    })
+  }
 
-  const res = await registerSubUserAPI({
-    mobile: form.value.mobile,
-    username: form.value.username,
-    sub_account_name: form.value.sub_account_name,
-    password: form.value.pwd,
-    sub_account_level,
-  })
-  if (res.code === '1') {
-    uni.showToast({ icon: 'success', title: '子账号注册成功' })
+  if (res.code.toString() === '1') {
+    uni.showToast({ icon: 'success', title: '子账号保存成功' })
     setTimeout(() => {
       uni.navigateTo({ url: '/pagesMember/subaccount/subaccount' })
     }, 500)
@@ -127,7 +128,7 @@ const onSave = async () => {
   <scroll-view class="viewport" scroll-y enable-back-to-top>
     <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
       <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">新增子账号</text>
+      <text class="text">{{ type === 'add' ? '新增子账号' : '编辑子账号' }}</text>
     </view>
     <view class="container form-content">
       <uni-forms ref="formRef" :rules="rules" :modelValue="form">

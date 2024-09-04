@@ -117,6 +117,39 @@ export const registerSubUserAPI = (data: RegisterSubUserData) => {
   })
 }
 
+export type ModifySubUserData = {
+  userId: string
+  mobile: string
+  username: string
+  sub_account_name: string
+  password: string
+  sub_account_level: string
+}
+
+/**
+ * 编辑子账号
+ * @param data 请求参数
+ */
+export const modifySubUserAPI = (data: ModifySubUserData) => {
+  return http({
+    method: 'POST',
+    url: '/user/modifySubUser',
+    data,
+  })
+}
+
+/**
+ * 删除子账号
+ * @param data 请求参数
+ */
+export const removeSubAccountAPI = (data: { userId: string }) => {
+  return http({
+    method: 'POST',
+    url: '/user/removeSubAccount',
+    data,
+  })
+}
+
 export type UpdateUserInfoData = {
   username?: string
   mobile?: string
@@ -313,5 +346,16 @@ export const getMyMerchantOrderListAPI = (data: {
     method: 'POST',
     url: '/sales/getMyMerchantOrderList',
     data,
+  })
+}
+
+/**
+ * 我的商户订单列表
+ * @param data 请求参数
+ */
+export const phoneCaptchaAPI = () => {
+  return http({
+    method: 'POST',
+    url: '/common/phoneCaptcha',
   })
 }

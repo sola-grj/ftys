@@ -40,6 +40,7 @@ export type TopItem = {
 /** 首页-分类商品 */
 export type BasicCategoryItem = {
   id: string
+  pid: string
   name: string
   image: string
   source: string

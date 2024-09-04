@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { getMyCouponListAPI, getCouponListAPI, receiveCouponAPI } from '@/services/coupon'
-import { getMySuggestAPI, getSubAccountAPI, type SubAccountItem } from '@/services/my'
+import {
+  getMySuggestAPI,
+  getSubAccountAPI,
+  removeSubAccountAPI,
+  type SubAccountItem,
+} from '@/services/my'
 import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
 import type { MySuggestItem } from '@/types/my'
@@ -35,11 +40,37 @@ const getSubAccountListData = async () => {
 onLoad(() => {
   getSubAccountListData()
 })
-const addSubAccount = () => {
-  uni.navigateTo({ url: '/pagesMember/subaccount/addaccount' })
+const addSubAccount = (type: string, data?: SubAccountItem) => {
+  uni.navigateTo({
+    url: `/pagesMember/subaccount/addaccount?type=${type}`,
+    success: (success) => {
+      if (type === 'edit') {
+        uni.$emit('editsubaccount', {
+          currentAccount: data,
+        })
+      }
+    },
+  })
 }
 const goback = () => {
   uni.navigateBack()
+}
+const deleteSubAccount = async (userId: string) => {
+  // 弹窗二次确认
+  uni.showModal({
+    content: '是否删除',
+    success: async (res) => {
+      if (res.confirm) {
+        const res = await removeSubAccountAPI({ userId })
+        if (res.code.toString() === '1') {
+          uni.showToast({ icon: 'success', title: '删除成功' })
+          subaccountList.value = subaccountList.value.filter((v) => v.userId !== userId)
+        } else {
+          uni.showToast({ icon: 'error', title: res.msg })
+        }
+      }
+    },
+  })
 }
 </script>
 
@@ -48,7 +79,7 @@ const goback = () => {
     <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
       <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
       <text class="text">子账号</text>
-      <view @tap="addSubAccount" class="add-feedback">新增</view>
+      <view @tap="($event) => addSubAccount('add')" class="add-feedback">新增</view>
     </view>
     <view class="container">
       <view class="item" v-for="item in subaccountList" :key="item.userId">
@@ -60,8 +91,11 @@ const goback = () => {
           </view>
         </view>
         <view class="right">
-          <text class="ftysIcon icon-xiugaioryijian" />
-          <text class="ftysIcon icon-shanchu" />
+          <text
+            @tap="($event) => addSubAccount('edit', item)"
+            class="ftysIcon icon-xiugaioryijian"
+          />
+          <text @tap="($event) => deleteSubAccount(item.userId)" class="ftysIcon icon-shanchu" />
         </view>
       </view>
       <view v-if="subaccountList.length === 0" class="bg">
