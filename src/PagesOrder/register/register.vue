@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { getSmsAPI, userRegisterAPI, resetPwdAPI } from '@/services/login'
-import { phoneCaptchaAPI } from '@/services/my'
-import { getMemberProfileAPI, putMemberProfileAPI } from '@/services/profile'
 import { useMemberStore } from '@/stores'
-import type { Gender, ProfileDetail } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
@@ -149,28 +146,6 @@ const onGetSmsTap = async () => {
 const { safeAreaInsets } = uni.getSystemInfoSync()
 
 const memberStore = useMemberStore()
-// 修改头像
-const onAvatarChange = () => {
-  // 调用拍照
-  uni.chooseImage({
-    success: (chooseImageRes) => {
-      const tempFilePaths = chooseImageRes.tempFilePaths
-      uni.uploadFile({
-        url: 'common/upload', //仅为示例，非真实的接口地址
-        filePath: tempFilePaths[0],
-        name: 'file',
-        formData: {
-          user: 'test',
-        },
-        success: (uploadFileRes) => {
-          let { data } = uploadFileRes
-          data = JSON.parse(data)
-          console.log(uploadFileRes.data)
-        },
-      })
-    },
-  })
-}
 
 onLoad(() => {})
 
@@ -236,30 +211,11 @@ const formRef = ref<UniHelper.UniFormsInstance>()
 
 const onSubmit = async () => {
   await formRef.value?.validate?.()
-  console.log('register=====', {
-    username: contactPerson.value,
-    password: pwd.value,
-    mobile: phone.value,
-    code: smsCode.value,
-    type_id: buyType.value,
-    sub_account_level: '1',
-    company_lon: companyLocation.value.longitude.toString(),
-    company_lat: companyLocation.value.latitude.toString(),
-    company_province: companyLocation.value.address,
-    compnay_city: companyLocation.value.address,
-    company_area: companyLocation.value.address,
-    company_addr: companyLocation.value.address,
-    company: company.value,
-    shipping_lon: deliverLocation.value.longitude.toString(),
-    shipping_lat: deliverLocation.value.latitude.toString(),
-    shipping_province: deliverLocation.value.address,
-    shipping_city: deliverLocation.value.address,
-    shipping_area: deliverLocation.value.address,
-    shipping_addr: deliverLocation.value.address,
-    images: imageList.value.join(','),
-    sale_id: inviteCode.value,
+  console.log('register=====', imageList.value)
+  const images: string[] = []
+  imageList.value.forEach((v: any) => {
+    images.push(v.url)
   })
-
   const res = await userRegisterAPI({
     username: contactPerson.value,
     password: pwd.value,
@@ -280,8 +236,9 @@ const onSubmit = async () => {
     shipping_city: deliverLocation.value.address,
     shipping_area: deliverLocation.value.address,
     shipping_addr: deliverLocation.value.address,
-    images: imageList.value.join(','),
+    images: images.join(','),
     sale_id: inviteCode.value,
+    picCode: imgCode.value,
   })
   if (res.code.toString() === '1') {
     uni.showToast({ icon: 'success', title: '注册成功' })
@@ -453,8 +410,6 @@ const refreshVerifyCode = () => {
             <input type="text" v-model="inviteCode" class="input" placeholder="请输入邀请码" />
           </uni-forms-item>
           <uni-forms-item class="form-item" name="images">
-            <!-- <text class="label">营业执照或门头照</text> -->
-            <!-- <view @tap="onAvatarChange" class="choose-img"></view> -->
             <uni-file-picker
               @delete="onDelete"
               @select="onSelect"
@@ -618,7 +573,7 @@ input {
     .uni-forms-item__content {
       display: flex;
       align-items: center;
-      height: 80rpx;
+      min-height: 80rpx;
 
       .content {
         flex: 1;
@@ -628,7 +583,7 @@ input {
 
       .verify-code {
         width: 160rpx;
-        height: 100%;
+        height: 80rpx;
         margin-left: 5rpx;
       }
     }

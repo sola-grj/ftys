@@ -22,6 +22,7 @@ import type {
 } from '@/types/home'
 import { ref } from 'vue'
 import type { PageParams } from '@/types/global'
+
 // 选中Index
 const activeIndex = ref(0)
 const onActiveChange = (index: number) => {

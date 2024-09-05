@@ -50,6 +50,7 @@ type RegisterParams = {
   shipping_addr: string
   images: string
   sale_id: string
+  picCode: string
 }
 
 type ResetPwdParams = {

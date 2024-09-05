@@ -46,28 +46,7 @@ const getOrderPerformanceData = async (dateFilter: string) => {
   const res = await getOrderPerformanceAPI({
     dateFilter,
   })
-  const mock = [
-    {
-      userId: '6280',
-      orderTime: '2024-08-11 09:26:19',
-      username: '樱木花道1',
-      mobile: '13355556666',
-    },
-    {
-      userId: '6280',
-      orderTime: '2024-08-11 09:26:19',
-      username: '樱木花道1',
-      mobile: '13355556666',
-    },
-    {
-      userId: '6280',
-      orderTime: '2024-08-11 09:26:19',
-      username: '樱木花道1',
-      mobile: '13355556666',
-    },
-  ]
-  orderList.value.push(...mock)
-  // orderList.value.push(...res.result.list)
+  orderList.value.push(...res.result.list)
 
   if (pageParams.page < res.result.total) {
     // 页码累加
@@ -82,6 +61,9 @@ const single = ref('')
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const activeIndex = ref('today')
 const onChangeIndex = (index: string) => {
+  isFinish.value = false
+  pageParams.page = 1
+  orderList.value = []
   activeIndex.value = index
   getOrderPerformanceData(index)
 }

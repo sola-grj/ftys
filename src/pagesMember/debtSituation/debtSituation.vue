@@ -23,7 +23,7 @@ const getCustomerBillListData = async () => {
   if (isFinish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
   }
-  const res = await getcustomerBillAPI()
+  const res = await getcustomerBillAPI({ filter: customerInfo.value })
   // 分页数据增加
   customerBillList.value.push(...res.result.list)
 
@@ -59,6 +59,9 @@ const goback = () => {
 watch(
   () => customerInfo,
   (newValue, oldValue) => {
+    pageParams.page = 1
+    isFinish.value = false
+    customerBillList.value = []
     getCustomerBillListData()
   },
   { immediate: false, deep: true },
@@ -80,7 +83,7 @@ watch(
       <view class="search">
         <uni-easyinput
           :inputBorder="false"
-          placeholder="请输入客户名称/客户编码/客户账号"
+          placeholder="请输入名称/手机号/客户id"
           class="search"
           prefixIcon="search"
           v-model="customerInfo"

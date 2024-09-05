@@ -13,10 +13,11 @@ import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
 import type { MySuggestItem } from '@/types/my'
 import { onLoad } from '@dcloudio/uni-app'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
-
+const status = ref('')
+const filter = ref('')
 const memberStore = useMemberStore()
 // 弹出层组件
 const typepopup = ref<UniHelper.UniPopupInstance>()
@@ -33,7 +34,11 @@ const getMyMerchantData = async () => {
   if (isFinish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
   }
-  const res = await getMyMerchantListAPI({ ...pageParams })
+  const res = await getMyMerchantListAPI({
+    status: status.value,
+    filter: filter.value,
+    ...pageParams,
+  })
   myMerchant.value.push(...res.result.list)
   totalOrderMoney.value = res.result.totalOrderMoney
   if (pageParams.page < res.result.total) {
@@ -46,22 +51,20 @@ const getMyMerchantData = async () => {
 onLoad(() => {
   getMyMerchantData()
 })
-const onChangeCustomer = async (data: MyMerchantItem) => {
-  const res = await cutAccountAPI({ userId: data.userId })
-  memberStore.setProfile(res!.result)
-  uni.showToast({ icon: 'success', title: '账号切换成功' })
-  setTimeout(() => {
-    uni.reLaunch({ url: '/pages/my/my' })
-  }, 500)
-}
+
 const goback = () => {
   uni.navigateBack()
 }
 const current = ref(0)
 const radioChange = (evt) => {
+  pageParams.page = 1
+  isFinish.value = false
+  myMerchant.value = []
   for (let i = 0; i < items.length; i++) {
     if (items[i].value === evt.detail.value) {
       current.value = i
+      status.value = items[i].value
+      getMyMerchantData()
       break
     }
   }
@@ -70,20 +73,20 @@ const radioChange = (evt) => {
 }
 const items = [
   {
-    value: 'USA',
+    value: '',
     name: '全部',
     checked: 'true',
   },
   {
-    value: 'CHN',
+    value: 'Unreviewed',
     name: '未审核',
   },
   {
-    value: 'BRA',
+    value: 'Normal',
     name: '正常',
   },
   {
-    value: 'JPN',
+    value: 'Disable',
     name: '被禁用',
   },
 ]
@@ -95,6 +98,16 @@ const goToDetail = (data: MyMerchantItem) => {
     },
   })
 }
+watch(
+  () => filter,
+  (newValue, oldValue) => {
+    pageParams.page = 1
+    isFinish.value = false
+    myMerchant.value = []
+    getMyMerchantData()
+  },
+  { immediate: false, deep: true },
+)
 </script>
 
 <template>
@@ -111,10 +124,10 @@ const goToDetail = (data: MyMerchantItem) => {
     >
       <view class="search">
         <uni-easyinput
-          placeholder="请输入客户名称/手机号"
+          placeholder="请输入客户名称/客户编码/客户账号"
           class="search"
           prefixIcon="search"
-          v-model="keyword"
+          v-model="filter"
         >
         </uni-easyinput>
         <text class="ftysIcon icon-gengduo1" @tap="typepopup?.open?.('top')" />

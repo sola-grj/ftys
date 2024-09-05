@@ -570,6 +570,10 @@ page {
   height: 200rpx;
   margin-top: 20rpx;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
   // background-color: #cfdcfa;
 
   .overview {
@@ -636,9 +640,7 @@ page {
   }
 
   .settings {
-    position: absolute;
-    bottom: 0;
-    right: 16rpx;
+    margin-right: 40rpx;
     font-size: 60rpx;
     // color: #fff;
 

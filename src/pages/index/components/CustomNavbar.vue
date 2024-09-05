@@ -2,6 +2,7 @@
 import type { TopItem } from '@/types/home'
 
 // 获取屏幕边界到安全区域的距离
+const { top, height } = uni.getMenuButtonBoundingClientRect()
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const goToSearch = () => {
   uni.navigateTo({ url: '/PagesOrder/search/search' })

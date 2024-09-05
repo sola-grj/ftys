@@ -1,24 +1,19 @@
 <script setup lang="ts">
-import { getMyCouponListAPI, getCouponListAPI, receiveCouponAPI } from '@/services/coupon'
 import {
-  addSuggestAPI,
   cutAccountAPI,
-  getCustomerListAPI,
-  getMyMerchantOrderListAPI,
-  getMySuggestAPI,
+  getChannelOrderListAPI,
   type CustomerItem,
-  type MyMerchantItem,
-  type MyMerchantOrderItem,
+  type ChannelOrderItem,
 } from '@/services/my'
 import { useMemberStore } from '@/stores'
-import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
-import type { MySuggestItem } from '@/types/my'
+import type { OrderItem } from '@/types/order'
 import { onLoad, onUnload } from '@dcloudio/uni-app'
-import { computed, ref } from 'vue'
+import { ref, watch } from 'vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const activeIndex = ref(0)
+const status = ref('')
 // 点击一级分类
 const onChangeIndex = (index: number) => {
   activeIndex.value = index
@@ -28,26 +23,31 @@ const memberStore = useMemberStore()
 const typepopup = ref<UniHelper.UniPopupInstance>()
 const items = [
   {
-    value: 'USA',
+    value: '',
     name: '全部',
     checked: 'true',
   },
   {
-    value: 'CHN',
+    value: '2',
     name: '已支付',
   },
   {
-    value: 'BRA',
+    value: '1',
     name: '未支付',
   },
 ]
 const current = ref(0)
 const currentStatus = ref('全部')
-const radioChange = (evt) => {
+const radioChange = (evt: any) => {
+  isFinish.value = false
+  pageParams.page = 1
+  channelOrderList.value = []
   for (let i = 0; i < items.length; i++) {
     if (items[i].value === evt.detail.value) {
       current.value = i
       currentStatus.value = items[i].name
+      status.value = items[i].value
+      getChannelOrderListData()
       break
     }
   }
@@ -59,16 +59,20 @@ const pageParams: Required<PageParams> = {
   page: 1,
   pageSize: 10,
 }
-const single = ref('')
+const shippedTime = ref('')
 const isFinish = ref(false)
-const myMerchantOrderList = ref<MyMerchantOrderItem[]>([])
-const getMyMerchantOrderListData = async (userId: string) => {
+const channelOrderList = ref<ChannelOrderItem[]>([])
+const getChannelOrderListData = async () => {
   // 退出判断
   if (isFinish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
   }
-  const res = await getMyMerchantOrderListAPI({ userId, ...pageParams })
-  myMerchantOrderList.value.push(...res.result.list)
+  const res = await getChannelOrderListAPI({
+    status: status.value,
+    shippedTime: shippedTime.value,
+    ...pageParams,
+  })
+  channelOrderList.value.push(...res.result.list)
   if (pageParams.page < res.result.total) {
     // 页码累加
     pageParams.page++
@@ -76,15 +80,9 @@ const getMyMerchantOrderListData = async (userId: string) => {
     isFinish.value = true
   }
 }
-const customerinfo = ref<MyMerchantItem>()
-onUnload(() => {
-  uni.$off('customerinfo')
-})
+
 onLoad(() => {
-  uni.$on('customerinfo', async (data) => {
-    customerinfo.value = data.customerinfo
-    // await getMyMerchantOrderListData(customerinfo.value?.userId.toString() as string)
-  })
+  getChannelOrderListData()
 })
 const onChangeCustomer = async (data: CustomerItem) => {
   const res = await cutAccountAPI({ userId: data.userId })
@@ -97,49 +95,73 @@ const onChangeCustomer = async (data: CustomerItem) => {
 const goback = () => {
   uni.navigateBack()
 }
+watch(
+  () => shippedTime,
+  (newValue, oldValue) => {
+    pageParams.page = 1
+    isFinish.value = false
+    channelOrderList.value = []
+    getChannelOrderListData()
+  },
+  { immediate: false, deep: true },
+)
+// 跳转订单详情
+const goToOrderDetail = (orderId: string) => {
+  uni.navigateTo({ url: `/PagesOrder/detail/detail?orderId=${orderId}` })
+}
 </script>
 
 <template>
-  <scroll-view class="viewport" @scrolltolower="getCustomerData" scroll-y enable-back-to-top>
+  <scroll-view class="viewport">
     <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
       <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
       <text class="text">渠道订单</text>
     </view>
-    <view class="container form-content">
+    <scroll-view
+      class="container form-content"
+      @scrolltolower="getChannelOrderListData"
+      scroll-y
+      enable-back-to-top
+    >
       <view class="condition">
         <view class="date">
           <text class="label">发货日期：</text>
-          <uni-datetime-picker :border="false" type="date" :clear-icon="false" v-model="single" />
+          <uni-datetime-picker clear-icon :border="false" type="date" v-model="shippedTime" />
         </view>
         <view class="status" @tap="typepopup?.open?.('top')"
           ><text class="label">订单状态：</text><text>{{ currentStatus }}</text>
         </view>
       </view>
       <view class="other-container">
-        <view v-for="item in 5" :key="item" class="other-item">
+        <view
+          v-for="item in channelOrderList"
+          :key="item.orderId"
+          class="other-item"
+          @tap="($event) => goToOrderDetail(item.orderId)"
+        >
           <view class="top">
             <view class="customer-name">
-              <view class="text">{{ 'item.orderNo' }}</view>
+              <view class="text">{{ item.orderNo }}</view>
             </view>
             <view class="more ftysIcon icon-xiangyoujiantou"></view>
           </view>
           <view class="bottom">
             <view class="b-item">
               <view class="label">下单时间</view>
-              <view class="value">{{ 'item.createTime' }}</view>
+              <view class="value">{{ item.createTime }}</view>
             </view>
             <view class="b-item">
               <view class="label">发货日期</view>
-              <view class="value">{{ 'item.shippedTime' }}</view>
+              <view class="value">{{ item.shippedTime }}</view>
             </view>
             <view class="b-item">
               <view class="label">发货金额</view>
-              <view class="value">{{ 'item.shippedOrderPrice' }}</view>
+              <view class="value">{{ item.orderPrice }}</view>
             </view>
           </view>
         </view>
       </view>
-    </view>
+    </scroll-view>
     <uni-popup ref="typepopup" background-color="#fff">
       <view class="customer-popup-content">
         <radio-group @change="radioChange">
@@ -165,6 +187,11 @@ page {
   height: 100%;
   // overflow: hidden;
   background-color: #f7f7f8;
+}
+
+::-webkit-scrollbar {
+  display: none;
+  /* 隐藏滚动条 */
 }
 
 .customer-popup-content {
@@ -244,51 +271,6 @@ page {
       }
 
       .status {
-      }
-    }
-
-    .login-container {
-      position: relative;
-      height: 80rpx;
-      margin-top: 20rpx;
-
-      .login-type {
-        display: flex;
-        height: 80rpx;
-        width: 500rpx;
-        background: #f2f4f7;
-        border-radius: 50rpx;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-
-        .pwd-btn,
-        .code-btn {
-          width: 50%;
-          line-height: 80rpx;
-          text-align: center;
-          border-radius: 50rpx;
-        }
-
-        .checked {
-          color: #fff;
-          background-color: #ff5040;
-        }
-      }
-    }
-
-    .info-container {
-      .info-item {
-        display: flex;
-        height: 100rpx;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid rgba(242, 244, 247, 1);
-        font-size: 28rpx;
-
-        .label {
-          color: rgba(175, 176, 178, 1);
-        }
       }
     }
 

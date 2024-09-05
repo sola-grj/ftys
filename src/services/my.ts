@@ -66,10 +66,11 @@ export const getOrderPerformanceAPI = (data: { dateFilter: string }) => {
  * 客户账款
  * @param data 请求参数
  */
-export const getcustomerBillAPI = () => {
+export const getcustomerBillAPI = (data: { filter: string }) => {
   return http<CustomerBillResult>({
     method: 'POST',
     url: '/sales/customerBill',
+    data,
   })
 }
 
@@ -309,7 +310,12 @@ export type MyMerchantResult = {
  * 我的商户列表
  * @param data 请求参数
  */
-export const getMyMerchantListAPI = (data: { page: number; pageSize: number; filter?: string }) => {
+export const getMyMerchantListAPI = (data: {
+  page: number
+  pageSize: number
+  filter?: string
+  status: string
+}) => {
   return http<MyMerchantResult>({
     method: 'POST',
     url: '/sales/getMyMerchantList',
@@ -357,5 +363,42 @@ export const phoneCaptchaAPI = () => {
   return http({
     method: 'POST',
     url: '/common/phoneCaptcha',
+  })
+}
+
+export type ChannelOrderItem = {
+  createTime: string
+  orderId: string
+  orderNo: string
+  orderPrice: string
+  shippedTime: string
+  status: string
+  userId: string
+  userInfo: {
+    id: string
+    mobile: string
+    username: string
+  }
+}
+
+export type ChannelOrderResult = {
+  list: ChannelOrderItem[]
+  page: number
+  total: number
+}
+/**
+ * 渠道订单
+ * @param data 请求参数
+ */
+export const getChannelOrderListAPI = (data: {
+  page: number
+  pageSize: number
+  status: string
+  shippedTime: string
+}) => {
+  return http<ChannelOrderResult>({
+    method: 'POST',
+    url: '/sales/getChannelOrderList',
+    data,
   })
 }
