@@ -26,6 +26,7 @@ const getMyCouponListData = async () => {
 }
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
+const { top, height } = uni.getMenuButtonBoundingClientRect()
 
 const activeIndex = ref('1') // 0 是密码登录 1是短信
 const onChangeIndex = (index: string) => {
@@ -95,7 +96,7 @@ const goToUseCoupon = (couponId: string) => {
 
 <template>
   <scroll-view class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
+    <view class="title" :style="{ paddingTop: height + top + 'px' }">
       <text v-if="from === 'my'" class="text">我的优惠券</text>
       <text v-else-if="from === 'order'" class="text">选择优惠券</text>
       <!-- 搜索框 -->
@@ -209,7 +210,7 @@ page {
     text-align: center;
     color: #fff;
     width: 100%;
-    height: 130rpx;
+    height: 186rpx;
 
     .text {
       position: absolute;
@@ -234,7 +235,7 @@ page {
       justify-content: space-between;
       padding: 0 4rpx 0 26rpx;
       height: 64rpx;
-      margin: 16rpx 20rpx;
+      margin-right: 20rpx;
       font-size: 28rpx;
       border-radius: 32rpx;
       background-color: rgba(255, 255, 255, 0.5);

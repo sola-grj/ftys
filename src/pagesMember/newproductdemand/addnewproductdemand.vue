@@ -163,6 +163,9 @@ const onPickerChange = (e: any) => {
   form.value.type = currentType.value.id
   picker.value.hide()
 }
+const goback = () => {
+  uni.navigateBack()
+}
 </script>
 
 <template>

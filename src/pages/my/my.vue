@@ -74,6 +74,7 @@ onShow(() => {
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
+const { top, height } = uni.getMenuButtonBoundingClientRect()
 // 订单选项
 const orderTypes = [
   { type: 1, text: '待付款', icon: 'icon-daifukuan' },
@@ -292,7 +293,7 @@ onLoad(() => {
 <template>
   <view class="viewport" scroll-y enable-back-to-top>
     <!-- 个人资料 -->
-    <view class="profile" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
+    <view class="profile" :style="{ paddingTop: height + top + 'px' }">
       <!-- 情况1：已登录 -->
       <view class="overview" v-if="memberStore.profile">
         <navigator url="/pagesMember/profile/profile" hover-class="none">

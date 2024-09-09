@@ -74,10 +74,7 @@ const createButtons = () => {
       ]
     case '3':
       // 待收货
-      return [
-        { id: 'again', name: '再来一单' },
-        { id: 'cancel', name: '确认收货' },
-      ]
+      return [{ id: 'again', name: '再来一单' }]
     case '4':
       // 待售后
       return [

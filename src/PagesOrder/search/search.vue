@@ -33,6 +33,7 @@ const pageParams: Required<PageParams> = {
 const finish = ref(false)
 // 获取屏幕边界到安全区域的距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
+const { top, height } = uni.getMenuButtonBoundingClientRect()
 // 搜索关键词
 const keyword = ref('')
 const onChangeKeyword = (event: any) => {
@@ -156,7 +157,7 @@ const goToDetail = (data: SearchGoodsItem) => {
 
 <template>
   <scroll-view class="viewport" scroll-y @scrolltolower="getSearchListData">
-    <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
+    <view class="navbar" :style="{ paddingTop: height + top + 'px' }">
       <view @tap="goToHome" class="back ftysIcon icon-xiangzuojiantou"></view>
       <!-- 搜索条 -->
       <view class="search">

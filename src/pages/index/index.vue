@@ -180,14 +180,7 @@ onShow(() => {
 <template>
   <!-- 自定义导航栏 -->
   <Customnavbar :topList="topList" />
-  <scroll-view
-    :refresher-triggered="isTriggered"
-    refresher-enabled
-    @refresherrefresh="onRefresherrefresh"
-    @scrolltolower="onScrollToLower"
-    class="sroll-view"
-    scroll-y
-  >
+  <scroll-view @scrolltolower="onScrollToLower" class="sroll-view" scroll-y>
     <PageSkeleton v-if="isLoading" />
     <template v-else>
       <!-- 分类面板 -->

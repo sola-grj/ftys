@@ -448,7 +448,13 @@
 						"navigationStyle": "custom",
 						"navigationBarTitleText": "渠道订单"
 					}
-				}
+				},
+				{
+					"path": "sourcegoods/sourcegoods",
+					"style": {
+						"navigationBarTitleText": "商品溯源"
+					}
+				},
 			]
 		}
 	],

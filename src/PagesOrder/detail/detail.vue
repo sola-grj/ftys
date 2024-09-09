@@ -248,6 +248,11 @@ const goToApply = () => {
     },
   })
 }
+const goToSource = (goodsId: string) => {
+  uni.navigateTo({
+    url: `/PagesOrder/sourcegoods/sourcegoods?goodsId=${goodsId}`,
+  })
+}
 </script>
 
 <template>
@@ -280,7 +285,15 @@ const goToApply = () => {
           <view class="item" v-for="item in order.orderDetail" :key="item.orderId">
             <image :src="item.goodsImage[0]" mode="scaleToFill" />
             <view class="info">
-              <view class="infotitle">{{ item.goodsName }}</view>
+              <view class="infotitle">
+                <text>{{ item.goodsName }}</text>
+                <text
+                  v-if="item.source === 'S'"
+                  @tap="($event) => goToSource(item.goodsId)"
+                  class="source-btn"
+                  >查看溯源</text
+                >
+              </view>
               <view class="right">
                 <view class="price">￥{{ item.unitPrice }}/{{ item.units }}</view>
                 <view v-if="order.status !== OrderState.DaiFaHuo" class="num">
@@ -492,6 +505,23 @@ page {
 
           .infotitle {
             flex: 1;
+            display: flex;
+            justify-content: space-between;
+
+            .source-btn {
+              width: 120rpx;
+              height: 50rpx;
+              line-height: 50rpx;
+              text-align: center;
+              color: #fff;
+              border-radius: 10rpx;
+              background: linear-gradient(
+                90deg,
+                rgba(255, 112, 77, 1) 0%,
+                rgba(255, 95, 77, 1) 100%
+              );
+              font-size: 24rpx;
+            }
           }
 
           .price {

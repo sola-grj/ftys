@@ -6,6 +6,8 @@ import { ref } from 'vue'
 export const useMemberStore = defineStore(
   'member',
   () => {
+    // 微信小程序右上角胶囊按钮
+    const { top, height } = uni.getMenuButtonBoundingClientRect()
     // 会员信息
     const profile = ref<LoginResult>()
 
@@ -24,6 +26,8 @@ export const useMemberStore = defineStore(
       profile,
       setProfile,
       clearProfile,
+      rightBtnTop: top,
+      rightBtnHeight: height,
     }
   },
   // TODO: 持久化

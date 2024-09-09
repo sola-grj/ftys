@@ -14,6 +14,7 @@ const pageParams: Required<PageParams> = {
 const isFinish = ref(false)
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
+const { top, height } = uni.getMenuButtonBoundingClientRect()
 // 获取意见反馈列表
 const suggestList = ref<MySuggestItem[]>([])
 const getSuggestListData = async () => {
@@ -22,42 +23,7 @@ const getSuggestListData = async () => {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
   }
   const res = await getMySuggestAPI({ ...pageParams })
-  // 分页数据增加
-  // suggestList.value.push(...res.result.list)
-  // const mockList = [
-  //   {
-  //     id: '1',
-  //     user_id: '1',
-  //     title: '标题',
-  //     content: '建议内容',
-  //     images: '1,2,3,4,5,6,7,8',
-  //     status: '1',
-  //     create_time: '2024-08-04 23:52:54',
-  //     update_time: 'null',
-  //   },
-  //   {
-  //     id: '2',
-  //     user_id: '1',
-  //     title: '标题2',
-  //     content: '建议内容',
-  //     images: '1,2,3,4,5,6,7,8',
-  //     status: '1',
-  //     create_time: '2024-08-04 23:52:54',
-  //     update_time: 'null',
-  //   },
-  //   {
-  //     id: '3',
-  //     user_id: '1',
-  //     title: '标题3',
-  //     content: '建议内容',
-  //     images: '1,2,3,4,5,6,7,8',
-  //     status: '1',
-  //     create_time: '2024-08-04 23:52:54',
-  //     update_time: 'null',
-  //   },
-  // ]
   suggestList.value.push(...res.result.list)
-  // suggestList.value.push(...mockList)
   if (pageParams.page < res.result.total) {
     // 页码累加
     pageParams.page++
@@ -79,7 +45,7 @@ const goback = () => {
 
 <template>
   <scroll-view @scrolltolower="getSuggestListData" class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
+    <view class="title" :style="{ paddingTop: height + top + 'px' }">
       <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
       <text class="text">意见反馈</text>
       <view @tap="addFeedback" class="add-feedback">新增反馈</view>
@@ -120,7 +86,7 @@ page {
     text-align: center;
     color: #fff;
     width: 100%;
-    height: 130rpx;
+    height: 186rpx;
 
     .text {
       position: absolute;

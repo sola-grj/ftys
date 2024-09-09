@@ -19,6 +19,7 @@ const pageParams: Required<PageParams> = {
 const isFinish = ref(false)
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
+const { top, height } = uni.getMenuButtonBoundingClientRect()
 // 获取意见反馈列表
 const subaccountList = ref<SubAccountItem[]>([])
 const getSubAccountListData = async () => {
@@ -76,7 +77,7 @@ const deleteSubAccount = async (userId: string) => {
 
 <template>
   <scroll-view @scrolltolower="getSubAccountListData" class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
+    <view class="title" :style="{ paddingTop: height + top + 'px' }">
       <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
       <text class="text">子账号</text>
       <view @tap="($event) => addSubAccount('add')" class="add-feedback">新增</view>
@@ -125,7 +126,7 @@ page {
     text-align: center;
     color: #fff;
     width: 100%;
-    height: 130rpx;
+    height: 186rpx;
 
     .text {
       position: absolute;
