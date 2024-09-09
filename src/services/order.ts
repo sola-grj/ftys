@@ -550,3 +550,56 @@ export const signInOrderAPI = (data: { orderId: string; signInImages: string }) 
     data,
   })
 }
+
+export type CommondityTraceResult = {
+  orderInfo: {
+    username: string
+    num: string
+    actNum: string
+    units: string
+    orderNo: string
+    salesReturnNum: string
+  }
+  providerInfo: {
+    providerCode: string
+    providerName: string
+  }
+  goodsInfo: {
+    desc: string
+    detailImages: string
+    fid: string
+    id: string
+    images: string
+    model: string
+    package: string
+    price: string
+    productPlace: string
+    providerCode: string
+    providerName: string
+    source: string
+    storage: string
+    unit: string
+    weight: string
+  }
+  traceInfo: string[]
+  traceNo: string
+  traceTimes: string
+  firstTraceTime: string
+}
+
+/**
+ *  商品溯源
+ * @param data 请求参数
+ */
+export const commodityTraceAPI = (data: {
+  orderId: string
+  goodsId: string
+  fGoodsId: string
+  source: string
+}) => {
+  return http<CommondityTraceResult>({
+    method: 'POST',
+    url: '/order/commodityTrace',
+    data,
+  })
+}

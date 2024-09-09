@@ -1,39 +1,34 @@
 <script setup lang="ts">
 import { getMyCouponListAPI, getCouponListAPI, receiveCouponAPI } from '@/services/coupon'
 import { getMySuggestAPI } from '@/services/my'
+import { commodityTraceAPI, type CommondityTraceResult } from '@/services/order'
 import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
 import type { MySuggestItem } from '@/types/my'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
-// 推荐分页参数
-const pageParams: Required<PageParams> = {
-  page: 1,
-  pageSize: 10,
-}
-const isFinish = ref(false)
-// 获取屏幕边界到安全区域距离
-const { safeAreaInsets } = uni.getSystemInfoSync()
-const { top, height } = uni.getMenuButtonBoundingClientRect()
+
+const query = defineProps<{
+  orderId: string
+  goodsId: string
+  fGoodsId: string
+  source: string
+}>()
+
 // 获取意见反馈列表
-const suggestList = ref<MySuggestItem[]>([])
-const getSuggestListData = async () => {
-  // 退出判断
-  if (isFinish.value === true) {
-    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
-  }
-  const res = await getMySuggestAPI({ ...pageParams })
-  suggestList.value.push(...res.result.list)
-  if (pageParams.page < res.result.total) {
-    // 页码累加
-    pageParams.page++
-  } else {
-    isFinish.value = true
-  }
+const sourceData = ref<CommondityTraceResult>({} as CommondityTraceResult)
+const getSourceData = async () => {
+  const res = await commodityTraceAPI({
+    orderId: query.orderId,
+    goodsId: query.goodsId,
+    fGoodsId: query.fGoodsId,
+    source: query.source,
+  })
+  sourceData.value = res.result
 }
 
 onLoad(() => {
-  getSuggestListData()
+  getSourceData()
 })
 const addFeedback = () => {
   uni.navigateTo({ url: '/pagesMember/addfeedback/addfeedback' })

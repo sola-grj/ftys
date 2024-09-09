@@ -108,36 +108,8 @@ onLoad(async () => {
   isLoading.value = false
 })
 
-// 倒计时结束
-const onTimeUp = () => {
-  order.value!.orderState = OrderState.YiQuXiao
-}
-
-// 去支付
-const onOrderPay = async () => {
-  if (import.meta.env.DEV) {
-    await getPayMockAPI({ orderId: query.id })
-  } else {
-    // #ifdef MP-WEIXIN
-    const res = await getPayWxPayMiniPayAPI({ orderId: query.id })
-    wx.requestPayment(res.result)
-    // #endif
-  }
-  // 关闭当前页面，在跳转支付结果页面
-  uni.redirectTo({ url: `/PagesOrder/payment/payment?id=${query.id}` })
-}
 // 是否为开发环境
 const isDev = import.meta.env.DEV
-
-// 模拟发货
-const onOrderSend = async () => {
-  if (isDev) {
-    await getMemberOrderConsignmentByIdAPI(query.id)
-    uni.showToast({ icon: 'success', title: '模拟发货完成' })
-    // 主动更新订单状态
-    order.value!.orderState = OrderState.DaiShouHuo
-  }
-}
 
 // 确认收货
 const onOrderConfirm = () => {
@@ -165,14 +137,6 @@ const onOrderDelete = () => {
   })
 }
 
-// 订单取消
-const orderCancel = async () => {
-  if (order.value?.orderState === OrderState.DaiFuKuan) {
-    const res = await getMemberOrderCancelByIdAPI(query.id, { cancelReason: reason.value })
-    order.value = res.result
-    popup.value?.close()
-  }
-}
 // 复制功能
 const copy = (orderNo: string) => {
   uni.setClipboardData({
@@ -248,9 +212,9 @@ const goToApply = () => {
     },
   })
 }
-const goToSource = (goodsId: string) => {
+const goToSource = (data: DetailItem) => {
   uni.navigateTo({
-    url: `/PagesOrder/sourcegoods/sourcegoods?goodsId=${goodsId}`,
+    url: `/PagesOrder/sourcegoods/sourcegoods?goodsId=${data.goodsId}&orderId=${order.value.orderId}&fGoodsId=${data.fGoodsId}&source=${data.source}`,
   })
 }
 </script>
@@ -289,7 +253,7 @@ const goToSource = (goodsId: string) => {
                 <text>{{ item.goodsName }}</text>
                 <text
                   v-if="item.source === 'S'"
-                  @tap="($event) => goToSource(item.goodsId)"
+                  @tap="($event) => goToSource(item)"
                   class="source-btn"
                   >查看溯源</text
                 >
