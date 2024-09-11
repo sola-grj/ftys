@@ -9,10 +9,10 @@ import { computed, ref } from 'vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const formRef = ref<UniHelper.UniFormsInstance>()
-const imageList = ref([])
-const imageUrlList = ref([])
+
 const title = ref('')
 const content = ref('')
+const range = ref('')
 
 const onTimeChange = (e: string[]) => {
   startTime.value = e[0]
@@ -52,41 +52,41 @@ const rules: UniHelper.UniFormsRules = {
     rules: [{ required: true, errorMessage: '请输入问题反馈' }],
   },
 }
-const onSave = async () => {
-  await addSuggestAPI({
-    title: title.value,
-    content: content.value,
-    images: imageUrlList.value.length > 0 ? imageUrlList.value.join(',') : '',
-  })
-  uni.navigateTo({ url: '/pagesMember/feedback/feedback' })
-}
-const onSelect = (event: any) => {
-  uni.uploadFile({
-    url: '/common/upload', //仅为示例，非真实的接口地址
-    filePath: event.tempFilePaths[0],
-    name: 'file',
+const onSave = () => {
+  let rStatus = ''
+  if (reconciliationStatus.value === '全部') {
+    rStatus = ''
+  } else if (reconciliationStatus.value === '已对账') {
+    rStatus = '2'
+  } else {
+    rStatus = '1'
+  }
+
+  let sStatus = ''
+  if (settlementStatus.value === '全部') {
+    sStatus = ''
+  } else if (settlementStatus.value === '已结算') {
+    sStatus = '2'
+  } else {
+    sStatus = '1'
+  }
+
+  uni.downloadFile({
+    url: `https://ksshop.snooowball.cn/api/capital/exportBill?shippedStartDate=${
+      startTime.value || ''
+    }&shippedEndDate=${endTime.value || ''}&checking_status=${rStatus}&settle_status=${sStatus}`, //仅为示例，并非真实的资源
     success: (res) => {
-      let { data } = res
-      data = JSON.parse(data)
-      // @ts-ignore
-      imageList.value.push({
-        // @ts-ignore
-        url: data!.result.url,
-        uuid: event.tempFiles[0].uuid,
-      })
-      // @ts-ignore
-      imageUrlList.value.push(data!.result.url)
-      // @ts-ignore
-      form.value.images = data!.result.url
-      console.log('event', event, data)
+      if (res.statusCode === 200) {
+        console.log('下载成功')
+      }
+    },
+    // @ts-ignore
+    fail: (errCode, errSubject, data, cause, errMsg) => {
+      console.log(errCode, errSubject, data, cause, errMsg)
     },
   })
 }
-const onDelete = (event: any) => {
-  console.log(event)
-  // @ts-ignore
-  imageList.value = [...imageList.value.filter((item) => item.uuid !== event.tempFile.uuid)]
-}
+
 const goback = () => {
   uni.navigateBack()
 }
@@ -102,7 +102,7 @@ const goback = () => {
       <uni-forms class="form" ref="formRef" :rules="rules" :modelValue="form">
         <uni-forms-item class="form-item" name="title">
           <text class="label">*按发货日期</text>
-          <uni-datetime-picker type="daterange" @change="onTimeChange" />
+          <uni-datetime-picker v-model="range" type="daterange" @change="onTimeChange" />
         </uni-forms-item>
         <uni-forms-item class="form-item" name="title">
           <text class="label">*对账状态</text>
@@ -120,7 +120,7 @@ const goback = () => {
             }}</picker>
           </view>
         </uni-forms-item>
-        <button @tap="onSave" open-type="" class="save">保存</button>
+        <button @tap="onSave" open-type="" class="save">导出对账单</button>
       </uni-forms>
     </view>
   </scroll-view>

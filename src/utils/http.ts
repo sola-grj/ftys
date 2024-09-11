@@ -42,6 +42,7 @@ const httpInterceptor = {
 }
 uni.addInterceptor('request', httpInterceptor)
 uni.addInterceptor('uploadFile', httpInterceptor)
+uni.addInterceptor('downloadFile', httpInterceptor)
 
 /**
  * 请求函数

@@ -569,7 +569,7 @@ export type CommondityTraceResult = {
     detailImages: string
     fid: string
     id: string
-    images: string
+    images: string[]
     model: string
     package: string
     price: string

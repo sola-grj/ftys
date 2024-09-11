@@ -25,6 +25,7 @@ const getSourceData = async () => {
     source: query.source,
   })
   sourceData.value = res.result
+  console.log('8888', sourceData.value.goodsInfo.images)
 }
 
 onLoad(() => {
@@ -44,19 +45,22 @@ const goback = () => {
       <view class="title">—查询信息—</view>
       <view class="item">
         <view class="label">溯源编码</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.traceNo }}</view>
       </view>
       <view class="item">
         <view class="label">当前查询次数</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.traceTimes }}</view>
       </view>
       <view class="item">
         <view class="label">首次查询时间</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.firstTraceTime }}</view>
       </view>
     </view>
     <view class="goods-info container">
       <view class="title">—商品信息—</view>
+      <image class="img" :src="sourceData.goodsInfo.images[0]" mode="aspectFit" />
+      <!-- <image class="img"
+        src="https://img0.baidu.com/it/u=2343944877,2522314031&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1081" /> -->
       <view class="item">
         <view class="label">商品名称</view>
         <view class="value">xxx</view>
@@ -67,22 +71,26 @@ const goback = () => {
       </view>
       <view class="item">
         <view class="label">商品单位</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.goodsInfo.unit }}</view>
       </view>
       <view class="item">
         <view class="label">商品描述</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.goodsInfo.desc }}</view>
       </view>
       <view class="item">
-        <view class="label">商品单位</view>
-        <view class="value">xxx</view>
+        <view class="label">原产地</view>
+        <view class="value">{{ sourceData.goodsInfo.productPlace }}</view>
       </view>
     </view>
     <view class="apply-info container">
       <view class="title">—供应商信息—</view>
       <view class="item">
         <view class="label">供应商</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.providerInfo.providerName }}</view>
+      </view>
+      <view class="item">
+        <view class="label">供应商编号</view>
+        <view class="value">{{ sourceData.providerInfo.providerCode }}</view>
       </view>
     </view>
     <view class="source-info container">
@@ -96,23 +104,23 @@ const goback = () => {
       <view class="title">—订单信息—</view>
       <view class="item">
         <view class="label">下单客户</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.orderInfo.username }}</view>
       </view>
       <view class="item">
         <view class="label">下单数量</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.orderInfo.num }}</view>
       </view>
       <view class="item">
         <view class="label">发货数量</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.orderInfo.actNum }}</view>
       </view>
       <view class="item">
         <view class="label">归属单号</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.orderInfo.salesReturnNum }}</view>
       </view>
       <view class="item">
         <view class="label">退货数量</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.orderInfo.salesReturnNum }}</view>
       </view>
     </view>
   </view>
@@ -127,15 +135,16 @@ page {
 
 .viewport {
   height: 100%;
+  overflow: scroll;
 
   .container {
-    min-height: 300rpx;
+    min-height: 100rpx;
     background: #fff;
     border-radius: 10rpx;
     margin: 20rpx;
     display: flex;
     flex-direction: column;
-    padding: 10rpx;
+    padding: 20rpx;
 
     .title {
       text-align: center;
@@ -148,6 +157,13 @@ page {
       display: flex;
       justify-content: space-between;
       line-height: 100rpx;
+    }
+  }
+
+  .goods-info {
+    .img {
+      height: 500rpx;
+      width: 100%;
     }
   }
 }
