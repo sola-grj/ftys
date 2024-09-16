@@ -58,6 +58,7 @@ export const getGoodsListByIdAPI = (data: {
   category: string
   page: number
   pageSize: number
+  priceSort?: string
 }) => {
   return http<GetGoodsListByIdResult>({
     method: 'POST',

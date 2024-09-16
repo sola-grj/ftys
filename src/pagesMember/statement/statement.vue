@@ -72,12 +72,20 @@ const onSave = () => {
   }
 
   uni.downloadFile({
-    url: `https://ksshop.snooowball.cn/api/capital/exportBill?shippedStartDate=${
+    url: `https://ksshop.snooowball.cn/api/capital_export/exportBill?shippedStartDate=${
       startTime.value || ''
     }&shippedEndDate=${endTime.value || ''}&checking_status=${rStatus}&settle_status=${sStatus}`, //仅为示例，并非真实的资源
     success: (res) => {
       if (res.statusCode === 200) {
-        console.log('下载成功')
+        console.log('下载成功', res)
+        var filePath = res.tempFilePath
+        uni.openDocument({
+          filePath: filePath,
+          showMenu: true,
+          success: function (res1) {
+            console.log('打开文档成功', res1)
+          },
+        })
       }
     },
     // @ts-ignore

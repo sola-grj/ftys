@@ -6,9 +6,14 @@ import { http } from '@/utils/http'
  * 获取搜索列表
  * @param data keyword 关键词
  */
-export const getSearchListAPI = (data: { keyword: string; page: number; pageSize: number }) => {
+export const getSearchListAPI = (data: {
+  keyword: string
+  page: number
+  pageSize: number
+  priceSort?: string
+}) => {
   return http<SearchGoodsResult>({
-    method: 'GET',
+    method: 'POST',
     url: '/goods/searchGoods',
     data,
   })

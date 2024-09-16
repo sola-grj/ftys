@@ -22,7 +22,7 @@ const getHistorySearchListData = async () => {
 }
 
 // 排序参数 // default price
-const orderType = ref('default')
+const orderType = ref('up')
 
 // 分页参数
 const pageParams: Required<PageParams> = {
@@ -59,7 +59,11 @@ const getSearchListData = async (action: string = '', other: string = '') => {
   if (finish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
   }
-  const res = await getSearchListAPI({ keyword: keyword.value, ...pageParams })
+  const res = await getSearchListAPI({
+    priceSort: orderType.value,
+    keyword: keyword.value,
+    ...pageParams,
+  })
   // 分页数据增加
   searchList.value.push(...res.result.list)
   if (pageParams.page < res.result.total) {
@@ -150,6 +154,18 @@ const addShoppingCart = async (data: SearchGoodsItem, num: number, type: string)
   }
 }
 
+const orderByPrice = () => {
+  pageParams.page = 1
+  searchList.value = []
+  finish.value = false
+  if (orderType.value === 'up') {
+    orderType.value = 'down'
+  } else {
+    orderType.value = 'up'
+  }
+  getSearchListData()
+}
+
 const goToDetail = (data: SearchGoodsItem) => {
   uni.navigateTo({ url: `/PagesOrder/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
 }
@@ -203,8 +219,12 @@ const goToDetail = (data: SearchGoodsItem) => {
     </view>
     <view class="search-list" v-else>
       <view class="order">
-        <view>默认</view>
-        <view>单价</view>
+        <!-- <view>默认</view> -->
+        <text @tap="orderByPrice" class="pricetext">单价</text>
+        <text
+          @tap="orderByPrice"
+          :class="`ftysIcon ${orderType === 'up' ? 'icon-shengxu' : 'icon-jiangxu1'}`"
+        ></text>
       </view>
       <view class="list-container">
         <view
@@ -392,7 +412,13 @@ page {
   margin: 20rpx 20rpx 0;
 
   .order {
+    // height: 100rpx;
     display: flex;
+    align-items: center;
+
+    .pricetext {
+      margin-left: 30rpx;
+    }
   }
 
   .list-container {

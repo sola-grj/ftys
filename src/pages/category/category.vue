@@ -35,6 +35,9 @@ const dryPageParams: Required<PageParams> = {
 // 页面是否加载完成 标识
 const fruitIsFinish = ref(false)
 const dryIsFinish = ref(false)
+// 排序参数 // default price
+const fruitOrderType = ref('up')
+const dryOrderType = ref('up')
 
 // 一级分类选中状态
 const activeIndex = ref(0) // 0 是生鲜 1是干货
@@ -47,6 +50,9 @@ const thirdActiveDryIndex = ref(0)
 // 四级分类选中状态
 const FourthActiveFruitIndex = ref(0)
 const FourthActiveDryIndex = ref(0)
+// 四级分类选中数据
+const FourthActiveFruitData = ref<BasicCategoryItem>({} as BasicCategoryItem)
+const FourthActiveDryData = ref<BasicCategoryItem>({} as BasicCategoryItem)
 
 // 获取商品分类数据
 const top1List = ref<BasicCategoryItem[]>([])
@@ -72,6 +78,7 @@ const getFiveTypeFruitCategoryData = async (source: string, category: string) =>
   const res = await getGoodsListByIdAPI({
     source,
     category,
+    priceSort: fruitOrderType.value,
     ...fruitPageParams,
   })
   fiveTypeFruitCategory.value.push(...res.result.list)
@@ -91,6 +98,7 @@ const getFiveTypeDryCategoryData = async (source: string, category: string) => {
   const res = await getGoodsListByIdAPI({
     source,
     category,
+    priceSort: dryOrderType.value,
     ...dryPageParams,
   })
   fiveTypeDryCategory.value.push(...res.result.list)
@@ -141,7 +149,8 @@ const getTypeListData = async () => {
       ? dryCargoCategory.value[0].childlist[0].childlist
       : []
   // 测试数据
-
+  FourthActiveFruitData.value = fruitCategory.value[0].childlist[0]
+  FourthActiveDryData.value = dryCargoCategory.value[0].childlist[0]
   // @ts-ignore
   // currentFourthFruitTypeCategory.value = [{ name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, ...currentFourthFruitTypeCategory.value]
   getFiveTypeFruitCategoryData(
@@ -263,6 +272,7 @@ const onTapFourthFruitType = (data: BasicCategoryItem, index: number) => {
   fruitIsFinish.value = false
   fiveTypeFruitCategory.value = []
   FourthActiveFruitIndex.value = index
+  FourthActiveFruitData.value = data
   getFiveTypeFruitCategoryData(data.source, data.id)
 }
 const onTapFourthDryType = (data: BasicCategoryItem, index: number) => {
@@ -274,6 +284,7 @@ const onTapFourthDryType = (data: BasicCategoryItem, index: number) => {
   dryIsFinish.value = false
   fiveTypeDryCategory.value = []
   FourthActiveDryIndex.value = index
+  FourthActiveDryData.value = data
   getFiveTypeDryCategoryData(data.source, data.id)
 }
 
@@ -339,6 +350,36 @@ const onCollect = async (data: SearchBasicCategoryItem) => {
       }
     })
     return
+  }
+}
+
+const orderByPrice = () => {
+  if (activeIndex.value === 0) {
+    if (fruitOrderType.value === 'up') {
+      fruitOrderType.value = 'down'
+    } else {
+      fruitOrderType.value = 'up'
+    }
+    // @ts-ignore
+    typepopup!.value?.close()
+    fruitPageParams.page = 1
+    fruitPageParams.pageSize = 10
+    fruitIsFinish.value = false
+    fiveTypeFruitCategory.value = []
+    getFiveTypeFruitCategoryData(FourthActiveFruitData.value.source, FourthActiveFruitData.value.id)
+  } else {
+    if (dryOrderType.value === 'up') {
+      dryOrderType.value = 'down'
+    } else {
+      dryOrderType.value = 'up'
+    }
+    // @ts-ignore
+    typepopup!.value?.close()
+    dryPageParams.page = 1
+    dryPageParams.pageSize = 10
+    dryIsFinish.value = false
+    fiveTypeDryCategory.value = []
+    getFiveTypeDryCategoryData(FourthActiveDryData.value.source, FourthActiveDryData.value.id)
   }
 }
 </script>
@@ -497,8 +538,18 @@ const onCollect = async (data: SearchBasicCategoryItem) => {
             </uni-popup>
           </view>
           <view class="order">
-            <view>默认</view>
-            <view>单价</view>
+            <!-- <view>默认</view> -->
+            <view @tap="orderByPrice">单价</view>
+            <text
+              v-if="activeIndex === 0"
+              @tap="orderByPrice"
+              :class="`ftysIcon ${fruitOrderType === 'up' ? 'icon-shengxu' : 'icon-jiangxu1'}`"
+            ></text>
+            <text
+              v-if="activeIndex === 1"
+              @tap="orderByPrice"
+              :class="`ftysIcon ${dryOrderType === 'up' ? 'icon-shengxu' : 'icon-jiangxu1'}`"
+            ></text>
           </view>
           <view class="list-container">
             <view
@@ -813,6 +864,7 @@ page {
 
     .order {
       display: flex;
+      align-items: center;
     }
 
     .list-container {
