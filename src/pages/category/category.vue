@@ -50,9 +50,6 @@ const thirdActiveDryIndex = ref(0)
 // 四级分类选中状态
 const FourthActiveFruitIndex = ref(0)
 const FourthActiveDryIndex = ref(0)
-// 四级分类选中数据
-const FourthActiveFruitData = ref<BasicCategoryItem>({} as BasicCategoryItem)
-const FourthActiveDryData = ref<BasicCategoryItem>({} as BasicCategoryItem)
 
 // 获取商品分类数据
 const top1List = ref<BasicCategoryItem[]>([])
@@ -70,7 +67,15 @@ const currentFourthDryTypeCategory = ref<BasicCategoryItem[]>([])
 const fiveTypeFruitCategory = ref<SearchBasicCategoryItem[]>([])
 const fiveTypeDryCategory = ref<SearchBasicCategoryItem[]>([])
 
+const fiveTypeFruitData = ref<{ source: string; category: string }>(
+  {} as { source: string; category: string },
+)
+const fiveTypeDryData = ref<{ source: string; category: string }>(
+  {} as { source: string; category: string },
+)
+
 const getFiveTypeFruitCategoryData = async (source: string, category: string) => {
+  fiveTypeFruitData.value = { source, category }
   // 退出判断
   if (fruitIsFinish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
@@ -91,6 +96,7 @@ const getFiveTypeFruitCategoryData = async (source: string, category: string) =>
 }
 
 const getFiveTypeDryCategoryData = async (source: string, category: string) => {
+  fiveTypeDryData.value = { source, category }
   // 退出判断
   if (dryIsFinish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
@@ -148,9 +154,6 @@ const getTypeListData = async () => {
     dryCargoCategory.value[0].childlist.length > 0
       ? dryCargoCategory.value[0].childlist[0].childlist
       : []
-  // 测试数据
-  FourthActiveFruitData.value = fruitCategory.value[0].childlist[0]
-  FourthActiveDryData.value = dryCargoCategory.value[0].childlist[0]
   // @ts-ignore
   // currentFourthFruitTypeCategory.value = [{ name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, ...currentFourthFruitTypeCategory.value]
   getFiveTypeFruitCategoryData(
@@ -272,7 +275,6 @@ const onTapFourthFruitType = (data: BasicCategoryItem, index: number) => {
   fruitIsFinish.value = false
   fiveTypeFruitCategory.value = []
   FourthActiveFruitIndex.value = index
-  FourthActiveFruitData.value = data
   getFiveTypeFruitCategoryData(data.source, data.id)
 }
 const onTapFourthDryType = (data: BasicCategoryItem, index: number) => {
@@ -284,7 +286,6 @@ const onTapFourthDryType = (data: BasicCategoryItem, index: number) => {
   dryIsFinish.value = false
   fiveTypeDryCategory.value = []
   FourthActiveDryIndex.value = index
-  FourthActiveDryData.value = data
   getFiveTypeDryCategoryData(data.source, data.id)
 }
 
@@ -366,7 +367,7 @@ const orderByPrice = () => {
     fruitPageParams.pageSize = 10
     fruitIsFinish.value = false
     fiveTypeFruitCategory.value = []
-    getFiveTypeFruitCategoryData(FourthActiveFruitData.value.source, FourthActiveFruitData.value.id)
+    getFiveTypeFruitCategoryData(fiveTypeFruitData.value.source, fiveTypeFruitData.value.category)
   } else {
     if (dryOrderType.value === 'up') {
       dryOrderType.value = 'down'
@@ -379,7 +380,7 @@ const orderByPrice = () => {
     dryPageParams.pageSize = 10
     dryIsFinish.value = false
     fiveTypeDryCategory.value = []
-    getFiveTypeDryCategoryData(FourthActiveDryData.value.source, FourthActiveDryData.value.id)
+    getFiveTypeDryCategoryData(fiveTypeDryData.value.source, fiveTypeDryData.value.category)
   }
 }
 </script>
@@ -926,7 +927,6 @@ page {
 
   .title {
     height: 60rpx;
-    line-height: 60rpx;
     color: #333;
     font-size: 28rpx;
 
