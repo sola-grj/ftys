@@ -18,7 +18,9 @@
 				"navigationStyle": "custom",
 				"navigationBarTextStyle": "white",
 				"navigationBarTitleText": "首页",
-				"navigationBarRightButton": {"hide": true}
+				"navigationBarRightButton": {
+					"hide": true
+				}
 			}
 		},
 		{
@@ -27,7 +29,9 @@
 				"navigationStyle": "custom",
 				"navigationBarTextStyle": "white",
 				"navigationBarTitleText": "我的",
-				"navigationBarRightButton": {"hide": true}
+				"navigationBarRightButton": {
+					"hide": true
+				}
 			}
 		},
 		// {
@@ -43,7 +47,9 @@
 			"style": {
 				"navigationStyle": "custom",
 				"navigationBarTitleText": "购物车",
-				"navigationBarRightButton": {"hide": true}
+				"navigationBarRightButton": {
+					"hide": true
+				}
 			}
 		},
 		{
@@ -51,7 +57,9 @@
 			"style": {
 				"navigationStyle": "custom",
 				"navigationBarTitleText": "购物车",
-				"navigationBarRightButton": {"hide": true}
+				"navigationBarRightButton": {
+					"hide": true
+				}
 			}
 		},
 		{
@@ -109,7 +117,7 @@
 	// 设置 TabBar
 	"tabBar": {
 		"color": "#333",
-		"selectedColor": "#27ba9b",
+		"selectedColor": "#ff5040",
 		"backgroundColor": "#fff",
 		"borderStyle": "white",
 		"list": [
@@ -185,7 +193,9 @@
 					"style": {
 						"navigationStyle": "custom",
 						"navigationBarTitleText": "",
-						"navigationBarRightButton": {"hide": true}
+						"navigationBarRightButton": {
+							"hide": true
+						}
 					}
 				},
 				{
@@ -235,7 +245,9 @@
 					"style": {
 						"navigationStyle": "custom",
 						"navigationBarTitleText": "",
-						"navigationBarRightButton": {"hide": true}
+						"navigationBarRightButton": {
+							"hide": true
+						}
 					}
 				},
 				{
@@ -299,7 +311,9 @@
 					"style": {
 						"navigationStyle": "custom",
 						"navigationBarTitleText": "子账号",
-						"navigationBarRightButton": {"hide": true}
+						"navigationBarRightButton": {
+							"hide": true
+						}
 					}
 				},
 				{
@@ -383,7 +397,9 @@
 					"style": {
 						"navigationBarTitleText": "搜索",
 						"navigationStyle": "custom",
-						"navigationBarRightButton": {"hide": true}
+						"navigationBarRightButton": {
+							"hide": true
+						}
 					}
 				},
 				{
@@ -399,7 +415,9 @@
 						"navigationStyle": "custom",
 						"navigationBarTextStyle": "white",
 						"navigationBarTitleText": "我的优惠券",
-						"navigationBarRightButton": {"hide": true}
+						"navigationBarRightButton": {
+							"hide": true
+						}
 					}
 				},
 				{
