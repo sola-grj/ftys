@@ -20,6 +20,9 @@ const baseURL = 'https://ksshop.snooowball.cn/api'
 const httpInterceptor = {
   // 拦截前触发
   invoke(options: UniApp.RequestOptions) {
+    uni.showLoading({
+      title: '加载中',
+    })
     // 1.非http开头需要拼接地址
     if (!options.url.startsWith('http')) {
       options.url = baseURL + options.url
@@ -71,6 +74,7 @@ export const http = <T>(options: UniApp.RequestOptions) => {
       ...options,
       // 2.请求成功
       success(res) {
+        uni.hideLoading()
         if (res.statusCode >= 200 && res.statusCode < 300) {
           // 2.1 提取核心数据 res.data
           resolve(res.data as Data<T>)
@@ -91,6 +95,7 @@ export const http = <T>(options: UniApp.RequestOptions) => {
       },
       // 响应失败
       fail(err) {
+        uni.hideLoading()
         // 3.1 网络错误 提示用户更换网络
         uni.showToast({
           icon: 'none',
