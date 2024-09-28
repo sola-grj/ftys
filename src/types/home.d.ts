@@ -92,7 +92,7 @@ export type RecommendItem = {
   name: string
   images: string[]
   source: string
-  unit_price: string
+  price: string
   isCollect: string
   cartGoodsNum: number
   cartId: string

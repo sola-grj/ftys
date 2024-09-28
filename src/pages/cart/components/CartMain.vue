@@ -181,7 +181,7 @@ const addShoppingCart = async (data: CartItem & RecommendItem, num: number, type
         fGoodsId: data.fGoodsId,
         num,
         units: data.units || data.units,
-        unitPrice: data.unit_price || data.unit_price,
+        unitPrice: data.unit_price || data.price,
       },
       num,
     )
@@ -219,7 +219,7 @@ const addShoppingCart = async (data: CartItem & RecommendItem, num: number, type
           cartId: currentCartId.value || data.id || data.cartId,
           num,
           units: data.units || data.units,
-          unitPrice: data.unit_price || data.unit_price,
+          unitPrice: data.unit_price || data.price,
         },
         num,
       )
@@ -229,6 +229,10 @@ const addShoppingCart = async (data: CartItem & RecommendItem, num: number, type
     }
   }
   getMemberCartData()
+  recommendPageParams.page = 1
+  recommendFinish.value = false
+  recommendList.value = []
+  getRecommendData()
 }
 
 const isShowManage = ref(false)
@@ -238,7 +242,7 @@ const onTapManage = () => {
 // 底部推荐数据
 // 获取底部推荐数据
 const recommendPageParams: Required<PageParams> = {
-  page: 3762,
+  page: 1,
   pageSize: 10,
 }
 const recommendFinish = ref(false)
@@ -367,7 +371,7 @@ const goToDetail = (data: RecommendItem) => {
               <image :src="item.images[0]" />
               <view class="name">{{ item.name }}</view>
               <view class="info" @tap.stop.prevent>
-                <view class="price">￥{{ item.unit_price }}</view>
+                <view class="price">￥{{ item.price }}</view>
                 <uni-number-box
                   class="number-box"
                   v-if="item.cartGoodsNum"
