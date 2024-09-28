@@ -6,6 +6,7 @@ import {
   userLoginAPI,
   verifyCodeLoginAPI,
 } from '@/services/login'
+import { wxLoginAPI } from '@/services/my'
 import { useMemberStore } from '@/stores'
 import type { LoginResult } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
@@ -136,6 +137,30 @@ const disabled = computed(() => {
     }
   }
 })
+
+const wxLogin = () => {
+  uni.login({
+    provider: 'weixin', //使用微信登录
+    success: async function (loginRes) {
+      const res = await wxLoginAPI({ code: loginRes.code })
+      if (res.code === '0') {
+        uni.showToast({ icon: 'none', title: res.msg })
+      } else {
+        // 保存会员信息
+        const memberStore = useMemberStore()
+        memberStore.setProfile(res.result)
+        uni.showToast({ icon: 'success', title: '登录成功' })
+        setTimeout(() => {
+          // 页面跳转
+          uni.switchTab({ url: '/pages/my/my' })
+        }, 500)
+      }
+      console.log(res)
+
+      console.log('====', loginRes)
+    },
+  })
+}
 </script>
 
 <template>
@@ -198,7 +223,7 @@ const disabled = computed(() => {
         <view class="caption">
           <text>其他登录方式</text>
         </view>
-        <view class="options">
+        <view class="options" @tap="wxLogin">
           <!-- 通用模拟登录 -->
           <view class="wechat-login" />
         </view>

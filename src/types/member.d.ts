@@ -34,6 +34,7 @@ export type LoginResult = {
     driver_id: string
     id: string
     user_id: string
+    openid: string
   }
 }
 /** 个人信息 用户详情信息 */

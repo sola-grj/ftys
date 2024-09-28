@@ -1,7 +1,18 @@
 <script setup lang="ts">
+import { bindWXAPI, checkBindWXAPI } from '@/services/my'
 import { useMemberStore } from '@/stores'
+import { onLoad } from '@dcloudio/uni-app'
+import { ref } from 'vue'
 
 const memberStore = useMemberStore()
+const isBindWx = ref(false)
+// 检查是否绑定微信
+const checkBindWX = async () => {
+  const res = await checkBindWXAPI()
+  if (res.result.idBindWX === '1') {
+    isBindWx.value = true
+  }
+}
 // 退出登录
 const onLogout = () => {
   uni.showModal({
@@ -16,6 +27,28 @@ const onLogout = () => {
     },
   })
 }
+const bindWx = () => {
+  if (isBindWx.value === false) {
+    uni.showModal({
+      content: '是否绑定当前微信？',
+      success: (res) => {
+        if (res.confirm) {
+          uni.login({
+            provider: 'weixin', //使用微信登录
+            success: async function (loginRes) {
+              const res = await bindWXAPI({ code: loginRes.code })
+              if (res.code === '0') {
+                uni.showToast({ icon: 'none', title: res.msg })
+              } else {
+                checkBindWX()
+              }
+            },
+          })
+        }
+      },
+    })
+  }
+}
 const resetPwd = () => {
   uni.navigateTo({
     url: '/PagesOrder/register/register?type=resetPwd',
@@ -24,6 +57,9 @@ const resetPwd = () => {
 const onChangeSwitch = (e: any) => {
   console.log(e.detail.value)
 }
+onLoad(() => {
+  checkBindWX()
+})
 </script>
 
 <template>
@@ -36,8 +72,8 @@ const onChangeSwitch = (e: any) => {
       </view>
       <view class="list-item">
         <view hover-class="none" class="item arrow">绑定微信</view>
-        <view>
-          <text>待绑定</text>
+        <view @tap="bindWx">
+          <text>{{ isBindWx ? '已绑定' : '待绑定' }}</text>
           <text class="ftysIcon icon-xiangyoujiantou"></text>
         </view>
       </view>

@@ -402,3 +402,38 @@ export const getChannelOrderListAPI = (data: {
     data,
   })
 }
+
+/**
+ * 微信登录
+ * @param data 请求参数
+ */
+export const wxLoginAPI = (data: { code: string }) => {
+  return http<LoginResult>({
+    method: 'POST',
+    url: '/user/wxLogin',
+    data,
+  })
+}
+
+/**
+ * 绑定微信
+ * @param data 请求参数
+ */
+export const bindWXAPI = (data: { code: string }) => {
+  return http({
+    method: 'POST',
+    url: '/user/bindWX',
+    data,
+  })
+}
+
+/**
+ * 检查是否绑定微信
+ * @param data 请求参数
+ */
+export const checkBindWXAPI = () => {
+  return http<{ openId: string; idBindWX: string }>({
+    method: 'POST',
+    url: '/user/checkBindWX',
+  })
+}

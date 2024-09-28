@@ -64,13 +64,13 @@
     },
     /* 小程序特有相关 */
     "mp-weixin" : {
-        "appid" : "wxbfc131242cc4c2c1",
+        "appid" : "wx1aeb2540631e429f",
         "setting" : {
             "urlCheck" : false,
-            "minified": true
+            "minified" : true
         },
         "usingComponents" : true,
-        "lazyCodeLoading": "requiredComponents"
+        "lazyCodeLoading" : "requiredComponents"
     },
     "mp-alipay" : {
         "usingComponents" : true

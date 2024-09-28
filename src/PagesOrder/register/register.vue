@@ -352,11 +352,11 @@ const refreshVerifyCode = () => {
             <text class="label">采购类型</text>
             <radio-group class="radio-group" @change="onTypeChange">
               <label class="radio">
-                <radio value="3" color="#27ba9b" :checked="buyType === '3'" />
+                <radio value="3" color="#ff5040" :checked="buyType === '3'" />
                 生鲜
               </label>
               <label class="radio">
-                <radio value="4" color="#27ba9b" :checked="buyType === '4'" />
+                <radio value="4" color="#ff5040" :checked="buyType === '4'" />
                 干货
               </label>
             </radio-group>
