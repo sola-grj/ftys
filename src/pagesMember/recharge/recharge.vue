@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { getMyCouponListAPI, getCouponListAPI, receiveCouponAPI } from '@/services/coupon'
-import { getMySuggestAPI } from '@/services/my'
+import {
+  getMySuggestAPI,
+  getRechargeB2BPayAPI,
+  getRechargePayAPI,
+  type RechargeResult,
+} from '@/services/my'
 import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
 import type { PageParams } from '@/types/global'
 import type { MySuggestItem } from '@/types/my'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 
-const amount = ref('')
+const amount = ref('100')
 const activeIndex = ref('100')
 // 推荐分页参数
 const pageParams: Required<PageParams> = {
@@ -17,60 +22,48 @@ const pageParams: Required<PageParams> = {
 const isFinish = ref(false)
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
-// 获取意见反馈列表
-const suggestList = ref<MySuggestItem[]>([])
-const getSuggestListData = async () => {
-  // 退出判断
-  if (isFinish.value === true) {
-    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
-  }
-  const res = await getMySuggestAPI({ ...pageParams })
-  // 分页数据增加
-  // suggestList.value.push(...res.result.list)
-  const mockList = [
-    {
-      id: '1',
-      user_id: '1',
-      title: '标题',
-      content: '建议内容',
-      images: '1,2,3,4,5,6,7,8',
-      status: '1',
-      create_time: '2024-08-04 23:52:54',
-      update_time: 'null',
+const goToRecharge = async () => {
+  uni.login({
+    provider: 'weixin', //使用微信登录
+    success: async function (loginRes) {
+      const res = await getRechargeB2BPayAPI({
+        rechargeMoney: amount.value,
+        code: loginRes.code,
+      })
+      wx.requestCommonPayment({
+        signData: res.result.signData,
+        paySig: res.result.paySig,
+        signature: res.result.signature,
+        mode: 'retail_pay_goods',
+        success(successRes: any) {
+          console.log('requestCommonPayment success', successRes)
+          uni.showToast({ icon: 'success', title: '支付成功' })
+        },
+        fail({ errMsg, errno }) {
+          console.error(errMsg, errno)
+        },
+      })
     },
-    {
-      id: '2',
-      user_id: '1',
-      title: '标题2',
-      content: '建议内容',
-      images: '1,2,3,4,5,6,7,8',
-      status: '1',
-      create_time: '2024-08-04 23:52:54',
-      update_time: 'null',
-    },
-    {
-      id: '3',
-      user_id: '1',
-      title: '标题3',
-      content: '建议内容',
-      images: '1,2,3,4,5,6,7,8',
-      status: '1',
-      create_time: '2024-08-04 23:52:54',
-      update_time: 'null',
-    },
-  ]
-  // suggestList.value.push(...res.result.list)
-  suggestList.value.push(...mockList)
-  if (pageParams.page < res.result.total) {
-    // 页码累加
-    pageParams.page++
-  } else {
-    isFinish.value = true
-  }
+  })
+
+  // uni.requestPayment({
+  //   provider: 'wxpay',
+  //   timeStamp: res.result.data.timeStamp,
+  //   nonceStr: res.result.data.nonceStr,
+  //   package: res.result.data.package,
+  //   signType: res.result.data.signType,
+  //   paySign: res.result.data.paySign,
+  //   success: function (res) {
+  //     console.log('success:' + JSON.stringify(res));
+  //   },
+  //   fail: function (err) {
+  //     console.log('fail:' + JSON.stringify(err));
+  //   }
+  // });
 }
 
 onLoad(() => {
-  getSuggestListData()
+  // getRechargePay()
 })
 const addFeedback = () => {
   uni.navigateTo({ url: '/pagesMember/addfeedback/addfeedback' })
@@ -81,7 +74,7 @@ const onChangeIndex = (index: string) => {
   }
   activeIndex.value = index
 }
-const goToRecharge = () => {}
+
 const goToAccountDetail = () => {
   uni.navigateTo({ url: '/pagesMember/capital/capital' })
 }
@@ -91,7 +84,7 @@ const goback = () => {
 </script>
 
 <template>
-  <scroll-view @scrolltolower="getSuggestListData" class="viewport" scroll-y enable-back-to-top>
+  <scroll-view class="viewport" scroll-y enable-back-to-top>
     <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
       <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
       <text class="text">客户余额</text>

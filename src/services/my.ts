@@ -437,3 +437,45 @@ export const checkBindWXAPI = () => {
     url: '/user/checkBindWX',
   })
 }
+
+export type RechargeResult = {
+  data: {
+    appId: string
+    timeStamp: string
+    nonceStr: string
+    package: string
+    paySign: string
+    signType: string
+  }
+  type: string
+}
+
+export type RechargeB2BResult = {
+  signData: string
+  paySig: string
+  signature: string
+}
+
+/**
+ * 获取支付参数
+ * @param data 请求参数
+ */
+export const getRechargePayAPI = (data: { rechargeMoney: number }) => {
+  return http<RechargeResult>({
+    method: 'POST',
+    url: '/Pay_V3/recharge',
+    data,
+  })
+}
+
+/**
+ * 获取支付参数
+ * @param data 请求参数
+ */
+export const getRechargeB2BPayAPI = (data: { rechargeMoney: string; code: string }) => {
+  return http<RechargeB2BResult>({
+    method: 'POST',
+    url: '/Pay_V3/rechargeB2B',
+    data,
+  })
+}
