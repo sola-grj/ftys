@@ -479,3 +479,14 @@ export const getRechargeB2BPayAPI = (data: { rechargeMoney: string; code: string
     data,
   })
 }
+
+/**
+ * 获取支付参数
+ * @param data 请求参数
+ */
+export const getUserMoneyAPI = () => {
+  return http<{ money: string; credit_money: string }>({
+    method: 'POST',
+    url: '/user/getUserMoney',
+  })
+}

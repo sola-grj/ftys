@@ -9,10 +9,13 @@ import unshipcustomerorders from './components/unshipcustomerorders.vue'
 import completeorder from './components/completeorder.vue'
 import completeorderdetail from './components/completeorderdetail.vue'
 import { getMyCouponListAPI } from '@/services/coupon'
-import { getFullPerformanceAPI } from '@/services/my'
+import { getFullPerformanceAPI, getUserMoneyAPI } from '@/services/my'
 
 // 获取会员信息
 const memberStore = useMemberStore()
+const money = ref('')
+const creditMoney = ref('')
+
 const currentUnshipCustomer = ref<UnShipCustomerItem>({} as UnShipCustomerItem)
 const isUnShipDetail = ref(false)
 const changeUnShipDetailStatus = (data: UnShipCustomerItem) => {
@@ -56,6 +59,7 @@ console.log('memberStore====', memberStore)
 // 三种用户角色
 // 我的页面判断用户权限
 onShow(() => {
+  getMoney()
   // 司机角色，不显示底部tabbar  	1:业务员 2:司机 3:生鲜 4:干货 5:生鲜&干货
   if (type_id === 2) {
     uni.hideTabBar({
@@ -87,10 +91,10 @@ const CouponTypes = ref([
   { name: '优惠券', data: couponNum.value || '0', desc: '下单立省' },
   {
     name: '欠款',
-    data: memberStore.profile?.userinfo.credit_money || '暂无欠款',
+    data: creditMoney.value || '暂无欠款',
     desc: '当前欠款',
   },
-  { name: '账户余额', data: memberStore.profile?.userinfo.money || '0.00', desc: '在线充值' },
+  { name: '账户余额', data: money.value || '0.00', desc: '在线充值' },
 ])
 // 客户常用工具
 let CustomerToolTypes: any = []
@@ -283,6 +287,14 @@ const onJump = (data: any) => {
 const keyword = ref('')
 const onChangeAccount = () => {
   uni.navigateTo({ url: '/pagesMember/changeaccount/changeaccount' })
+}
+
+const getMoney = async () => {
+  const res = await getUserMoneyAPI()
+  money.value = res.result.money
+  creditMoney.value = res.result.credit_money
+  CouponTypes.value[1].data = res.result.credit_money || '暂无欠款'
+  CouponTypes.value[2].data = res.result.money || '0.00'
 }
 onLoad(() => {
   getCouponNum()

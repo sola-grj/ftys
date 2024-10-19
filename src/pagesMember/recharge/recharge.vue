@@ -4,6 +4,7 @@ import {
   getMySuggestAPI,
   getRechargeB2BPayAPI,
   getRechargePayAPI,
+  getUserMoneyAPI,
   type RechargeResult,
 } from '@/services/my'
 import type { CouponItem, MyCouponItem, WholeCouponItem } from '@/types/coupon'
@@ -14,18 +15,20 @@ import { computed, ref } from 'vue'
 
 const amount = ref('100')
 const activeIndex = ref('100')
-// 推荐分页参数
-const pageParams: Required<PageParams> = {
-  page: 1,
-  pageSize: 10,
+
+const money = ref('')
+const getMoney = async () => {
+  const res = await getUserMoneyAPI()
+  money.value = res.result.money
 }
-const isFinish = ref(false)
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const goToRecharge = async () => {
   uni.login({
     provider: 'weixin', //使用微信登录
     success: async function (loginRes) {
+      console.log('00000000000000000', amount.value)
+
       const res = await getRechargeB2BPayAPI({
         rechargeMoney: amount.value,
         code: loginRes.code,
@@ -36,11 +39,14 @@ const goToRecharge = async () => {
         signature: res.result.signature,
         mode: 'retail_pay_goods',
         success(successRes: any) {
+          getMoney()
           console.log('requestCommonPayment success', successRes)
           uni.showToast({ icon: 'success', title: '支付成功' })
         },
         fail({ errMsg, errno }) {
+          getMoney()
           console.error(errMsg, errno)
+          uni.showToast({ icon: 'error', title: `${errMsg}-${errno}` })
         },
       })
     },
@@ -64,6 +70,7 @@ const goToRecharge = async () => {
 
 onLoad(() => {
   // getRechargePay()
+  getMoney()
 })
 const addFeedback = () => {
   uni.navigateTo({ url: '/pagesMember/addfeedback/addfeedback' })
@@ -81,6 +88,33 @@ const goToAccountDetail = () => {
 const goback = () => {
   uni.navigateBack()
 }
+const maxlength = ref(0)
+const checkNum = (e) => {
+  let val = e.toString()
+  let dot = val.indexOf('.')
+  if (dot == 0) {
+    val = val.replace(/[^$#$]/g, '0.')
+    val = val.replace(/\.{2,}/g, '.')
+  } else {
+    val = val.replace(/[^\d.]/g, '')
+    val = val.replace(/\.{2,}/g, '.')
+    val = val.replace(/^0+\./g, '0.')
+    val = val.match(/^0+[1-9]+/) ? (val = val.replace(/^0+/g, '')) : val
+    val = val.match(/^\d*(\.?\d{0,2})/g)[0] || ''
+  }
+
+  if (val.includes('.')) {
+    let point = val.toString().split('.')[1].length
+    if (point === 2) {
+      maxlength.value = val.length // 限制输入框可输入的长度范围只在小数点后两位
+    }
+  } else {
+    maxlength.value = 15 // 如果没有小数点，则输入框可输入长度是最原始长度
+  }
+
+  amount.value = val // 如果有改变 给输入框内容赋值
+  console.log(amount.value)
+}
 </script>
 
 <template>
@@ -91,7 +125,9 @@ const goback = () => {
     </view>
     <view class="container">
       <view class="image">
-        <view class="left">余额 ￥<text class="money">1233333</text> </view>
+        <view class="left"
+          >余额 ￥<text class="money">{{ money }}</text>
+        </view>
         <view class="detail" @tap="goToAccountDetail">查看明细>> </view>
       </view>
       <view class="recharge-container">
@@ -143,7 +179,7 @@ const goback = () => {
         </view>
         <view class="define" v-if="activeIndex === 'define'">
           <text>自定义金额</text>
-          <uni-easyinput v-model="amount" type="text" />
+          <uni-easyinput @input="checkNum" type="digit" />
         </view>
       </view>
       <view class="btn" @tap="goToRecharge">立即充值</view>
