@@ -126,7 +126,7 @@ const getHistoryData = async () => {
 const isLoading = ref(false)
 
 // uniapp 生命周期
-onLoad(async () => {
+onShow(async () => {
   uni.showTabBar({
     animation: true,
   })
@@ -170,11 +170,11 @@ const onRefresherrefresh = async () => {
   // 关闭动画
   isTriggered.value = false
 }
-onShow(() => {
-  uni.showTabBar({
-    animation: true,
-  })
-})
+// onShow(() => {
+//   uni.showTabBar({
+//     animation: true,
+//   })
+// })
 </script>
 
 <template>

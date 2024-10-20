@@ -24,7 +24,6 @@ type verigyCodeLoginParams = {
 // 短信验证码参数
 type smsParams = {
   mobile: string
-  event: string // register login
 }
 
 // 用户注册参数
@@ -116,7 +115,7 @@ export const verifyCodeLoginAPI = (data: verigyCodeLoginParams) => {
 export const getSmsAPI = (data: smsParams) => {
   return http({
     method: 'POST',
-    url: '/sms/send',
+    url: '/Ks_Sms/get_code',
     data,
   })
 }

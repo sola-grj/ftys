@@ -3,7 +3,7 @@ import { useAddShoppingCart, useCollect, useUpdateShoppingCart } from '@/composa
 import { getGoodsCollectsAPI, getRecentlyOrderAPI } from '@/services/order'
 import type { PageParams } from '@/types/global'
 import type { QuickOrderCategoryItem, QuickOrderListItem } from '@/types/order'
-import { onLoad } from '@dcloudio/uni-app'
+import { onShow } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
 const typepopup = ref<UniHelper.UniPopupInstance>()
@@ -186,7 +186,7 @@ const addShoppingCart = async (data: QuickOrderListItem, num: number, type: stri
 const onChangeIndex = (index: number) => {
   activeIndex.value = index
 }
-onLoad(() => {
+onShow(() => {
   geCommonlyUsedData()
   geRencentlyBuyData()
 })

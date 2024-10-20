@@ -171,7 +171,7 @@ onUnload(() => {
 })
 
 // 页面加载
-onLoad(() => {
+onShow(() => {
   getTypeListData()
   uni.$on('categoryInfo', async (data) => {
     await getTypeListData()

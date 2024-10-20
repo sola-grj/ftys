@@ -490,3 +490,15 @@ export const getUserMoneyAPI = () => {
     url: '/user/getUserMoney',
   })
 }
+
+/**
+ * 获取短信验证码
+ * @param data 请求参数
+ */
+export const getSmsCodeAPI = (data: { mobile: string }) => {
+  return http({
+    method: 'POST',
+    url: '/Ks_Sms/get_code',
+    data,
+  })
+}

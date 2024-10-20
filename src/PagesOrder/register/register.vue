@@ -129,7 +129,11 @@ const countDown = ref(60)
 const checked = ref(false)
 
 const onGetSmsTap = async () => {
-  const res = await getSmsAPI({ mobile: phone.value, event: 'login' })
+  if (!phone.value) {
+    uni.showToast({ icon: 'error', title: '请输入手机号码' })
+    return
+  }
+  const res = await getSmsAPI({ mobile: phone.value })
   console.log('======>>>>>', res)
 
   checked.value = true
@@ -345,7 +349,7 @@ const refreshVerifyCode = () => {
               type="password"
               v-model="pwd"
               :clearable="false"
-              placeholder="请输入内容"
+              placeholder="请输入密码"
             ></uni-easyinput>
           </uni-forms-item>
           <uni-forms-item class="form-item" v-if="type === 'register'">

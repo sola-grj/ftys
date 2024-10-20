@@ -39,7 +39,7 @@ const againBuyGoodsOrder = ref<OrderItem>({} as OrderItem)
 onUnload(() => {
   uni.$off('againBuy')
 })
-onLoad(() => {
+onShow(() => {
   getRecommendData()
   getMemberCartData()
   uni.$on('againBuy', async (data) => {
