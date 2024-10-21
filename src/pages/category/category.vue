@@ -221,8 +221,23 @@ const goToSearch = () => {
 
 // 点击一级分类
 const onChangeIndex = (index: number) => {
-  activeIndex.value = index
-  // 更新三级分类数据
+  if (index === 0 && fruitCategory.value.length === 0) {
+    uni.showModal({
+      content: '当前用户只支持查看干货分类',
+      success: async (res) => {
+        activeIndex.value = 1
+      },
+    })
+  } else if (index === 1 && dryCargoCategory.value.length === 0) {
+    uni.showModal({
+      content: '当前用户只支持查看生鲜分类',
+      success: async (res) => {
+        activeIndex.value = 0
+      },
+    })
+  } else {
+    activeIndex.value = index
+  }
 }
 
 // 点击二级分类

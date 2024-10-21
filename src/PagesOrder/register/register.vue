@@ -157,7 +157,14 @@ onLoad(() => {})
 
 // 修改类型
 const onTypeChange: UniHelper.RadioGroupOnChange = (ev) => {
-  buyType.value = ev.detail.value
+  console.log('ev===', ev)
+
+  const arr = ev.detail.value
+  if (arr.length === 2) {
+    buyType.value = '5'
+  } else if (arr.length === 1) {
+    buyType.value = arr[0]
+  }
 }
 
 // 选择位置
@@ -353,16 +360,16 @@ const refreshVerifyCode = () => {
           </uni-forms-item>
           <uni-forms-item class="form-item" v-if="type === 'register'">
             <text class="label">采购类型</text>
-            <radio-group class="radio-group" @change="onTypeChange">
+            <checkbox-group class="radio-group" @change="onTypeChange">
               <label class="radio">
-                <radio value="3" color="#ff5040" :checked="buyType === '3'" />
+                <checkbox value="3" color="#ff5040" :checked="buyType === '3' || buyType === '5'" />
                 生鲜
               </label>
               <label class="radio">
-                <radio value="4" color="#ff5040" :checked="buyType === '4'" />
+                <checkbox value="4" color="#ff5040" :checked="buyType === '4' || buyType === '5'" />
                 干货
               </label>
-            </radio-group>
+            </checkbox-group>
           </uni-forms-item>
         </view>
         <!-- 下一步按钮 -->
@@ -462,6 +469,7 @@ page {
   background: rgba(229, 229, 229, 1);
   margin-top: 20rpx;
 }
+
 input {
   text-align: right;
 }

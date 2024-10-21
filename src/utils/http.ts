@@ -40,6 +40,7 @@ const httpInterceptor = {
     if (token) {
       options.header.token = token
     }
+    uni.hideLoading()
     console.log(options)
   },
 }
