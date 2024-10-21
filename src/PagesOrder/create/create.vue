@@ -237,10 +237,7 @@ const showValue = () => {
 <template>
   <scroll-view scroll-y class="viewport">
     <view class="top-title">
-      <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
-        <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-        <text class="text">确认订单</text>
-      </view>
+      <SolaShopHeader title="确认订单" />
     </view>
     <view class="container">
       <!-- 收货地址 -->
@@ -369,46 +366,12 @@ page {
   width: 100%;
   background: linear-gradient(to bottom, rgb(241 73 17) 0%, #f7f7f8 100%);
   padding: 20rpx;
-
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 130rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-
-    .add-feedback {
-      width: 160rpx;
-      font-size: 28rpx;
-      height: 40rpx;
-      text-align: center;
-      line-height: 40rpx;
-      position: absolute;
-      right: 20rpx;
-      bottom: 20rpx;
-      border-radius: 20rpx;
-      background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
-    }
-  }
 }
 
 .container {
   // overflow: scroll;
   position: relative;
-  top: -270rpx;
+  top: -220rpx;
   height: 100%;
   display: inline-block;
   width: 100%;

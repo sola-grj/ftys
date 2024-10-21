@@ -193,9 +193,7 @@ onShow(() => {
 </script>
 <template>
   <scroll-view class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
-      <text class="text">快捷下单</text>
-    </view>
+    <SolaShopHeader title="快捷下单" />
     <scroll-view
       @scrolltolower="activeIndex === 0 ? geCommonlyUsedData() : geRencentlyBuyData()"
       scroll-y
@@ -340,27 +338,6 @@ page {
 .viewport {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
-
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 130rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-  }
 
   .container {
     height: 100%;

@@ -5,12 +5,14 @@
  */
 import SolaShopSwiper from '@/components/SolaShopSwiper.vue'
 import SolaShopGuess from '@/components/SolaShopGuess.vue'
+import SolaShopHeader from '@/components/SolaShopHeader.vue'
 import 'vue'
 declare module 'vue' {
   export interface GlobalComponents {
     //
     SolaShopSwiper: typeof SolaShopSwiper
     SolaShopGuess: typeof SolaShopGuess
+    SolaShopHeader: typeof SolaShopHeader
   }
 }
 

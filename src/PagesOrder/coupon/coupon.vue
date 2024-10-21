@@ -96,10 +96,12 @@ const goToUseCoupon = (couponId: string) => {
 
 <template>
   <scroll-view class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: height + top + 'px' }">
+    <SolaShopHeader v-if="from === 'my'" title="我的优惠券" />
+    <SolaShopHeader v-else-if="from === 'order'" title="选择优惠券" />
+    <SolaShopHeader v-else />
+    <!-- <view class="title" :style="{ paddingTop: height + top + 'px' }">
       <text v-if="from === 'my'" class="text">我的优惠券</text>
       <text v-else-if="from === 'order'" class="text">选择优惠券</text>
-      <!-- 搜索框 -->
       <view v-else @tap="goToSearch" class="search">
         <text class="ftysIcon icon-sousuo"></text>
         <input disabled />
@@ -110,7 +112,7 @@ const goToUseCoupon = (couponId: string) => {
         class="ftysIcon icon-xiangzuojiantou"
         :class="from === 'home' ? 'home-back' : ''"
       ></text>
-    </view>
+    </view> -->
     <view class="container">
       <view v-if="from === 'my'" class="login-container">
         <view class="login-type">
@@ -204,58 +206,6 @@ page {
 .viewport {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
-
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 186rpx;
-
-    .text {
-      position: absolute;
-      bottom: 10rpx;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      bottom: 10rpx;
-      left: 20rpx;
-    }
-
-    .home-back {
-      bottom: 24rpx;
-    }
-
-    .search {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 4rpx 0 26rpx;
-      height: 64rpx;
-      margin-right: 20rpx;
-      font-size: 28rpx;
-      border-radius: 32rpx;
-      background-color: rgba(255, 255, 255, 0.5);
-      border: 1px solid #ff5040;
-      width: 85%;
-      position: absolute;
-      right: 0;
-
-      .search-btn {
-        color: #fff;
-        border-radius: 30rpx;
-        height: 54rpx;
-        line-height: 54rpx;
-        background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
-        font-size: 26rpx;
-        font-weight: 400;
-        margin: 0;
-      }
-    }
-  }
 
   .container {
     height: 100%;

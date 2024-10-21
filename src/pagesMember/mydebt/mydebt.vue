@@ -20,6 +20,13 @@ const currentCommonlyType = ref<QuickOrderCategoryItem>({} as QuickOrderCategory
 const currentRecentlyType = ref<QuickOrderCategoryItem>({} as QuickOrderCategoryItem)
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
+// 状态栏高度
+const statusBarHeight = uni.getSystemInfoSync().statusBarHeight || 0
+// 胶囊数据
+const { top, height } = wx.getMenuButtonBoundingClientRect()
+// 自定义导航栏高度 = 胶囊高度 + 胶囊的padding*2, 如果获取不到设置为38
+const barHeight = height ? height + (top - statusBarHeight) * 2 : 38
+
 const allFinish = ref(false)
 const allPageParams: Required<PageParams> = {
   page: 1,
@@ -146,12 +153,9 @@ const goToPayment = async () => {
 }
 </script>
 <template>
-  <scroll-view class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
-      <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">我的欠款</text>
-    </view>
-    <scroll-view @scrolltolower="getMyDebtData" scroll-y enable-back-to-top class="container">
+  <view class="viewport" scroll-y enable-back-to-top>
+    <SolaShopHeader title="我的欠款" />
+    <scroll-view class="container">
       <view class="image">
         <view class="top">
           <text class="t-title">订单欠款</text>
@@ -159,7 +163,13 @@ const goToPayment = async () => {
         </view>
         <view class="bottom"> 实际欠款：￥{{ total }} (实际欠款=订单欠款-不关联原单退款) </view>
       </view>
-      <view class="list-container">
+      <scroll-view
+        @scrolltolower="getMyDebtData"
+        scroll-y
+        enable-back-to-top
+        class="list-container"
+        :style="{ height: `calc(100vh - 400rpx - ${statusBarHeight}rpx - ${barHeight}rpx)` }"
+      >
         <view class="recharge-title">
           <text class="text">欠款记录</text>
         </view>
@@ -201,9 +211,9 @@ const goToPayment = async () => {
             </view>
           </view>
         </view>
-      </view>
+      </scroll-view>
     </scroll-view>
-  </scroll-view>
+  </view>
 </template>
 <style lang="scss">
 page {
@@ -243,29 +253,8 @@ page {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
 
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 130rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-  }
-
   .container {
-    height: 100%;
+    // height: 100%;
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;
@@ -299,6 +288,7 @@ page {
     }
 
     .list-container {
+      overflow-y: scroll;
       .recharge-title {
         position: relative;
         margin-top: 40rpx;
@@ -364,9 +354,6 @@ page {
           padding-left: 20rpx;
           font-size: 24rpx;
           white-space: nowrap;
-
-          .title {
-          }
 
           .price {
             margin-top: 10rpx;

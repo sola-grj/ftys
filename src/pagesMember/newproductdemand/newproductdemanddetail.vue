@@ -20,10 +20,7 @@ const goBack = () => {
 
 <template>
   <scroll-view class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
-      <text @tap="goBack" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">新品需求详情</text>
-    </view>
+    <SolaShopHeader title="新品需求详情" />
     <view class="container">
       <view class="detail-item">
         <text class="dtitle">商品名称</text>
@@ -67,40 +64,6 @@ page {
 .viewport {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
-
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 130rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-
-    .add-feedback {
-      width: 160rpx;
-      font-size: 28rpx;
-      height: 40rpx;
-      text-align: center;
-      line-height: 40rpx;
-      position: absolute;
-      right: 20rpx;
-      bottom: 20rpx;
-      border-radius: 20rpx;
-      background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
-    }
-  }
 
   .container {
     height: 100%;

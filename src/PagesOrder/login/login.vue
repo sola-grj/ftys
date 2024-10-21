@@ -21,7 +21,15 @@ const countDown = ref(60)
 const checked = ref(false)
 
 const onGetSmsTap = async () => {
-  const res = await getSmsAPI({ mobile: phone.value, event: 'login' })
+  if (checked.value) {
+    uni.showToast({ icon: 'error', title: '请稍后再试' })
+    return
+  }
+  if (!phone.value) {
+    uni.showToast({ icon: 'error', title: '请输入手机号' })
+    return
+  }
+  const res = await getSmsAPI({ mobile: phone.value })
   console.log('======>>>>>', res)
 
   checked.value = true
@@ -159,6 +167,9 @@ const wxLogin = () => {
 
       console.log('====', loginRes)
     },
+    fail: function (e) {
+      console.log('e===', e)
+    },
   })
 }
 </script>
@@ -223,9 +234,9 @@ const wxLogin = () => {
         <view class="caption">
           <text>其他登录方式</text>
         </view>
-        <view class="options" @tap="wxLogin">
+        <view class="options">
           <!-- 通用模拟登录 -->
-          <view class="wechat-login" />
+          <view class="wechat-login" @tap="wxLogin" />
         </view>
       </view>
     </view>

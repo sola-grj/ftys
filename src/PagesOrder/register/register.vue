@@ -129,11 +129,13 @@ const countDown = ref(60)
 const checked = ref(false)
 
 const onGetSmsTap = async () => {
-  if (!phone.value) {
+  if (!phone.value && !memberStore.profile?.userinfo.mobile) {
     uni.showToast({ icon: 'error', title: '请输入手机号码' })
     return
   }
-  const res = await getSmsAPI({ mobile: phone.value })
+  const res = await getSmsAPI({
+    mobile: phone.value || (memberStore.profile?.userinfo.mobile as string),
+  })
   console.log('======>>>>>', res)
 
   checked.value = true
@@ -294,12 +296,9 @@ const refreshVerifyCode = () => {
 <template>
   <view class="viewport">
     <!-- 导航栏 -->
-    <view class="title" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
-      <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <view class="text">{{
-        type === 'register' ? '注册账号' : type === 'resetPwd' ? '重置密码' : '找回密码'
-      }}</view>
-    </view>
+    <SolaShopHeader
+      :title="type === 'register' ? '注册账号' : type === 'resetPwd' ? '重置密码' : '找回密码'"
+    />
     <!-- 表单 -->
     <view class="container">
       <uni-forms
@@ -448,27 +447,6 @@ page {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
 
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 130rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-  }
-
   .container {
     height: 100%;
     background: #fff;
@@ -484,34 +462,6 @@ page {
   background: rgba(229, 229, 229, 1);
   margin-top: 20rpx;
 }
-
-// 导航栏
-.navbar {
-  position: relative;
-
-  .title {
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 16px;
-    font-weight: 500;
-    color: #fff;
-  }
-
-  .back {
-    position: absolute;
-    height: 40px;
-    width: 40px;
-    left: 0;
-    font-size: 20px;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-}
-
 input {
   text-align: right;
 }
@@ -595,6 +545,8 @@ input {
     .uni-forms-item__error {
       // margin-left: 200rpx;
       padding-top: 0;
+      top: unset !important;
+      bottom: 0 !important;
     }
 
     &:last-child {

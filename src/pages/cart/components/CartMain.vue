@@ -445,7 +445,7 @@ const goToDetail = (data: RecommendItem) => {
 }
 
 .top-title {
-  height: 200rpx;
+  // height: 200rpx;
   // width: 200rpx;
   // background: linear-gradient(to bottom, rgb(241 73 17) 0%, #f7f7f8 100%);
   padding: 20rpx;

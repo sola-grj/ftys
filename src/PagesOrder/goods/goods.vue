@@ -51,6 +51,16 @@ const getGoodsByIdData = async () => {
     goodsId: query.goodsId,
   })
   goods.value = res.result
+  if (res.code === '0') {
+    uni.showModal({
+      content: '当前商品不存在',
+      success: async (res) => {
+        uni.reLaunch({
+          url: '/pages/index/index',
+        })
+      },
+    })
+  }
 }
 
 const addressStore = useAddressStore()

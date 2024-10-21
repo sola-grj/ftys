@@ -2,7 +2,12 @@
 import { getCategoryTopAPI } from '@/services/category'
 import { getCategoryAPI, getHomeBannerAPI } from '@/services/home'
 import type { CategoryTopItem } from '@/types/category'
-import type { BannerItem, BasicCategoryItem, SearchBasicCategoryItem } from '@/types/home'
+import type {
+  BannerItem,
+  BasicCategoryItem,
+  MustBuyItem,
+  SearchBasicCategoryItem,
+} from '@/types/home'
 import { onLoad, onShow, onTabItemTap, onUnload } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { useMemberStore } from '@/stores'
@@ -67,6 +72,9 @@ const currentFourthDryTypeCategory = ref<BasicCategoryItem[]>([])
 const fiveTypeFruitCategory = ref<SearchBasicCategoryItem[]>([])
 const fiveTypeDryCategory = ref<SearchBasicCategoryItem[]>([])
 
+const currentFruitCategoryId = ref('')
+const currentDryCategoryId = ref('')
+
 const fiveTypeFruitData = ref<{ source: string; category: string }>(
   {} as { source: string; category: string },
 )
@@ -74,7 +82,21 @@ const fiveTypeDryData = ref<{ source: string; category: string }>(
   {} as { source: string; category: string },
 )
 
+onTabItemTap((e) => {
+  console.log('e------', e)
+  if (e.text === '分类') {
+    getTypeListData()
+  }
+})
+
 const getFiveTypeFruitCategoryData = async (source: string, category: string) => {
+  if (category !== currentFruitCategoryId.value) {
+    currentFruitCategoryId.value = category
+    fiveTypeFruitCategory.value = []
+    fruitPageParams.page = 1
+    fruitIsFinish.value = false
+  }
+
   fiveTypeFruitData.value = { source, category }
   // 退出判断
   if (fruitIsFinish.value === true) {
@@ -117,7 +139,7 @@ const getFiveTypeDryCategoryData = async (source: string, category: string) => {
 }
 
 // 首次初始化数据
-const getTypeListData = async () => {
+const getTypeListData = async (type?: string) => {
   // 重置分页器
   fruitPageParams.page = 1
   fruitPageParams.pageSize = 10
@@ -145,25 +167,30 @@ const getTypeListData = async () => {
   top1List.value = res.result.top1
   top2List.value = res.result.top2
   // 设置三级数据
-  currentThirdFruitTypeCategory.value = fruitCategory.value[0].childlist
-  currentThirdDryTypeCategory.value = dryCargoCategory.value[0].childlist
+  currentThirdFruitTypeCategory.value = fruitCategory.value[0] && fruitCategory.value[0].childlist
+  currentThirdDryTypeCategory.value =
+    dryCargoCategory.value[0] && dryCargoCategory.value[0].childlist
   // 设置四级数据
   currentFourthFruitTypeCategory.value =
-    fruitCategory.value[0].childlist.length > 0 ? fruitCategory.value[0].childlist[0].childlist : []
+    fruitCategory.value[0] && fruitCategory.value[0].childlist.length > 0
+      ? fruitCategory.value[0] && fruitCategory.value[0].childlist[0].childlist
+      : []
   currentFourthDryTypeCategory.value =
-    dryCargoCategory.value[0].childlist.length > 0
-      ? dryCargoCategory.value[0].childlist[0].childlist
+    dryCargoCategory.value[0] && dryCargoCategory.value[0].childlist.length > 0
+      ? dryCargoCategory.value[0] && dryCargoCategory.value[0].childlist[0].childlist
       : []
   // @ts-ignore
   // currentFourthFruitTypeCategory.value = [{ name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, ...currentFourthFruitTypeCategory.value]
-  getFiveTypeFruitCategoryData(
-    fruitCategory.value[0].childlist[0].source,
-    fruitCategory.value[0].childlist[0].id,
-  )
-  getFiveTypeDryCategoryData(
-    dryCargoCategory.value[0].childlist[0].source,
-    dryCargoCategory.value[0].childlist[0].id,
-  )
+  if (!type) {
+    getFiveTypeFruitCategoryData(
+      fruitCategory.value[0] && fruitCategory.value[0].childlist[0].source,
+      fruitCategory.value[0] && fruitCategory.value[0].childlist[0].id,
+    )
+    getFiveTypeDryCategoryData(
+      dryCargoCategory.value[0] && dryCargoCategory.value[0].childlist[0].source,
+      dryCargoCategory.value[0] && dryCargoCategory.value[0].childlist[0].id,
+    )
+  }
 }
 const scrollLeft = ref(0)
 onUnload(() => {
@@ -172,9 +199,8 @@ onUnload(() => {
 
 // 页面加载
 onShow(() => {
-  getTypeListData()
   uni.$on('categoryInfo', async (data) => {
-    await getTypeListData()
+    await getTypeListData('type')
     const index = fruitCategory.value.findIndex(
       (v) =>
         v.id === (data.categoryInfo.pid === '0' ? data.categoryInfo.id : data.categoryInfo.pid),
@@ -383,6 +409,10 @@ const orderByPrice = () => {
     getFiveTypeDryCategoryData(fiveTypeDryData.value.source, fiveTypeDryData.value.category)
   }
 }
+
+const goToDetail = (data: MustBuyItem) => {
+  uni.navigateTo({ url: `/PagesOrder/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
+}
 </script>
 
 <template>
@@ -557,13 +587,14 @@ const orderByPrice = () => {
               class="item"
               v-for="item in activeIndex === 0 ? fiveTypeFruitCategory : fiveTypeDryCategory"
               :key="item.goodsId"
+              @tap="($event) => goToDetail(item)"
             >
               <image :src="item.images[0]" mode="scaleToFill" />
               <view class="info">
                 <view class="title">{{ item.name }}</view>
                 <view class="price">￥{{ item.price }}</view>
               </view>
-              <view class="right">
+              <view class="right" @tap.stop.prevent>
                 <view
                   @tap="($event) => onCollect(item)"
                   :class="`ftysIcon ${

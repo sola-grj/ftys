@@ -67,20 +67,23 @@ const onDelete = (event: any) => {
 const goback = () => {
   uni.navigateBack()
 }
+
+const makePhoneCall = (phoneNumber: string) => {
+  uni.makePhoneCall({
+    phoneNumber, //仅为示例
+  })
+}
 </script>
 
 <template>
   <scroll-view class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
-      <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">联系客服</text>
-    </view>
+    <SolaShopHeader title="联系客服" />
     <view class="container">
       <image class="image" src="@/static/images/customer.png" />
-      <view class="item">
+      <view class="item" @tap="($event) => makePhoneCall('13455556666')">
         <text class="ftysIcon icon-dianhua">13455556666</text>
       </view>
-      <view class="item">
+      <view class="item" @tap="($event) => makePhoneCall('13455556666')">
         <text class="ftysIcon icon-dianhua">13455556666</text>
       </view>
       <view class="item">
@@ -103,27 +106,6 @@ page {
 .viewport {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
-
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 130rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-  }
 
   .container {
     display: flex;

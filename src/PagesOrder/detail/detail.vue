@@ -231,10 +231,7 @@ const goToSource = (data: DetailItem) => {
   </view> -->
   <scroll-view scroll-y class="viewport" id="scroller" @scrolltolower="onScrolltolower">
     <template v-if="order.orderNo">
-      <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
-        <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-        <text class="text">订单详情</text>
-      </view>
+      <SolaShopHeader title="订单详情" />
       <view class="container">
         <view class="address-info" v-if="order.status === OrderState.YiShouHuo">
           <text class="ftysIcon icon-ditu_dingwei" />
@@ -392,27 +389,6 @@ page {
 
 .viewport {
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
-
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 130rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-  }
 
   .container {
     position: relative;

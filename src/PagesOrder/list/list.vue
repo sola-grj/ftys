@@ -94,7 +94,7 @@ page {
     width: 16.6%;
     height: 6rpx;
     padding: 0 50rpx;
-    background-color: #27ba9b;
+    background-color: #ff5040;
     /* 过渡效果 */
     transition: all 0.4s;
   }

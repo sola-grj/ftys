@@ -61,11 +61,7 @@ const addNewProduct = () => {
 
 <template>
   <scroll-view @scrolltolower="getMyGoodsApplyData" class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: height + top + 'px' }">
-      <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">新品需求</text>
-      <view @tap="addNewProduct" class="add-feedback">新增需求</view>
-    </view>
+    <SolaShopHeader title="新品需求" />
     <view class="container">
       <view v-for="item in myGoodsApply" :key="item.id" class="feedback-item">
         <view class="left">
@@ -76,6 +72,9 @@ const addNewProduct = () => {
           </view>
         </view>
         <view class="right" @tap="($event) => goToDetail(item)"> 详情>> </view>
+      </view>
+      <view class="add">
+        <button @tap="addNewProduct" class="add-btn">新增需求</button>
       </view>
     </view>
   </scroll-view>
@@ -92,46 +91,12 @@ page {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
 
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 186rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-
-    .add-feedback {
-      width: 160rpx;
-      font-size: 28rpx;
-      height: 40rpx;
-      text-align: center;
-      line-height: 40rpx;
-      position: absolute;
-      right: 20rpx;
-      bottom: 20rpx;
-      border-radius: 20rpx;
-      background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
-    }
-  }
-
   .container {
+    position: relative;
     height: 100%;
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;
-    padding: 30rpx;
 
     .feedback-item {
       display: flex;
@@ -140,6 +105,7 @@ page {
       justify-content: space-between;
       border-bottom: 1px solid rgba(242, 244, 247, 1);
       margin-top: 30rpx;
+      padding: 30rpx;
 
       .left {
         display: flex;
@@ -164,6 +130,16 @@ page {
 
     .feedback-item:nth-last-child(1) {
       border-bottom: none;
+    }
+    .add {
+      width: 100%;
+      position: fixed;
+      bottom: 10rpx;
+      .add-btn {
+        width: 80%;
+        color: #fff;
+        background-color: #ff5040;
+      }
     }
   }
 }

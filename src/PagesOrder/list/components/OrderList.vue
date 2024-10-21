@@ -49,16 +49,35 @@ const isDshFinish = ref(false)
 const isDpjFinish = ref(false)
 
 // 根据订单状态生成底部buttons
-const createButtons = () => {
+const createButtons = (order: OrderItem) => {
   switch (props.orderState) {
     case '0':
-      // 全部
-      return [
-        { id: 'cancel', name: '取消订单' },
-        { id: 'edit', name: '编辑' },
-        { id: 'again', name: '再来一单' },
-        { id: 'pay', name: '去支付' },
-      ]
+      if (order.status === '1') {
+        return [
+          { id: 'cancel', name: '取消订单' },
+          { id: 'pay', name: '去支付' },
+        ]
+      } else if (order.status === '2') {
+        return [
+          // { id: 'cancel', name: '取消订单' },
+          { id: 'edit', name: '编辑' },
+          { id: 'again', name: '再来一单' },
+        ]
+      } else if (order.status === '3') {
+        return [{ id: 'again', name: '再来一单' }]
+      } else if (order.status === '4') {
+        return [
+          // { id: 'cancel', name: '取消订单' },
+          // { id: 'edit', name: '编辑' },
+          // { id: 'again', name: '再来一单' },
+        ]
+      } else if (order.status === '6') {
+        return [
+          { id: 'finish', name: '再来一单' },
+          { id: 'after-sales', name: '申请售后' },
+        ]
+      }
+      break
     case '1':
       // 待支付
       return [
@@ -68,7 +87,7 @@ const createButtons = () => {
     case '2':
       // 代发货
       return [
-        { id: 'cancel', name: '取消订单' },
+        // { id: 'cancel', name: '取消订单' },
         { id: 'edit', name: '编辑' },
         { id: 'again', name: '再来一单' },
       ]
@@ -192,9 +211,11 @@ const onOrderPay = async (orderId: string) => {
         const res = await orderPayAPI({ orderId })
         if (res.code === '1') {
           uni.showToast({ icon: 'success', title: '支付成功' })
-          uni.reLaunch({
-            url: '/PagesOrder/list/list',
-          })
+          setTimeout(() => {
+            uni.reLaunch({
+              url: '/PagesOrder/list/list',
+            })
+          }, 600)
         } else {
           uni.showToast({ icon: 'error', title: res.msg })
         }
@@ -259,7 +280,7 @@ const copy = (orderNo: string) => {
           @tap="($event) => onTapBottom(order, btn.id)"
           class="btn"
           :class="btn.id === 'pay' ? 'pay-btn' : ''"
-          v-for="btn in createButtons()"
+          v-for="btn in createButtons(order)"
           :key="btn.id"
           >{{ btn.name }}</view
         >

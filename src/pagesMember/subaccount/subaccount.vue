@@ -77,11 +77,7 @@ const deleteSubAccount = async (userId: string) => {
 
 <template>
   <scroll-view @scrolltolower="getSubAccountListData" class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: height + top + 'px' }">
-      <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">子账号</text>
-      <view @tap="($event) => addSubAccount('add')" class="add-feedback">新增</view>
-    </view>
+    <SolaShopHeader title="子账号" />
     <view class="container">
       <view class="item" v-for="item in subaccountList" :key="item.userId">
         <view class="left">
@@ -106,6 +102,9 @@ const deleteSubAccount = async (userId: string) => {
         />
         <text>暂无内容</text>
       </view>
+      <view class="add">
+        <button @tap="($event) => addSubAccount('add')" class="add-btn">新增</button>
+      </view>
     </view>
   </scroll-view>
 </template>
@@ -118,49 +117,15 @@ page {
 }
 
 .viewport {
+  position: relative;
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
-
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 186rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-
-    .add-feedback {
-      width: 160rpx;
-      font-size: 28rpx;
-      height: 40rpx;
-      text-align: center;
-      line-height: 40rpx;
-      position: absolute;
-      right: 20rpx;
-      bottom: 20rpx;
-      border-radius: 20rpx;
-      background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
-    }
-  }
 
   .container {
     height: 100%;
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;
-    padding: 30rpx;
 
     .item {
       display: flex;
@@ -168,7 +133,7 @@ page {
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid #f2f4f7;
-
+      padding: 30rpx;
       .left {
         display: flex;
         flex-direction: column;
@@ -203,6 +168,16 @@ page {
       image {
         height: 500rpx;
         width: 500rpx;
+      }
+    }
+    .add {
+      width: 100%;
+      position: fixed;
+      bottom: 10rpx;
+      .add-btn {
+        width: 80%;
+        color: #fff;
+        background-color: #ff5040;
       }
     }
   }

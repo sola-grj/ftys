@@ -102,10 +102,7 @@ const goback = () => {
 
 <template>
   <scroll-view class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
-      <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">导出对账单</text>
-    </view>
+    <SolaShopHeader title="导出对账单" />
     <view class="container form-content">
       <uni-forms class="form" ref="formRef" :rules="rules" :modelValue="form">
         <uni-forms-item class="form-item" name="title">
@@ -154,27 +151,6 @@ page {
 .viewport {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
-
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 130rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-  }
 
   .container {
     height: 100%;
