@@ -169,14 +169,16 @@ export type OrderItem = {
   detail: DetailItem[]
   afterSalesDetail: DetailItem[]
   fGoodsId: string
+  createTime: string
 }
 
 // 订单列表上送参数
 export type OrderListReqData = {
   page: number
   pageSize: number
-  status?: string
-  // isFinish?: boolean
+  queryTimeType?: string
+  reportFormStartDate?: string
+  reportFormEndDate?: string
 }
 
 /** 订单列表 */

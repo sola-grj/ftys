@@ -428,6 +428,17 @@ export const bindWXAPI = (data: { code: string }) => {
 }
 
 /**
+ *解绑微信
+ * @param data 请求参数
+ */
+export const UnbindWXAPI = () => {
+  return http({
+    method: 'POST',
+    url: '/user/unbindWX',
+  })
+}
+
+/**
  * 检查是否绑定微信
  * @param data 请求参数
  */

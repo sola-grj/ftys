@@ -32,6 +32,11 @@ const addShoppingCart = async (data: RecommendItem, num: number, type: string) =
     if (res.code === '1') {
       currentCartId.value = res.result.cartId
       data.cartGoodsNum = res.result.goodsNum
+      uni.setTabBarBadge({
+        //显示数字
+        index: 3, //tabbar下标
+        text: '6', //数字
+      })
     }
   } else {
     const res = await useUpdateShoppingCart(
@@ -218,6 +223,15 @@ page {
       border-radius: 10rpx;
       min-height: 400rpx;
       text-align: center;
+
+      .name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -webkit-line-clamp: 2;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        text-align: left;
+      }
     }
 
     image {

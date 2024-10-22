@@ -35,6 +35,12 @@ const settlementStatus = ref('全部')
 
 const reconciliation = ref([['全部', '未对账', '已对账']])
 const settlement = ref([['全部', '未结算', '已结算']])
+const start = new Date(new Date().setDate(new Date().getDate() - 45))
+  .toLocaleDateString()
+  .replaceAll('/', '-')
+const end = new Date(new Date().setDate(new Date().getDate() + 45))
+  .toLocaleDateString()
+  .replaceAll('/', '-')
 
 // 注册表单数据
 const form = ref({
@@ -107,7 +113,13 @@ const goback = () => {
       <uni-forms class="form" ref="formRef" :rules="rules" :modelValue="form">
         <uni-forms-item class="form-item" name="title">
           <text class="label">*按发货日期</text>
-          <uni-datetime-picker v-model="range" type="daterange" @change="onTimeChange" />
+          <uni-datetime-picker
+            :start="start"
+            :end="end"
+            v-model="range"
+            type="daterange"
+            @change="onTimeChange"
+          />
         </uni-forms-item>
         <uni-forms-item class="form-item" name="title">
           <text class="label">*对账状态</text>

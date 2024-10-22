@@ -32,6 +32,7 @@ const activeIndex = ref('1') // 0 是密码登录 1是短信
 const onChangeIndex = (index: string) => {
   activeIndex.value = index
   myCurrentCouponList.value = myCouponList.value.filter((v) => v.status === index)
+  console.log('myCurrentCouponList====', myCurrentCouponList.value)
 }
 const goback = () => {
   uni.navigateBack()
@@ -155,6 +156,13 @@ const goToUseCoupon = (couponId: string) => {
             <image class="image" v-if="item.status === '2'" src="@/static/images/used.png" />
             <image class="image" v-if="item.status === '3'" src="@/static/images/expired.png" />
           </view>
+        </view>
+        <view v-if="myCurrentCouponList.length === 0" class="bg">
+          <image
+            src="https://img.js.design/assets/img/66909fda4fc21e83fb682df4.png#52a35c0ee65bdb8ba63bcefcce2ce6e6"
+            mode="aspectFit"
+          />
+          <text>暂无内容</text>
         </view>
       </view>
       <view v-if="from === 'home'" class="coupon-list">
@@ -420,6 +428,19 @@ page {
           }
         }
       }
+    }
+  }
+
+  .bg {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: rgba(175, 177, 178, 1);
+
+    image {
+      height: 500rpx;
+      width: 500rpx;
     }
   }
 }

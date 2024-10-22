@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { bindWXAPI, checkBindWXAPI } from '@/services/my'
+import { bindWXAPI, checkBindWXAPI, UnbindWXAPI } from '@/services/my'
 import { useMemberStore } from '@/stores'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
@@ -11,6 +11,8 @@ const checkBindWX = async () => {
   const res = await checkBindWXAPI()
   if (res.result.idBindWX === '1') {
     isBindWx.value = true
+  } else {
+    isBindWx.value = false
   }
 }
 // 退出登录
@@ -40,7 +42,32 @@ const bindWx = () => {
               if (res.code === '0') {
                 uni.showToast({ icon: 'none', title: res.msg })
               } else {
-                checkBindWX()
+                uni.showToast({ icon: 'success', title: '绑定成功' })
+                setTimeout(() => {
+                  checkBindWX()
+                }, 500)
+              }
+            },
+          })
+        }
+      },
+    })
+  } else {
+    uni.showModal({
+      content: '是否解绑当前微信？',
+      success: (res) => {
+        if (res.confirm) {
+          uni.login({
+            provider: 'weixin', //使用微信登录
+            success: async function (loginRes) {
+              const res = await UnbindWXAPI()
+              if (res.code === '0') {
+                uni.showToast({ icon: 'none', title: res.msg })
+              } else {
+                uni.showToast({ icon: 'success', title: '解绑成功' })
+                setTimeout(() => {
+                  checkBindWX()
+                }, 500)
               }
             },
           })

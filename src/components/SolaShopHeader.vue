@@ -6,6 +6,7 @@ const statusBarHeight = uni.getSystemInfoSync().statusBarHeight || 0
 const { top, height } = wx.getMenuButtonBoundingClientRect()
 // 自定义导航栏高度 = 胶囊高度 + 胶囊的padding*2, 如果获取不到设置为38
 const barHeight = height ? height + (top - statusBarHeight) * 2 : 38
+console.log('public==========', statusBarHeight, barHeight)
 
 // 接收数据
 defineProps<{
@@ -59,6 +60,7 @@ const goToSearch = () => {
   display: block;
   // height: 280rpx;
 }
+
 .sola-header {
   // position: fixed;
   // top: 0;
@@ -82,6 +84,7 @@ const goToSearch = () => {
       transform: translateY(-50%);
     }
   }
+
   .navbar {
     background-size: cover;
     position: relative;
