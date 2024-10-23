@@ -6,12 +6,13 @@ const statusBarHeight = uni.getSystemInfoSync().statusBarHeight || 0
 const { top, height } = wx.getMenuButtonBoundingClientRect()
 // 自定义导航栏高度 = 胶囊高度 + 胶囊的padding*2, 如果获取不到设置为38
 const barHeight = height ? height + (top - statusBarHeight) * 2 : 38
-console.log('public==========', statusBarHeight, barHeight)
 
 // 接收数据
-defineProps<{
+const props = defineProps<{
   title?: string
+  defineBack?: any
 }>()
+console.log('public==========', props.defineBack)
 
 const goback = () => {
   uni.navigateBack()
@@ -33,7 +34,10 @@ const goToSearch = () => {
         'text-align': 'center',
       }"
     >
-      <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
+      <text
+        @tap="() => (defineBack ? defineBack() : goback())"
+        class="ftysIcon icon-xiangzuojiantou"
+      ></text>
       <text>{{ title }}</text>
     </view>
     <view

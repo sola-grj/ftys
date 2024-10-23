@@ -52,9 +52,6 @@ onLoad(() => {
   getMyMerchantData()
 })
 
-const goback = () => {
-  uni.navigateBack()
-}
 const current = ref(0)
 const radioChange = (evt) => {
   pageParams.page = 1
@@ -78,18 +75,21 @@ const items = [
     checked: 'true',
   },
   {
-    value: 'Unreviewed',
+    value: 'unreviewed',
     name: '未审核',
   },
   {
-    value: 'Normal',
+    value: 'normal',
     name: '正常',
   },
   {
-    value: 'Disable',
+    value: 'disable',
     name: '被禁用',
   },
 ]
+const goback = () => {
+  uni.switchTab({ url: '/pages/my/my' })
+}
 const goToDetail = (data: MyMerchantItem) => {
   uni.navigateTo({
     url: '/pagesMember/mycustomer/customerinfo',
@@ -112,7 +112,7 @@ watch(
 
 <template>
   <scroll-view class="viewport">
-    <SolaShopHeader title="我的商户" />
+    <SolaShopHeader title="我的商户" :define-back="goback" />
     <scroll-view
       @scrolltolower="getMyMerchantData"
       scroll-y

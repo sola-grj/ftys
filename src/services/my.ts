@@ -513,3 +513,32 @@ export const getSmsCodeAPI = (data: { mobile: string }) => {
     data,
   })
 }
+
+/**
+ * 获取短信验证码
+ * @param data 请求参数
+ */
+export const reviewAccountAPI = (data: { customerUserId: string | number }) => {
+  return http({
+    method: 'POST',
+    url: '/user/reviewAccount',
+    data,
+  })
+}
+
+export type ServiceType = {
+  id: number
+  number: string
+  type: string
+}
+
+/**
+ * 联系客服
+ * @param data 请求参数
+ */
+export const getServiceInfoAPI = () => {
+  return http<ServiceType[]>({
+    method: 'POST',
+    url: '/common/getServiceInfo',
+  })
+}

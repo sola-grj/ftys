@@ -6,6 +6,7 @@ import {
   getCustomerListAPI,
   getMyMerchantOrderListAPI,
   getMySuggestAPI,
+  reviewAccountAPI,
   type CustomerItem,
   type MyMerchantItem,
   type MyMerchantOrderItem,
@@ -65,16 +66,34 @@ const onChangeCustomer = async (data: CustomerItem) => {
   }, 500)
 }
 const goback = () => {
-  uni.navigateBack()
+  uni.navigateTo({ url: '/pagesMember/mycustomer/mycustomer' })
+}
+const process = () => {
+  uni.showModal({
+    content: '是否对当前商户通过审核？',
+    success: async (res) => {
+      if (res.confirm) {
+        // 后端删除单品
+        const res = await reviewAccountAPI({
+          customerUserId: customerinfo.value!.userId,
+        })
+        if (res.code === '1') {
+          uni.showToast({ icon: 'success', title: '审核成功' })
+          setTimeout(() => {
+            uni.navigateTo({ url: '/pagesMember/mycustomer/mycustomer' })
+          })
+        } else {
+          uni.showToast({ icon: 'none', title: '审核失败' })
+        }
+      }
+    },
+  })
 }
 </script>
 
 <template>
-  <scroll-view class="viewport" @scrolltolower="getCustomerData" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
-      <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">商户信息</text>
-    </view>
+  <scroll-view class="viewport">
+    <SolaShopHeader :define-back="goback" title="商户信息" />
     <view class="container form-content">
       <view class="login-container">
         <view class="login-type">
@@ -129,6 +148,9 @@ const goback = () => {
           <view class="label">创建时间</view>
           <view class="value">{{ customerinfo?.createTime }}</view>
         </view>
+        <view v-if="customerinfo?.status === 'unreviewed'">
+          <button style="background-color: #ff5040; color: #fff" @tap="process">审核</button>
+        </view>
       </view>
       <view v-if="activeIndex === 1" class="other-container">
         <view v-for="item in myMerchantOrderList" :key="item.orderId" class="other-item">
@@ -153,6 +175,13 @@ const goback = () => {
             </view>
           </view>
         </view>
+        <view v-if="myMerchantOrderList.length === 0" class="bg">
+          <image
+            src="https://img.js.design/assets/img/66909fda4fc21e83fb682df4.png#52a35c0ee65bdb8ba63bcefcce2ce6e6"
+            mode="aspectFit"
+          />
+          <text>暂无内容</text>
+        </view>
       </view>
     </view>
   </scroll-view>
@@ -168,27 +197,6 @@ page {
 .viewport {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
-
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 130rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-  }
 
   .container {
     height: calc(100vh - 130rpx);
@@ -276,6 +284,19 @@ page {
               color: rgba(175, 176, 178, 1);
             }
           }
+        }
+      }
+
+      .bg {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: rgba(175, 177, 178, 1);
+
+        image {
+          height: 500rpx;
+          width: 500rpx;
         }
       }
     }

@@ -18,35 +18,6 @@ const allQueryParams = ref<OrderListReqData>({
   pageSize: 5,
   status: props.orderState,
 })
-// 待支付
-const dzfQueryParams = {
-  page: 1,
-  pageSize: 5,
-  status: props.orderState,
-}
-// 待发货
-const dfhQueryParams = {
-  page: 1,
-  pageSize: 5,
-  status: props.orderState,
-}
-// 待收货
-const dshQueryParams = {
-  page: 1,
-  pageSize: 5,
-  status: props.orderState,
-}
-// 待售后
-const dpjQueryParams = {
-  page: 1,
-  pageSize: 5,
-  status: props.orderState,
-}
-const isAllFinish = ref(false)
-const isDzfFinish = ref(false)
-const isDfhFinish = ref(false)
-const isDshFinish = ref(false)
-const isDpjFinish = ref(false)
 
 // 根据订单状态生成底部buttons
 const createButtons = (order: OrderItem) => {
