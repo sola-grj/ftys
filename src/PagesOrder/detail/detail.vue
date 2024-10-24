@@ -19,6 +19,7 @@ import { ref } from 'vue'
 import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 import { deleteMemberAddressByIdAPI } from '@/services/address'
 import type { CartItem } from '@/types/cart'
+import { cal } from '@/utils/cal'
 
 // 只有在编辑的时候，输入框才能输入
 const inputDisabled = ref(true)
@@ -45,6 +46,7 @@ const onCopy = (id: string) => {
 // 获取页面参数
 const query = defineProps<{
   orderId: string
+  type: string
 }>()
 
 // 获取页面栈
@@ -106,6 +108,7 @@ onLoad(async () => {
   isLoading.value = true
   await getMemberOrderByIdData()
   isLoading.value = false
+  totalPrice.value = order.value.orderPrice
 })
 
 // 是否为开发环境
@@ -153,7 +156,8 @@ const copy = (orderNo: string) => {
 const goback = () => {
   uni.navigateBack()
 }
-
+const totalPrice = ref('')
+const payPrice = ref(0)
 const currentCartId = ref('')
 const addShoppingCart = async (data: DetailItem, num: number, type: string) => {
   if (num === 0) {
@@ -175,6 +179,14 @@ const addShoppingCart = async (data: DetailItem, num: number, type: string) => {
         console.log(fail)
       },
     })
+  } else {
+    totalPrice.value = order.value.orderDetail
+      // @ts-ignore
+      .reduce((sum, item) => cal.jia(sum, cal.cheng(Number(item.unitPrice), item.num)), 0)
+      // @ts-ignore
+      .toFixed(2)
+
+    console.log(order.value, totalPrice.value)
   }
 }
 
@@ -197,7 +209,12 @@ const editOrder = async () => {
     cartList: order.value.orderDetail,
   })
   if (res.code === '1') {
-    uni.navigateTo({ url: `/PagesOrder/list/list?type=2` })
+    uni.showToast({ icon: 'success', title: '修改成功' })
+    setTimeout(() => {
+      uni.navigateTo({ url: `/PagesOrder/list/list?type=2` })
+    }, 500)
+  } else {
+    uni.showToast({ icon: 'none', title: res.msg })
   }
 }
 
@@ -257,9 +274,7 @@ const goToSource = (data: DetailItem) => {
               </view>
               <view class="right">
                 <view class="price">￥{{ item.unitPrice }}/{{ item.units }}</view>
-                <view v-if="order.status !== OrderState.DaiFaHuo" class="num">
-                  X{{ item.num }}</view
-                >
+                <view v-if="type !== 'edit'" class="num"> X{{ item.num }}</view>
                 <uni-number-box
                   v-else
                   class="number-box"
@@ -292,19 +307,19 @@ const goToSource = (data: DetailItem) => {
         <view class="detail-container">
           <view class="detail-item">
             <text class="label">商品总价</text>
-            <text class="value">{{ order.orderPrice }}</text>
+            <text class="value">{{ type === 'edit' ? totalPrice : order.orderPrice }}</text>
           </view>
-          <view class="detail-item">
+          <view v-if="type !== 'edit'" class="detail-item">
             <text class="label">运费</text>
             <text class="value">0.00</text>
           </view>
-          <view class="detail-item">
+          <view v-if="type !== 'edit'" class="detail-item">
             <text class="label"
               >优惠券 <text class="coupon-info">{{ order.couponInfo.couponName }}</text>
             </text>
-            <text class="value">{{ 0.0 }}</text>
+            <text class="value">{{ order.couponInfo.faceValue }}</text>
           </view>
-          <view class="detail-item">
+          <view v-if="type !== 'edit'" class="detail-item">
             <text class="label">实付款</text>
             <text class="value red">￥{{ order.orderPayPrice }}</text>
           </view>
@@ -329,7 +344,7 @@ const goToSource = (data: DetailItem) => {
         <view class="btn" v-if="order.status === OrderState.YiShouHuo">
           <button open-type="" hover-class="button-hover" @tap="goToApply">申请售后</button>
         </view>
-        <view class="btn" v-if="order.status === OrderState.DaiFaHuo">
+        <view class="btn" v-if="type === 'edit'">
           <button @tap="editOrder" open-type="" hover-class="button-hover">保存修改</button>
         </view>
       </view>

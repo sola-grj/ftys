@@ -98,7 +98,7 @@ const chooseCoupon = (couponId: string) => {
   ) as MyCouponItem
   // @ts-ignore
   selectedCardListMoney.value = cal
-    .jian(selectedCardListMoney.value, currentChooseCoupon.value.face_value)
+    .jian(Number(selectedCardListMoney.value), Number(currentChooseCoupon.value.face_value))
     .toFixed(2)
   console.log(couponId, 'couponId', currentChooseCoupon.value)
 }

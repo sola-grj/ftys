@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { useAddShoppingCart, useCollect, useUpdateShoppingCart } from '@/composables'
+import {
+  removeShoppingCart,
+  useAddShoppingCart,
+  useCollect,
+  useUpdateShoppingCart,
+} from '@/composables'
 import { getGoodsCollectsAPI, getRecentlyOrderAPI } from '@/services/order'
 import type { PageParams } from '@/types/global'
 import type { QuickOrderCategoryItem, QuickOrderListItem } from '@/types/order'
@@ -167,19 +172,41 @@ const addShoppingCart = async (data: QuickOrderListItem, num: number, type: stri
     if (res.code === '1') {
       currentCartId.value = res.result.cartId
       data.cartGoodsNum = res.result.goodsNum
+      uni.setTabBarBadge({
+        //显示数字
+        index: 3, //tabbar下标
+        text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
+      })
     }
   } else {
-    const res = await useUpdateShoppingCart(
-      {
-        cartId: currentCartId.value || data.cartId,
+    if (num === 0) {
+      const res = await removeShoppingCart(currentCartId.value || data.cartId)
+      if (res.code === '1') {
+        data.cartGoodsNum = 0
+        uni.setTabBarBadge({
+          //显示数字
+          index: 3, //tabbar下标
+          text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
+        })
+      }
+    } else {
+      const res = await useUpdateShoppingCart(
+        {
+          cartId: currentCartId.value || data.cartId,
+          num,
+          unitPrice: data.price,
+          units: data.unit,
+        },
         num,
-        unitPrice: data.price,
-        units: data.unit,
-      },
-      num,
-    )
-    if (res.code === '1') {
-      data.cartGoodsNum = res.result.goodsNum
+      )
+      if (res.code === '1') {
+        data.cartGoodsNum = res.result.goodsNum
+        uni.setTabBarBadge({
+          //显示数字
+          index: 3, //tabbar下标
+          text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
+        })
+      }
     }
   }
 }
@@ -448,7 +475,13 @@ page {
           width: 90%;
           padding-left: 20rpx;
 
-          .title {
+          .infotitle {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            -webkit-line-clamp: 2;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            text-align: left;
           }
 
           .price {

@@ -13,6 +13,7 @@ import { getFullPerformanceAPI, getUserMoneyAPI } from '@/services/my'
 
 // 获取会员信息
 const memberStore = useMemberStore()
+const pay_way = memberStore.profile?.userinfo.pay_way
 const money = ref('')
 const creditMoney = ref('')
 
@@ -293,6 +294,7 @@ const getMoney = async () => {
   const res = await getUserMoneyAPI()
   money.value = res.result.money
   creditMoney.value = res.result.credit_money
+  CouponTypes.value[0].data = res.result.couponsCount || '暂无优惠券'
   CouponTypes.value[1].data = res.result.credit_money || '暂无欠款'
   CouponTypes.value[2].data = res.result.money || '0.00'
 }

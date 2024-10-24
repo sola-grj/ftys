@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useAddShoppingCart, useUpdateShoppingCart } from '@/composables'
+import { removeShoppingCart, useAddShoppingCart, useUpdateShoppingCart } from '@/composables'
+import type { CartItem } from '@/types/cart'
 import type { PageParams } from '@/types/global'
 import type { RecommendItem } from '@/types/home'
 import { ref } from 'vue'
@@ -16,7 +17,7 @@ const goToCoupon = () => {
 // 更新购物车
 // 添加购物车
 const currentCartId = ref('')
-const addShoppingCart = async (data: RecommendItem, num: number, type: string) => {
+const addShoppingCart = async (data: CartItem & RecommendItem, num: number, type: string) => {
   if (type === 'first') {
     const res = await useAddShoppingCart(
       {
@@ -35,21 +36,56 @@ const addShoppingCart = async (data: RecommendItem, num: number, type: string) =
       uni.setTabBarBadge({
         //显示数字
         index: 3, //tabbar下标
-        text: '6', //数字
+        text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
       })
     }
   } else {
-    const res = await useUpdateShoppingCart(
-      {
-        cartId: currentCartId.value || data.cartId,
+    if (num === 0) {
+      // 弹窗二次确认
+      uni.showModal({
+        content: '是否删除',
+        success: async (res) => {
+          if (res.confirm) {
+            // 后端删除单品
+            const res = await removeShoppingCart(currentCartId.value || data.id || data.cartId)
+            if (res.code === '1') {
+              data.num = 0
+              uni.setTabBarBadge({
+                //显示数字
+                index: 3, //tabbar下标
+                text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
+              })
+            } else {
+              uni.showToast({ icon: 'error', title: res.msg })
+            }
+            // // 重新获取列表
+            // getMemberCartData()
+          } else {
+            // data.num = data.num
+          }
+        },
+        fail: (fail) => {
+          console.log(fail)
+        },
+      })
+    } else {
+      const res = await useUpdateShoppingCart(
+        {
+          cartId: currentCartId.value || data.cartId,
+          num,
+          unitPrice: data.price,
+          units: data.units,
+        },
         num,
-        unitPrice: data.price,
-        units: data.units,
-      },
-      num,
-    )
-    if (res.code === '1') {
-      data.cartGoodsNum = res.result.goodsNum
+      )
+      if (res.code === '1') {
+        data.cartGoodsNum = res.result.goodsNum
+        uni.setTabBarBadge({
+          //显示数字
+          index: 3, //tabbar下标
+          text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
+        })
+      }
     }
   }
 }

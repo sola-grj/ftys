@@ -36,11 +36,11 @@ const createButtons = (order: OrderItem) => {
         ]
       } else if (order.status === '3') {
         return [{ id: 'again', name: '再来一单' }]
-      } else if (order.status === '4') {
+      } else if (order.status === '12') {
         return [
-          // { id: 'cancel', name: '取消订单' },
-          // { id: 'edit', name: '编辑' },
-          // { id: 'again', name: '再来一单' },
+          { id: 'cancel', name: '取消订单' },
+          { id: 'edit', name: '编辑' },
+          { id: 'again', name: '再来一单' },
         ]
       } else if (order.status === '6') {
         return [
@@ -76,6 +76,13 @@ const createButtons = (order: OrderItem) => {
       return [
         { id: 'finish', name: '再来一单' },
         { id: 'after-sales', name: '申请售后' },
+      ]
+    case '12':
+      // 已完成
+      return [
+        { id: 'cancel', name: '取消订单' },
+        { id: 'edit', name: '编辑' },
+        { id: 'again', name: '再来一单' },
       ]
 
     default:
@@ -116,7 +123,7 @@ const onTapBottom = (order: OrderItem, id: string) => {
     cancelOrder(order.orderId)
   }
   if (id === 'edit') {
-    goToOrderDetail(order)
+    goToOrderDetail(order, 'edit')
   }
   if (id === 'again') {
     againBuy(order)
@@ -195,8 +202,8 @@ const onOrderPay = async (orderId: string) => {
   })
 }
 // 跳转商品详情
-const goToOrderDetail = (order: OrderItem) => {
-  uni.navigateTo({ url: `/PagesOrder/detail/detail?orderId=${order.orderId}` })
+const goToOrderDetail = (order: OrderItem, type?: string) => {
+  uni.navigateTo({ url: `/PagesOrder/detail/detail?orderId=${order.orderId}&type=${type}` })
 }
 
 // 复制功能
@@ -266,6 +273,8 @@ const copy = (orderNo: string) => {
 <style lang="scss">
 // 订单列表
 .orders {
+  height: 100vh;
+
   .card {
     min-height: 100rpx;
     padding: 20rpx;

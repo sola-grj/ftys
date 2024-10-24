@@ -130,12 +130,22 @@ const addShoppingCart = async (data: SearchGoodsItem, num: number, type: string)
     if (res.code === '1') {
       currentCartId.value = res.result.cartId
       data.cartGoodsNum = res.result.goodsNum
+      uni.setTabBarBadge({
+        //显示数字
+        index: 3, //tabbar下标
+        text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
+      })
     }
   } else {
     if (num === 0) {
       const res = await removeShoppingCart(currentCartId.value || data.cartId)
       if (res.code === '1') {
         data.cartGoodsNum = 0
+        uni.setTabBarBadge({
+          //显示数字
+          index: 3, //tabbar下标
+          text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
+        })
       }
     } else {
       const res = await useUpdateShoppingCart(
@@ -149,6 +159,11 @@ const addShoppingCart = async (data: SearchGoodsItem, num: number, type: string)
       )
       if (res.code === '1') {
         data.cartGoodsNum = res.result.goodsNum
+        uni.setTabBarBadge({
+          //显示数字
+          index: 3, //tabbar下标
+          text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
+        })
       }
     }
   }
@@ -441,6 +456,12 @@ page {
         padding-left: 20rpx;
 
         .title {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          -webkit-line-clamp: 2;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          text-align: left;
         }
 
         .price {

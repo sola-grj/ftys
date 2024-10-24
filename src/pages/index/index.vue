@@ -22,6 +22,7 @@ import type {
 } from '@/types/home'
 import { ref } from 'vue'
 import type { PageParams } from '@/types/global'
+import { getShoppingCartAPI } from '@/services/cart'
 
 // 选中Index
 const activeIndex = ref(0)
@@ -121,7 +122,11 @@ const getHistoryData = async () => {
     historyFinish.value = true
   }
 }
-
+const currentCartData = ref(0)
+const getShoppingData = async () => {
+  const res = await getShoppingCartAPI()
+  currentCartData.value = res.result.length
+}
 // 是否加载中
 const isLoading = ref(false)
 
@@ -138,8 +143,14 @@ onShow(async () => {
     getMustBuyData(),
     getRecommendData(),
     getHistoryData(),
+    getShoppingData(),
   ])
   isLoading.value = false
+  uni.setTabBarBadge({
+    //显示数字
+    index: 3, //tabbar下标
+    text: `${currentCartData.value === 0 ? '' : currentCartData.value}`, //数字
+  })
 })
 
 const onScrollToLower = async () => {

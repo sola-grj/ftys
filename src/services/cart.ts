@@ -85,7 +85,7 @@ export type UpdateShoppingCartDataType = {
  * @param data selected 是否选中
  */
 export const addShoppingCartAPI = (data: AddShoppingCartDataType) => {
-  return http<{ cartId: string; goodsNum: number }>({
+  return http<{ cartId: string; goodsNum: number; shoppingCartNum: number }>({
     method: 'POST',
     url: '/shopping_cart/addShoppingCart',
     data,
@@ -97,7 +97,7 @@ export const addShoppingCartAPI = (data: AddShoppingCartDataType) => {
  * @param data selected 是否选中
  */
 export const updateShoppingCartAPI = (data: UpdateShoppingCartDataType) => {
-  return http<{ cartId: string; goodsNum: number }>({
+  return http<{ cartId: string; goodsNum: number; shoppingCartNum: number }>({
     method: 'POST',
     url: '/shopping_cart/updateShoppingCart',
     data,
@@ -120,7 +120,7 @@ export const getShoppingCartAPI = () => {
  * @param
  */
 export const removeShoppingCartAPI = (data: { cartId: string }) => {
-  return http({
+  return http<{ shoppingCartNum: number }>({
     method: 'POST',
     url: '/shopping_cart/removeShoppingCart',
     data,
