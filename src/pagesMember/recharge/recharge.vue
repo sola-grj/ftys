@@ -115,6 +115,9 @@ const checkNum = (e) => {
   amount.value = val // 如果有改变 给输入框内容赋值
   console.log(amount.value)
 }
+const goToMy = () => {
+  uni.switchTab({ url: '/pages/my/my' })
+}
 </script>
 
 <template>
@@ -123,7 +126,7 @@ const checkNum = (e) => {
       <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
       <text class="text">客户余额</text>
     </view> -->
-    <SolaShopHeader title="客户余额" />
+    <SolaShopHeader :define-back="goToMy" title="客户余额" />
     <view class="container">
       <view class="image">
         <view class="left"

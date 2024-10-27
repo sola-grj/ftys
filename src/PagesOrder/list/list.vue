@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import OrderList from './components/OrderList.vue'
 import { useMemberStore } from '@/stores'
-import { onLoad } from '@dcloudio/uni-app'
+import { onBackPress, onLoad, onUnload } from '@dcloudio/uni-app'
 // import Test from './components/test.vue'
 const memberStore = useMemberStore()
 const pay_way = memberStore.profile?.userinfo.pay_way
@@ -23,6 +23,11 @@ const tabItems = ref(['全部', '待支付', '待发货', '待收货', '待售�
 const query = defineProps<{
   type: number
 }>()
+onUnload(() => {
+  console.log('onUnload')
+
+  uni.switchTab({ url: '/pages/my/my' })
+})
 
 const current = ref(0)
 onLoad(() => {

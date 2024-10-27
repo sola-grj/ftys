@@ -473,6 +473,13 @@
 						"navigationBarTitleText": "商品溯源"
 					}
 				},
+				{
+					"path": "orderpay/orderpay",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "订单支付"
+					}
+				},
 			]
 		}
 	],

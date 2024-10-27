@@ -209,7 +209,7 @@ export type CreateOrderData = {
  * @param data 请求参数
  */
 export const createOrderAPI = (data: CreateOrderData) => {
-  return http<{ orderId: string }>({
+  return http<{ orderId: string; orderNo: string; money: string; orderPayPrice: string }>({
     method: 'POST',
     url: '/order/createOrder',
     data,
@@ -264,7 +264,7 @@ export const creditRepayAPI = (data: { capitalIds: string; repayMoney: string })
  * 订单支付
  * @param data 请求参数
  */
-export const orderPayAPI = (data: { orderId: string }) => {
+export const orderPayAPI = (data: { orderId: string; payType: string; password: string }) => {
   return http({
     method: 'POST',
     url: '/order/orderPay',

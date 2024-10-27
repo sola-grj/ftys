@@ -179,6 +179,13 @@ const goToUseCoupon = (couponId: string) => {
             <view class="use-btn">领取</view>
           </view>
         </view>
+        <view v-if="couponList.length === 0" class="bg">
+          <image
+            src="https://img.js.design/assets/img/66909fda4fc21e83fb682df4.png#52a35c0ee65bdb8ba63bcefcce2ce6e6"
+            mode="aspectFit"
+          />
+          <text>暂无内容</text>
+        </view>
       </view>
       <view v-if="from === 'order'" class="avalible-coupon-list">
         <view v-for="item in avalibleCouponList" :key="item.name" class="avalible-coupon-item">

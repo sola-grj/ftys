@@ -170,6 +170,7 @@ export type OrderItem = {
   afterSalesDetail: DetailItem[]
   fGoodsId: string
   createTime: string
+  money: string
 }
 
 // 订单列表上送参数
@@ -179,6 +180,7 @@ export type OrderListReqData = {
   queryTimeType?: string
   reportFormStartDate?: string
   reportFormEndDate?: string
+  status?: string
 }
 
 /** 订单列表 */
@@ -187,6 +189,9 @@ export type OrderListResult = {
   totalPrice: string
   page: number
   list: OrderItem[]
+  userInfo: {
+    money: string
+  }
 }
 
 /** 快捷下单 */

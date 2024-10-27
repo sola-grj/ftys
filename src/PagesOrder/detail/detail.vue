@@ -16,33 +16,8 @@ import type { DetailItem, LogisticItem, OrderResult } from '@/types/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
 import PageSkeleton from './components/PageSkeleton.vue'
 import { ref } from 'vue'
-import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
-import { deleteMemberAddressByIdAPI } from '@/services/address'
-import type { CartItem } from '@/types/cart'
 import { cal } from '@/utils/cal'
 
-// 只有在编辑的时候，输入框才能输入
-const inputDisabled = ref(true)
-// 获取屏幕边界到安全区域距离
-const { safeAreaInsets } = uni.getSystemInfoSync()
-// 弹出层组件
-const popup = ref<UniHelper.UniPopupInstance>()
-// 取消原因列表
-const reasonList = ref([
-  '商品无货',
-  '不想要了',
-  '商品信息填错了',
-  '地址信息填写错误',
-  '商品降价',
-  '其它',
-])
-// 订单取消原因
-const reason = ref('')
-// 复制内容
-const onCopy = (id: string) => {
-  // 设置系统剪贴板的内容
-  uni.setClipboardData({ data: id })
-}
 // 获取页面参数
 const query = defineProps<{
   orderId: string
@@ -89,9 +64,6 @@ const order = ref<OrderDetailResult>({} as OrderDetailResult)
 const getMemberOrderByIdData = async () => {
   const res = await orderDetailAPI({ orderId: query.orderId })
   order.value = res.result
-  if (order.value.status === OrderState.DaiFaHuo) {
-    inputDisabled.value = false
-  }
 }
 
 // 是否加载中
@@ -211,7 +183,7 @@ const editOrder = async () => {
   if (res.code === '1') {
     uni.showToast({ icon: 'success', title: '修改成功' })
     setTimeout(() => {
-      uni.navigateTo({ url: `/PagesOrder/list/list?type=2` })
+      uni.navigateTo({ url: `/PagesOrder/list/list?type=0` })
     }, 500)
   } else {
     uni.showToast({ icon: 'none', title: res.msg })
@@ -285,7 +257,7 @@ const goToSource = (data: DetailItem) => {
               <view class="note">
                 <uni-easyinput
                   v-model="item.remark"
-                  :disabled="inputDisabled"
+                  :disabled="type !== 'edit'"
                   placeholder="请输入商品备注"
                   class="question"
                   type="text"
@@ -297,7 +269,7 @@ const goToSource = (data: DetailItem) => {
             <view class="rtitle">备注</view>
             <uni-easyinput
               v-model="order.remark"
-              :disabled="inputDisabled"
+              :disabled="type !== 'edit'"
               placeholder="建议备注前先与商家沟通确认"
               class="question"
               type="textarea"

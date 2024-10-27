@@ -486,6 +486,11 @@ input {
   margin-left: 20rpx;
 }
 
+.checked {
+  background: #dcdcdc;
+  color: #666;
+}
+
 // 头像
 .avatar {
   text-align: center;

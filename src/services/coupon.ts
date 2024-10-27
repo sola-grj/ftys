@@ -22,6 +22,7 @@ export type MyCouponListResult = {
   page: string
   total: string
   list: MyCouponItem[]
+  deliverDate: string
 }
 
 /**

@@ -81,12 +81,12 @@ onShow(() => {
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const { top, height } = uni.getMenuButtonBoundingClientRect()
 // 订单选项
-const orderTypes = [
-  { type: 1, text: '待付款', icon: 'icon-daifukuan' },
-  { type: 2, text: '待发货', icon: 'icon-31daifahuo' },
-  { type: 3, text: '待收货', icon: 'icon-daishouhuo' },
-  { type: 4, text: '退换/售后', icon: 'icon-shouhou' },
-]
+const orderTypes = ref([
+  { type: 1, text: '待付款', icon: 'icon-daifukuan', count: '' },
+  { type: 2, text: '待发货', icon: 'icon-31daifahuo', count: '' },
+  { type: 3, text: '待收货', icon: 'icon-daishouhuo', count: '' },
+  { type: 4, text: '退换/售后', icon: 'icon-shouhou', count: '' },
+])
 // 优惠券、欠款、余额
 const CouponTypes = ref([
   { name: '优惠券', data: couponNum.value || '0', desc: '下单立省' },
@@ -289,9 +289,12 @@ const keyword = ref('')
 const onChangeAccount = () => {
   uni.navigateTo({ url: '/pagesMember/changeaccount/changeaccount' })
 }
-
 const getMoney = async () => {
   const res = await getUserMoneyAPI()
+  orderTypes.value[0].count = res.result.unpaidCount
+  orderTypes.value[1].count = res.result.unshippedCount
+  orderTypes.value[2].count = res.result.unreceivedCount
+  orderTypes.value[3].count = res.result.afterSaleCount
   money.value = res.result.money
   creditMoney.value = res.result.credit_money
   CouponTypes.value[0].data = res.result.couponsCount || '暂无优惠券'
@@ -365,11 +368,18 @@ onLoad(() => {
           <navigator
             v-for="item in orderTypes"
             :key="item.type"
-            :class="`ftysIcon ${item.icon}`"
             :url="`/PagesOrder/list/list?type=${item.type}`"
             class="navigator"
             hover-class="none"
           >
+            <uni-badge
+              class="uni-badge-left-margin"
+              :text="item.count"
+              absolute="rightTop"
+              size="small"
+            >
+              <text :class="`ftysIcon ${item.icon}`"></text>
+            </uni-badge>
             <text class="text">{{ item.text }}</text>
           </navigator>
         </view>
@@ -698,6 +708,19 @@ page {
     display: flex;
     justify-content: space-between;
     padding: 40rpx 20rpx 10rpx;
+
+    .ftysIcon {
+      font-size: 60rpx;
+    }
+
+    // .uni-badge-left-margin {
+    //   width: 100%;
+    // }
+
+    // :deep(.uni-badge--x) {
+    //   display: flex;
+    //   justify-content: space-around;
+    // }
 
     .navigator,
     .contact {

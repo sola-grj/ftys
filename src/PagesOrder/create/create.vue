@@ -19,6 +19,7 @@ import { computed, ref } from 'vue'
 
 const couponpopup = ref()
 const memberStore = useMemberStore()
+const pay_way = memberStore.profile?.userinfo.pay_way
 const remark = ref('')
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -47,11 +48,12 @@ const getYestDayOrNextDay = () => {
 
   return { tomorrow: tomorrow.toLocaleDateString().replaceAll('/', '-'), tomorrowOfWeek }
 }
-
+const deliverDate = ref('')
 // 获取优惠券
 const couponList = ref<MyCouponItem[]>([])
 const getOwnCouponData = async () => {
   const res = await getMyCouponListAPI({ status: '1' })
+  deliverDate.value = res.result.deliverDate
   couponList.value = res.result.list
   isAvalibleCouponList()
 }
@@ -191,8 +193,14 @@ const onOrderSubmit = async () => {
     })
   }
   setTimeout(() => {
-    // 关闭当前页面，跳转到订单详情页
-    uni.redirectTo({ url: `/PagesOrder/list/list` })
+    if (pay_way === 'credit') {
+      // 关闭当前页面，跳转到订单详情页
+      uni.redirectTo({ url: `/PagesOrder/list/list` })
+    } else {
+      uni.navigateTo({
+        url: `/PagesOrder/orderpay/orderpay?orderId=${res.result.order_id}&orderNo=${res.result.orderNo}&money=${res.result.money}&orderPayPrice=${res.result.orderPayPrice}`,
+      })
+    }
   }, 500)
 }
 const goback = () => {
@@ -260,9 +268,7 @@ const showValue = () => {
       <!-- 配送时间 -->
       <view class="time">
         <view class="time-title">配送时间</view>
-        <view class="time-value"
-          >{{ getYestDayOrNextDay().tomorrow }}({{ getYestDayOrNextDay().tomorrowOfWeek }})</view
-        >
+        <view class="time-value">{{ deliverDate }}</view>
       </view>
 
       <!-- 商品信息 -->

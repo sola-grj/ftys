@@ -25,9 +25,16 @@ const form = ref({
   cpassword: '',
 })
 const onGetSmsTap = async () => {
+  if (checked.value) {
+    uni.showToast({ icon: 'error', title: '请稍后再试' })
+    return
+  }
+  if (!memberStore.profile?.userinfo.mobile) {
+    uni.showToast({ icon: 'error', title: '请输入手机号码' })
+    return
+  }
   const res = await getSmsAPI({
     mobile: memberStore.profile?.userinfo.mobile as string,
-    event: 'login',
   })
   console.log('======>>>>>', res)
 
@@ -63,10 +70,14 @@ const onSave = async () => {
   await formRef.value?.validate?.()
   const res = await setpaypwdAPI({
     paypwd: form.value.password,
+    code: form.value.smsCode,
+    mobile: memberStore.profile?.userinfo.mobile as string,
   })
   if (res.code === '1') {
     uni.showToast({ icon: 'success', title: '设置成功' })
-    uni.navigateTo({ url: '/pagesMember/settings/settings' })
+    setTimeout(() => {
+      uni.redirectTo({ url: '/pagesMember/settings/settings' })
+    }, 500)
   } else {
     uni.showToast({ icon: 'error', title: res.msg })
   }
@@ -105,10 +116,7 @@ const goback = () => {
 
 <template>
   <scroll-view class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
-      <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">设置支付密码</text>
-    </view>
+    <SolaShopHeader title="设置支付密码" />
     <view class="container form-content">
       <uni-forms class="form" ref="formRef" :rules="rules" :modelValue="form">
         <uni-forms-item class="form-item" name="phone">
@@ -167,27 +175,6 @@ page {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
 
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 130rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-  }
-
   .container {
     height: 100%;
     background: #fff;
@@ -204,7 +191,11 @@ page {
       font-size: 25rpx;
       border-radius: 10rpx;
       background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
-      margin-left: 20rpx;
+    }
+
+    .checked {
+      background: #dcdcdc;
+      color: #666;
     }
 
     .uni-forms-item__content {

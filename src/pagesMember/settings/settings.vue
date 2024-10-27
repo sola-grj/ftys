@@ -6,6 +6,7 @@ import { ref } from 'vue'
 
 const memberStore = useMemberStore()
 const isBindWx = ref(false)
+const ispayPwdSwitch = ref('0')
 // 检查是否绑定微信
 const checkBindWX = async () => {
   const res = await checkBindWXAPI()
@@ -13,6 +14,11 @@ const checkBindWX = async () => {
     isBindWx.value = true
   } else {
     isBindWx.value = false
+  }
+  if (res.result.payPwdSwitch === '1') {
+    ispayPwdSwitch.value = '1'
+  } else {
+    ispayPwdSwitch.value = '0'
   }
 }
 // 退出登录
@@ -82,7 +88,14 @@ const resetPwd = () => {
   })
 }
 const onChangeSwitch = (e: any) => {
-  console.log(e.detail.value)
+  uni.showModal({
+    content: '你还没有设置支付密码，请设置后在使用此功能',
+    success: async (res) => {
+      if (res.confirm) {
+        uni.navigateTo({ url: '/pagesMember/setpaypwd/setpaypwd' })
+      }
+    },
+  })
 }
 onLoad(() => {
   checkBindWX()
@@ -104,9 +117,13 @@ onLoad(() => {
           <text class="ftysIcon icon-xiangyoujiantou"></text>
         </view>
       </view>
-      <view class="list-item" v-if="memberStore.profile?.userinfo.type_id.toString() !== '2'">
+      <view
+        class="list-item"
+        @tap="onChangeSwitch"
+        v-if="memberStore.profile?.userinfo.type_id.toString() !== '2'"
+      >
         <view hover-class="none" class="item arrow">余额支付使用密码</view>
-        <switch :checked="true" @change="onChangeSwitch" />
+        <switch disabled :checked="ispayPwdSwitch == '1'" />
       </view>
     </view>
     <!-- 操作按钮 -->

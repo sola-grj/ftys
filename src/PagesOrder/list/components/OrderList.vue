@@ -25,13 +25,13 @@ const createButtons = (order: OrderItem) => {
     case '0':
       if (order.status === '1') {
         return [
-          { id: 'cancel', name: '取消订单' },
           { id: 'pay', name: '去支付' },
+          { id: 'edit', name: '编辑' },
+          { id: 'cancel', name: '取消订单' },
         ]
       } else if (order.status === '2') {
         return [
-          // { id: 'cancel', name: '取消订单' },
-          { id: 'edit', name: '编辑' },
+          { id: 'cancel', name: '取消订单' },
           { id: 'again', name: '再来一单' },
         ]
       } else if (order.status === '3') {
@@ -52,14 +52,14 @@ const createButtons = (order: OrderItem) => {
     case '1':
       // 待支付
       return [
-        { id: 'cancel', name: '取消订单' },
         { id: 'pay', name: '去支付' },
+        { id: 'edit', name: '编辑' },
+        { id: 'cancel', name: '取消订单' },
       ]
     case '2':
       // 代发货
       return [
-        // { id: 'cancel', name: '取消订单' },
-        { id: 'edit', name: '编辑' },
+        { id: 'cancel', name: '取消订单' },
         { id: 'again', name: '再来一单' },
       ]
     case '3':
@@ -89,7 +89,7 @@ const createButtons = (order: OrderItem) => {
       break
   }
 }
-
+const userBalance = ref('')
 // 获取订单列表
 const orderList = ref<OrderItem[]>([])
 const getMemberOrderData = async () => {
@@ -101,7 +101,7 @@ const getMemberOrderData = async () => {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
   }
   const res = await getOrderListAPI(allQueryParams.value)
-
+  userBalance.value = res.result.userInfo.money
   orderList.value.push(...res.result.list)
   if (allQueryParams.value.page < res.result.total) {
     // 页码累加
@@ -129,7 +129,7 @@ const onTapBottom = (order: OrderItem, id: string) => {
     againBuy(order)
   }
   if (id === 'pay') {
-    onOrderPay(order.orderId)
+    onOrderPay(order)
   }
   if (id === 'after-sales') {
     goToOrderDetail(order)
@@ -181,24 +181,9 @@ const cancelOrder = (orderId: string) => {
 }
 
 // 去支付
-const onOrderPay = async (orderId: string) => {
-  uni.showModal({
-    content: '确定要支付吗？',
-    success: async (res) => {
-      if (res.confirm) {
-        const res = await orderPayAPI({ orderId })
-        if (res.code === '1') {
-          uni.showToast({ icon: 'success', title: '支付成功' })
-          setTimeout(() => {
-            uni.reLaunch({
-              url: '/PagesOrder/list/list',
-            })
-          }, 600)
-        } else {
-          uni.showToast({ icon: 'error', title: res.msg })
-        }
-      }
-    },
+const onOrderPay = async (order: OrderItem) => {
+  uni.navigateTo({
+    url: `/PagesOrder/orderpay/orderpay?orderId=${order.orderId}&orderNo=${order.orderNo}&money=${userBalance.value}&orderPayPrice=${order.orderPayPrice}`,
   })
 }
 // 跳转商品详情
@@ -227,7 +212,7 @@ const copy = (orderNo: string) => {
       v-for="order in orderList"
       :key="order.orderId"
     >
-      <view class="top">
+      <view class="top" @tap.stop.prevent>
         <view class="order-id"
           >{{ order.orderNo }} <text @tap="($event) => copy(order.orderNo)" class="copy">复制</text>
         </view>

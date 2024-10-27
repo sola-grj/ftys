@@ -211,7 +211,7 @@ export const updateUserInfoAPI = (data: UpdateUserInfoData) => {
  * 设置支付密码
  * @param data 请求参数
  */
-export const setpaypwdAPI = (data: { paypwd: string }) => {
+export const setpaypwdAPI = (data: { paypwd: string; code: string; mobile: string }) => {
   return http({
     method: 'POST',
     url: '/user/setpaypwd',
@@ -443,7 +443,7 @@ export const UnbindWXAPI = () => {
  * @param data 请求参数
  */
 export const checkBindWXAPI = () => {
-  return http<{ openId: string; idBindWX: string }>({
+  return http<{ openId: string; idBindWX: string; payPwdSwitch: string }>({
     method: 'POST',
     url: '/user/checkBindWX',
   })
@@ -495,8 +495,23 @@ export const getRechargeB2BPayAPI = (data: { rechargeMoney: string; code: string
  * 获取支付参数
  * @param data 请求参数
  */
+0
+1
+;('-581.80')
+;('840.70')
+12
+0
+21
 export const getUserMoneyAPI = () => {
-  return http<{ money: string; credit_money: string; couponsCount: string }>({
+  return http<{
+    money: string
+    credit_money: string
+    couponsCount: string
+    afterSaleCount: string
+    unpaidCount: string
+    unreceivedCount: string
+    unshippedCount: string
+  }>({
     method: 'POST',
     url: '/user/getUserMoney',
   })
