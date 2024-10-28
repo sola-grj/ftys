@@ -200,18 +200,22 @@ onUnload(() => {
 // 页面加载
 onShow(() => {
   uni.$on('categoryInfo', async (data) => {
-    await getTypeListData('type')
-    const index = fruitCategory.value.findIndex(
-      (v) =>
-        v.id === (data.categoryInfo.pid === '0' ? data.categoryInfo.id : data.categoryInfo.pid),
-    )
-    console.log('index====', index)
-    if (data.categoryInfo.source === 'S') {
-      onTapTwoLevelFruit(data.categoryInfo, index)
+    if (!query.type) {
+      await getTypeListData('')
     } else {
-      // 跳转到干货分类下
-      onChangeIndex(1)
-      onTapTwoLevelDry(data.categoryInfo, index)
+      await getTypeListData('type')
+      const index = fruitCategory.value.findIndex(
+        (v) =>
+          v.id === (data.categoryInfo.pid === '0' ? data.categoryInfo.id : data.categoryInfo.pid),
+      )
+      console.log('index====', index)
+      if (data.categoryInfo.source === 'S') {
+        onTapTwoLevelFruit(data.categoryInfo, index)
+      } else {
+        // 跳转到干货分类下
+        onChangeIndex(1)
+        onTapTwoLevelDry(data.categoryInfo, index)
+      }
     }
   })
 })
