@@ -200,7 +200,7 @@ onUnload(() => {
 // 页面加载
 onShow(() => {
   uni.$on('categoryInfo', async (data) => {
-    if (!query.type) {
+    if (data.categoryInfo.name === '更多') {
       await getTypeListData('')
     } else {
       await getTypeListData('type')
