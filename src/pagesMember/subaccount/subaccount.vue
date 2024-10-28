@@ -54,7 +54,9 @@ const addSubAccount = (type: string, data?: SubAccountItem) => {
   })
 }
 const goback = () => {
-  uni.navigateBack()
+  uni.switchTab({
+    url: '/pages/my/my',
+  })
 }
 const deleteSubAccount = async (userId: string) => {
   // 弹窗二次确认
@@ -77,7 +79,7 @@ const deleteSubAccount = async (userId: string) => {
 
 <template>
   <scroll-view @scrolltolower="getSubAccountListData" class="viewport" scroll-y enable-back-to-top>
-    <SolaShopHeader title="子账号" />
+    <SolaShopHeader :define-back="goback" title="子账号" />
     <view class="container">
       <view class="item" v-for="item in subaccountList" :key="item.userId">
         <view class="left">

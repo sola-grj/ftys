@@ -1,5 +1,9 @@
 <script setup lang="ts"></script>
 <template>
-  <view>服务条款</view>
+  <view class="container">服务条款</view>
 </template>
-<style lang="scss"></style>
+<style lang="scss">
+.container {
+  padding: 20rpx;
+}
+</style>

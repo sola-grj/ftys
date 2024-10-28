@@ -1,5 +1,9 @@
 <script setup lang="ts"></script>
 <template>
-  <view>售后规则</view>
+  <view class="container">售后规则</view>
 </template>
-<style lang="scss"></style>
+<style lang="scss">
+.container {
+  padding: 20rpx;
+}
+</style>

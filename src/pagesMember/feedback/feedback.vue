@@ -39,13 +39,15 @@ const addFeedback = () => {
   uni.navigateTo({ url: '/pagesMember/addfeedback/addfeedback' })
 }
 const goback = () => {
-  uni.navigateBack()
+  uni.switchTab({
+    url: '/pages/my/my',
+  })
 }
 </script>
 
 <template>
   <scroll-view @scrolltolower="getSuggestListData" class="viewport" scroll-y enable-back-to-top>
-    <SolaShopHeader title="意见反馈" />
+    <SolaShopHeader :define-back="goback" title="意见反馈" />
     <view class="container">
       <view v-for="item in suggestList" :key="item.id" class="feedback-item">
         <view class="f-title">
@@ -61,6 +63,13 @@ const goback = () => {
             :src="'//img.js.design/assets/img/6690dc2515275e6eaeb2e9ab.png#65ae707b4e6dae0ff083f534f478cc2a'"
           />
         </view>
+      </view>
+      <view v-if="suggestList.length === 0" class="bg">
+        <image
+          src="https://img.js.design/assets/img/66909fda4fc21e83fb682df4.png#52a35c0ee65bdb8ba63bcefcce2ce6e6"
+          mode="aspectFit"
+        />
+        <text>暂无内容</text>
       </view>
       <view class="add">
         <button @tap="addFeedback" class="add-btn">新增反馈</button>
@@ -85,6 +94,19 @@ page {
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;
+
+    .bg {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: rgba(175, 177, 178, 1);
+
+      image {
+        height: 500rpx;
+        width: 500rpx;
+      }
+    }
 
     .feedback-item {
       padding: 14rpx;

@@ -52,7 +52,9 @@ const goToDetail = (item: GetMyGoodsApplyItem) => {
 }
 
 const goback = () => {
-  uni.navigateBack()
+  uni.switchTab({
+    url: '/pages/my/my',
+  })
 }
 const addNewProduct = () => {
   uni.navigateTo({ url: '/pagesMember/newproductdemand/addnewproductdemand' })
@@ -61,7 +63,7 @@ const addNewProduct = () => {
 
 <template>
   <scroll-view @scrolltolower="getMyGoodsApplyData" class="viewport" scroll-y enable-back-to-top>
-    <SolaShopHeader title="新品需求" />
+    <SolaShopHeader :define-back="goback" title="新品需求" />
     <view class="container">
       <view v-for="item in myGoodsApply" :key="item.id" class="feedback-item">
         <view class="left">
@@ -72,6 +74,13 @@ const addNewProduct = () => {
           </view>
         </view>
         <view class="right" @tap="($event) => goToDetail(item)"> 详情>> </view>
+      </view>
+      <view v-if="myGoodsApply.length === 0" class="bg">
+        <image
+          src="https://img.js.design/assets/img/66909fda4fc21e83fb682df4.png#52a35c0ee65bdb8ba63bcefcce2ce6e6"
+          mode="aspectFit"
+        />
+        <text>暂无内容</text>
       </view>
       <view class="add">
         <button @tap="addNewProduct" class="add-btn">新增需求</button>
@@ -97,6 +106,19 @@ page {
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;
+
+    .bg {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: rgba(175, 177, 178, 1);
+
+      image {
+        height: 500rpx;
+        width: 500rpx;
+      }
+    }
 
     .feedback-item {
       display: flex;
