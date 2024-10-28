@@ -73,7 +73,7 @@ const onClickItem = (e) => {
         @clickItem="onClickItem"
       />
     </view>
-    <view v-if="pay_way === 'online'" class="content">
+    <view class="content">
       <view v-if="current === 0">
         <OrderList :order-state="'0'" />
       </view>
@@ -93,7 +93,7 @@ const onClickItem = (e) => {
         <OrderList :order-state="'5'" />
       </view>
     </view>
-    <view v-else class="content">
+    <!-- <view v-else class="content">
       <view v-if="current === 0">
         <OrderList :order-state="'0'" />
       </view>
@@ -112,7 +112,7 @@ const onClickItem = (e) => {
       <view v-if="current === 5">
         <OrderList :order-state="'5'" />
       </view>
-    </view>
+    </view> -->
   </view>
 </template>
 

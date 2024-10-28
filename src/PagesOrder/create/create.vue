@@ -98,6 +98,12 @@ const chooseCoupon = (couponId: string) => {
   currentChooseCoupon.value = avalibleCouponList.value.find(
     (item) => item.couponId === couponId,
   ) as MyCouponItem
+  console.log(
+    'selectedCardListMoney=======',
+    selectedCardListMoney.value,
+    currentChooseCoupon.value,
+  )
+
   // @ts-ignore
   selectedCardListMoney.value = cal
     .jian(Number(selectedCardListMoney.value), Number(currentChooseCoupon.value.face_value))

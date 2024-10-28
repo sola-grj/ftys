@@ -54,9 +54,38 @@ const orderPay = async () => {
     uni.showToast({ icon: 'none', title: res.msg || '支付失败' })
   }
 }
+const wxPay = async () => {
+  uni.login({
+    provider: 'weixin', //使用微信登录
+    success: async function (loginRes) {
+      const res = await orderPayAPI({
+        orderId: query.orderId,
+        payType: payType.value,
+        code: loginRes.code,
+      })
+      console.log('res =====', res)
+
+      wx.requestCommonPayment({
+        signData: res.result.signData,
+        paySig: res.result.paySig,
+        signature: res.result.signature,
+        mode: 'retail_pay_goods',
+        success(successRes: any) {
+          uni.showToast({ icon: 'success', title: '支付成功' })
+          setTimeout(() => {
+            uni.redirectTo({ url: '/PagesOrder/list/list' })
+          }, 500)
+        },
+        fail({ errMsg, errno }) {
+          uni.showToast({ icon: 'none', title: res.msg || '支付失败' })
+        },
+      })
+    },
+  })
+}
 const submit = () => {
   if (payType.value === 'wx') {
-    console.log('wx===')
+    wxPay()
   } else {
     orderPay()
   }
@@ -77,7 +106,7 @@ const submit = () => {
         </view>
         <view class="info-item">
           <view class="label">订单金额</view>
-          <view class="value money">{{ orderPayPrice }}</view>
+          <view class="value money">{{ orderPayPrice && Number(orderPayPrice).toFixed(2) }}￥</view>
         </view>
       </view>
       <!-- 支付方式 -->

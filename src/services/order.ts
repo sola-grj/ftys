@@ -264,8 +264,13 @@ export const creditRepayAPI = (data: { capitalIds: string; repayMoney: string })
  * 订单支付
  * @param data 请求参数
  */
-export const orderPayAPI = (data: { orderId: string; payType: string; password: string }) => {
-  return http({
+export const orderPayAPI = (data: {
+  orderId: string
+  payType: string
+  password?: string
+  code?: string
+}) => {
+  return http<{ signData: string; paySig: string; signature: string }>({
     method: 'POST',
     url: '/order/orderPay',
     data,
