@@ -148,11 +148,18 @@ onShow(async () => {
     getShoppingData(),
   ])
   isLoading.value = false
-  uni.setTabBarBadge({
-    //显示数字
-    index: 3, //tabbar下标
-    text: `${currentCartData.value === 0 ? '' : currentCartData.value}`, //数字
-  })
+  if (currentCartData.value !== 0) {
+    uni.setTabBarBadge({
+      //显示数字
+      index: 3, //tabbar下标
+      text: `${currentCartData.value}`, //数字
+    })
+  } else {
+    uni.removeTabBarBadge({
+      //显示数字
+      index: 3, //tabbar下标
+    })
+  }
 })
 
 const onScrollToLower = async () => {

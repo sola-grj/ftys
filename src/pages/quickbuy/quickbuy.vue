@@ -172,22 +172,36 @@ const addShoppingCart = async (data: QuickOrderListItem, num: number, type: stri
     if (res.code === '1') {
       currentCartId.value = res.result.cartId
       data.cartGoodsNum = res.result.goodsNum
-      uni.setTabBarBadge({
-        //显示数字
-        index: 3, //tabbar下标
-        text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
-      })
+      if (res.result.shoppingCartNum !== 0) {
+        uni.setTabBarBadge({
+          //显示数字
+          index: 3, //tabbar下标
+          text: `${res.result.shoppingCartNum}`, //数字
+        })
+      } else {
+        uni.removeTabBarBadge({
+          //显示数字
+          index: 3, //tabbar下标
+        })
+      }
     }
   } else {
     if (num === 0) {
       const res = await removeShoppingCart(currentCartId.value || data.cartId)
       if (res.code === '1') {
         data.cartGoodsNum = 0
-        uni.setTabBarBadge({
-          //显示数字
-          index: 3, //tabbar下标
-          text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
-        })
+        if (res.result.shoppingCartNum !== 0) {
+          uni.setTabBarBadge({
+            //显示数字
+            index: 3, //tabbar下标
+            text: `${res.result.shoppingCartNum}`, //数字
+          })
+        } else {
+          uni.removeTabBarBadge({
+            //显示数字
+            index: 3, //tabbar下标
+          })
+        }
       }
     } else {
       const res = await useUpdateShoppingCart(
@@ -201,11 +215,18 @@ const addShoppingCart = async (data: QuickOrderListItem, num: number, type: stri
       )
       if (res.code === '1') {
         data.cartGoodsNum = res.result.goodsNum
-        uni.setTabBarBadge({
-          //显示数字
-          index: 3, //tabbar下标
-          text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
-        })
+        if (res.result.shoppingCartNum !== 0) {
+          uni.setTabBarBadge({
+            //显示数字
+            index: 3, //tabbar下标
+            text: `${res.result.shoppingCartNum}`, //数字
+          })
+        } else {
+          uni.removeTabBarBadge({
+            //显示数字
+            index: 3, //tabbar下标
+          })
+        }
       }
     }
   }

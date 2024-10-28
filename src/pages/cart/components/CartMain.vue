@@ -74,11 +74,18 @@ const onDeleteCart = (id: string) => {
       if (res.confirm) {
         // 后端删除单品
         const res = await removeShoppingCart(id)
-        uni.setTabBarBadge({
-          //显示数字
-          index: 3, //tabbar下标
-          text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
-        })
+        if (res.result.shoppingCartNum !== 0) {
+          uni.setTabBarBadge({
+            //显示数字
+            index: 3, //tabbar下标
+            text: `${res.result.shoppingCartNum}`, //数字
+          })
+        } else {
+          uni.removeTabBarBadge({
+            //显示数字
+            index: 3, //tabbar下标
+          })
+        }
         // 重新获取列表
         getMemberCartData()
       }
@@ -101,11 +108,18 @@ const onDeleteCarts = (datas: CartItem[]) => {
         if (res.confirm) {
           // 后端删除单品
           const res = await removeShoppingCart(ids.join(','))
-          uni.setTabBarBadge({
-            //显示数字
-            index: 3, //tabbar下标
-            text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
-          })
+          if (res.result.shoppingCartNum !== 0) {
+            uni.setTabBarBadge({
+              //显示数字
+              index: 3, //tabbar下标
+              text: `${res.result.shoppingCartNum}`, //数字
+            })
+          } else {
+            uni.removeTabBarBadge({
+              //显示数字
+              index: 3, //tabbar下标
+            })
+          }
           // 重新获取列表
           getMemberCartData()
           isShowManage.value = false
@@ -198,22 +212,36 @@ const addShoppingCart = async (data: CartItem & RecommendItem, num: number, type
     if (res.code === '1') {
       currentCartId.value = res.result.cartId
       data.num = res.result.goodsNum
-      uni.setTabBarBadge({
-        //显示数字
-        index: 3, //tabbar下标
-        text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
-      })
+      if (res.result.shoppingCartNum !== 0) {
+        uni.setTabBarBadge({
+          //显示数字
+          index: 3, //tabbar下标
+          text: `${res.result.shoppingCartNum}`, //数字
+        })
+      } else {
+        uni.removeTabBarBadge({
+          //显示数字
+          index: 3, //tabbar下标
+        })
+      }
     }
   } else {
     if (num === 0) {
       const res = await removeShoppingCart(currentCartId.value || data.cartId)
       if (res.code === '1') {
         data.cartGoodsNum = 0
-        uni.setTabBarBadge({
-          //显示数字
-          index: 3, //tabbar下标
-          text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
-        })
+        if (res.result.shoppingCartNum !== 0) {
+          uni.setTabBarBadge({
+            //显示数字
+            index: 3, //tabbar下标
+            text: `${res.result.shoppingCartNum}`, //数字
+          })
+        } else {
+          uni.removeTabBarBadge({
+            //显示数字
+            index: 3, //tabbar下标
+          })
+        }
       }
     } else {
       const res = await useUpdateShoppingCart(
@@ -227,11 +255,18 @@ const addShoppingCart = async (data: CartItem & RecommendItem, num: number, type
       )
       if (res.code === '1') {
         data.num = res.result.goodsNum
-        uni.setTabBarBadge({
-          //显示数字
-          index: 3, //tabbar下标
-          text: `${res.result.shoppingCartNum === 0 ? '' : res.result.shoppingCartNum}`, //数字
-        })
+        if (res.result.shoppingCartNum !== 0) {
+          uni.setTabBarBadge({
+            //显示数字
+            index: 3, //tabbar下标
+            text: `${res.result.shoppingCartNum}`, //数字
+          })
+        } else {
+          uni.removeTabBarBadge({
+            //显示数字
+            index: 3, //tabbar下标
+          })
+        }
       }
     }
   }
