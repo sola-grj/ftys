@@ -66,11 +66,11 @@ const getTypeListData = async () => {
   top1List.value = res.result.top1
   top2List.value = res.result.top2
   top2List.value.push({
-    id: 'string',
-    pid: 'string',
+    id: '',
+    pid: '',
     name: '更多',
     image: '../../../static/images/more.png',
-    source: 'string',
+    source: 'S',
     childlist: [],
   })
 }

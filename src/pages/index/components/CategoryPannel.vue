@@ -7,24 +7,39 @@ defineProps<{
 }>()
 
 const onTap = (item: BasicCategoryItem) => {
-  console.log('====000', `/pages/category/category?type=${item.id}`)
-  if (item.name === '更多') {
-    uni.switchTab({
-      url: '/pages/category/category',
-    })
-  } else {
-    uni.switchTab({
-      url:
-        item.name === '更多'
-          ? '/pages/category/category'
-          : `/pages/category/category?type=${item.id}`,
-      success: (success) => {
-        uni.$emit('categoryInfo', {
-          categoryInfo: item,
-        })
-      },
-    })
-  }
+  uni.switchTab({
+    url:
+      item.name === '更多'
+        ? '/pages/category/category'
+        : `/pages/category/category?type=${item.id}`,
+    success: (success) => {
+      uni.$emit('categoryInfo', {
+        categoryInfo: item,
+      })
+    },
+  })
+  // if (item.name === '更多') {
+  //   uni.switchTab({
+  //     url: '/pages/category/category',
+  //     success: (success) => {
+  //       uni.$emit('categoryInfo', {
+  //         categoryInfo: item,
+  //       })
+  //     },
+  //   })
+  // } else {
+  //   uni.switchTab({
+  //     url:
+  //       item.name === '更多'
+  //         ? '/pages/category/category'
+  //         : `/pages/category/category?type=${item.id}`,
+  //     success: (success) => {
+  //       uni.$emit('categoryInfo', {
+  //         categoryInfo: item,
+  //       })
+  //     },
+  //   })
+  // }
 }
 </script>
 
