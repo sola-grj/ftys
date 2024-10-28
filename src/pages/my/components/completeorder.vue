@@ -28,7 +28,7 @@ const getShipedOrderListData = async () => {
 
   shipedOrderList.value.push(...res.result.list)
   // suggestList.value.push(...mockList)
-  if (ShipedOrderPageParams.page < res.result.total) {
+  if (ShipedOrderPageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     ShipedOrderPageParams.page++
   } else {

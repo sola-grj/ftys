@@ -38,7 +38,7 @@ const onChangeIndex = (val: string) => {
 const couponNum = ref('')
 const getCouponNum = async () => {
   const res = await getMyCouponListAPI()
-  couponNum.value = res.result.total
+  couponNum.value = Math.ceil(res.result.total / 10)
 }
 // 查看当前账号是主账号还是子账号 1:主账号 2:子账号
 let user_role = memberStore.profile?.userinfo.user_role

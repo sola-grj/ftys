@@ -28,7 +28,7 @@ const getMyGoodsApplyData = async () => {
   const res = await getMyGoodsApplyAPI({ ...pageParams })
   // 分页数据增加
   myGoodsApply.value.push(...res.result.list)
-  if (pageParams.page < res.result.total) {
+  if (pageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     pageParams.page++
   } else {
@@ -131,10 +131,12 @@ page {
     .feedback-item:nth-last-child(1) {
       border-bottom: none;
     }
+
     .add {
       width: 100%;
       position: fixed;
       bottom: 10rpx;
+
       .add-btn {
         width: 80%;
         color: #fff;

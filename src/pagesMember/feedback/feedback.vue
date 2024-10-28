@@ -24,7 +24,7 @@ const getSuggestListData = async () => {
   }
   const res = await getMySuggestAPI({ ...pageParams })
   suggestList.value.push(...res.result.list)
-  if (pageParams.page < res.result.total) {
+  if (pageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     pageParams.page++
   } else {
@@ -90,6 +90,7 @@ page {
       padding: 14rpx;
       border-bottom: 1px solid #f2f4f7;
       padding: 30rpx;
+
       .f-title {
         .f-text {
         }
@@ -114,10 +115,12 @@ page {
         }
       }
     }
+
     .add {
       width: 100%;
       position: fixed;
       bottom: 10rpx;
+
       .add-btn {
         width: 80%;
         color: #fff;

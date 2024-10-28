@@ -45,7 +45,7 @@ const getUnShipListData = async () => {
   const res = await getUnShipCustomerAPI({ account: props.keyword, ...unShipCustomerPageParams })
   unShipCustomerList.value.push(...res.result.list)
   // suggestList.value.push(...mockList)
-  if (unShipCustomerPageParams.page < res.result.total) {
+  if (unShipCustomerPageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     unShipCustomerPageParams.page++
   } else {

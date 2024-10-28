@@ -40,7 +40,7 @@ const getMyMerchantOrderListData = async (userId: string) => {
   }
   const res = await getMyMerchantOrderListAPI({ userId, ...pageParams })
   myMerchantOrderList.value.push(...res.result.list)
-  if (pageParams.page < res.result.total) {
+  if (pageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     pageParams.page++
   } else {

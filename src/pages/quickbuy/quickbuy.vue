@@ -52,7 +52,7 @@ const geCommonlyUsedData = async () => {
   }
   // 分页数据增加
   commonlyUsedList.value.push(...res.result.list)
-  if (CommonlyUsedPageParams.page < res.result.total) {
+  if (CommonlyUsedPageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     CommonlyUsedPageParams.page++
   } else {
@@ -82,7 +82,7 @@ const geRencentlyBuyData = async () => {
   }
   // 分页数据增加
   recentlyBuyList.value.push(...res.result.list)
-  if (RecentlyBuyPageParams.page < res.result.total) {
+  if (RecentlyBuyPageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     RecentlyBuyPageParams.page++
   } else {

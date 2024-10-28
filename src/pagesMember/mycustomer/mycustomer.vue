@@ -41,7 +41,7 @@ const getMyMerchantData = async () => {
   })
   myMerchant.value.push(...res.result.list)
   totalOrderMoney.value = res.result.totalOrderMoney
-  if (pageParams.page < res.result.total) {
+  if (pageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     pageParams.page++
   } else {

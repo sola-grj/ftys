@@ -109,7 +109,7 @@ const getFiveTypeFruitCategoryData = async (source: string, category: string) =>
     ...fruitPageParams,
   })
   fiveTypeFruitCategory.value.push(...res.result.list)
-  if (fruitPageParams.page < res.result.total) {
+  if (fruitPageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     fruitPageParams.page++
   } else {
@@ -130,7 +130,7 @@ const getFiveTypeDryCategoryData = async (source: string, category: string) => {
     ...dryPageParams,
   })
   fiveTypeDryCategory.value.push(...res.result.list)
-  if (dryPageParams.page < res.result.total) {
+  if (dryPageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     dryPageParams.page++
   } else {

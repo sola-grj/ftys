@@ -262,7 +262,7 @@ const getRecommendData = async () => {
   const res = await getRecommendGoodsAPI({ ...recommendPageParams })
   // 分页数据增加
   recommendList.value.push(...res.result.list)
-  if (recommendPageParams.page < res.result.total) {
+  if (recommendPageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     recommendPageParams.page++
   } else {

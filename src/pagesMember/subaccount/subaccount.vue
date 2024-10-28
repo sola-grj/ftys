@@ -30,7 +30,7 @@ const getSubAccountListData = async () => {
   const res = await getSubAccountAPI({ ...pageParams })
 
   subaccountList.value.push(...res.result.list)
-  if (pageParams.page < res.result.total) {
+  if (pageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     pageParams.page++
   } else {
@@ -134,6 +134,7 @@ page {
       align-items: center;
       border-bottom: 1px solid #f2f4f7;
       padding: 30rpx;
+
       .left {
         display: flex;
         flex-direction: column;
@@ -170,10 +171,12 @@ page {
         width: 500rpx;
       }
     }
+
     .add {
       width: 100%;
       position: fixed;
       bottom: 10rpx;
+
       .add-btn {
         width: 80%;
         color: #fff;

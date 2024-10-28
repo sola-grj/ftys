@@ -48,7 +48,7 @@ const getMyDebtData = async () => {
   })
   // 分页数据增加
   myDebtList.value.push(...res.result.list)
-  if (allPageParams.page < res.result.total) {
+  if (allPageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     allPageParams.page++
   } else {
@@ -289,6 +289,7 @@ page {
 
     .list-container {
       overflow-y: scroll;
+
       .recharge-title {
         position: relative;
         margin-top: 40rpx;

@@ -15,7 +15,7 @@ const isFinish = ref(false)
 // 全部 请求参数
 const allQueryParams = ref<OrderListReqData>({
   page: 1,
-  pageSize: 5,
+  pageSize: 10,
   status: props.orderState,
 })
 
@@ -103,7 +103,7 @@ const getMemberOrderData = async () => {
   const res = await getOrderListAPI(allQueryParams.value)
   userBalance.value = res.result.userInfo.money
   orderList.value.push(...res.result.list)
-  if (allQueryParams.value.page < res.result.total) {
+  if (allQueryParams.value.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     allQueryParams.value.page++
   } else {

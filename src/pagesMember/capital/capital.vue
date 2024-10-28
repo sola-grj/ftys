@@ -39,7 +39,7 @@ const getAllCapitalData = async () => {
   const res = await getCapitalListAPI({ ...allPageParams })
   // 分页数据增加
   allCapitalList.value.push(...res.result.list)
-  if (allPageParams.page < res.result.total) {
+  if (allPageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     allPageParams.page++
   } else {
@@ -56,7 +56,7 @@ const getInCapitalData = async () => {
   const res = await getCapitalListAPI({ ...inPageParams, type: 'in' })
   // 分页数据增加
   inCapitalList.value.push(...res.result.list)
-  if (inPageParams.page < res.result.total) {
+  if (inPageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     inPageParams.page++
   } else {
@@ -74,7 +74,7 @@ const getOutCapitalData = async () => {
   const res = await getCapitalListAPI({ ...outPageParams, type: 'out' })
   // 分页数据增加
   outCapitalList.value.push(...res.result.list)
-  if (outPageParams.page < res.result.total) {
+  if (outPageParams.page < Math.ceil(res.result.total / 10)) {
     // 页码累加
     outPageParams.page++
   } else {
