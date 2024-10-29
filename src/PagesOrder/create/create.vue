@@ -167,6 +167,7 @@ const onOrderSubmit = async () => {
       num: item.num.toString(),
       unitPrice: item.unit_price.toString(),
       costUnitPrice: item.cost_unit_price ? item.cost_total_price : '',
+      remark: item.remark,
     })
   })
   // 不使用优惠券
@@ -287,6 +288,11 @@ const showValue = () => {
               <view class="price">￥{{ item.unit_price }}/{{ item.units }}</view>
               <view class="num"> X{{ item.num }}</view>
             </view>
+            <uni-easyinput
+              placeholder="请输入商品备注"
+              class="question"
+              v-model="item.remark"
+            ></uni-easyinput>
           </view>
         </view>
         <view class="remark">
@@ -462,6 +468,7 @@ page {
 
     .item {
       display: flex;
+      align-items: center;
       margin-top: 30rpx;
 
       image {

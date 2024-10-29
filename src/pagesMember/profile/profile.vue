@@ -113,21 +113,6 @@ const onSelect = (event: any) => {
 
 <template>
   <view class="viewport">
-    <!-- 导航栏 -->
-    <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
-      <navigator
-        open-type="navigateBack"
-        class="back ftysIcon icon-xiangzuojiantou"
-        hover-class="none"
-      ></navigator>
-      <view class="title">个人信息</view>
-    </view>
-    <!-- 头像 -->
-    <view class="avatar">
-      <view class="avatar-content">
-        <image class="image" :src="memberStore.profile?.userinfo.avatar" mode="aspectFill" />
-      </view>
-    </view>
     <view class="form">
       <!-- 表单内容 -->
       <view class="form-content">
@@ -316,7 +301,7 @@ page {
     color: #fff;
     border-radius: 80rpx;
     font-size: 30rpx;
-    background-color: #27ba9b;
+    background-color: #ff5040;
   }
 }
 </style>

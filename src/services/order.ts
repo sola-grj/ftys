@@ -195,6 +195,7 @@ export type CreateOrderCartItem = {
   num: number | string
   unitPrice: string
   costUnitPrice: string
+  remark: string
 }
 
 export type CreateOrderData = {
