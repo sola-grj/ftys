@@ -142,7 +142,7 @@ const againBuy = (order: OrderItem) => {
     content: '确定再来一单吗',
     success: async (res) => {
       if (res.confirm) {
-        uni.reLaunch({
+        uni.switchTab({
           url: '/pages/cart/cart?from=order',
           success: (res) => {
             uni.$emit('againBuy', { againBuyGoodsOrder: order })

@@ -31,6 +31,18 @@ const getMemberCartData = async () => {
     item.check = false
     return item
   })
+  if (res.result.length > 0) {
+    uni.setTabBarBadge({
+      //显示数字
+      index: 3, //tabbar下标
+      text: `${res.result.length}`, //数字
+    })
+  } else {
+    uni.removeTabBarBadge({
+      //显示数字
+      index: 3, //tabbar下标
+    })
+  }
   console.log('====', cartList.value)
 }
 

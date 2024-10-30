@@ -26,7 +26,7 @@ const query = defineProps<{
 onUnload(() => {
   console.log('onUnload')
 
-  uni.switchTab({ url: '/pages/my/my' })
+  // uni.switchTab({ url: '/pages/my/my' })
 })
 
 const current = ref(0)

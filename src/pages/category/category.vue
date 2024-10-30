@@ -670,6 +670,20 @@ const goToDetail = (data: MustBuyItem) => {
                 </view>
               </view>
             </view>
+            <view
+              v-if="
+                activeIndex === 0
+                  ? fiveTypeFruitCategory.length === 0
+                  : fiveTypeDryCategory.length === 0
+              "
+              class="bg"
+            >
+              <image
+                src="https://img.js.design/assets/img/66909fda4fc21e83fb682df4.png#52a35c0ee65bdb8ba63bcefcce2ce6e6"
+                mode="aspectFit"
+              />
+              <text>暂无内容</text>
+            </view>
           </view>
         </view>
       </scroll-view>
@@ -995,6 +1009,19 @@ page {
           .jiagou {
             flex: 1;
           }
+        }
+      }
+
+      .bg {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: rgba(175, 177, 178, 1);
+
+        image {
+          height: 500rpx;
+          width: 500rpx;
         }
       }
     }

@@ -30,12 +30,18 @@ const rules: UniHelper.UniFormsRules = {
   },
 }
 const onSave = async () => {
-  await addSuggestAPI({
+  await formRef.value?.validate?.()
+  const res = await addSuggestAPI({
     title: title.value,
     content: content.value,
     images: imageUrlList.value.length > 0 ? imageUrlList.value.join(',') : '',
   })
-  uni.navigateTo({ url: '/pagesMember/feedback/feedback' })
+  if (res.code === 1) {
+    uni.showToast({ icon: 'success', title: '添加成功' })
+    setTimeout(() => {
+      uni.navigateTo({ url: '/pagesMember/feedback/feedback' })
+    }, 500)
+  }
 }
 const onSelect = (event: any) => {
   uni.uploadFile({

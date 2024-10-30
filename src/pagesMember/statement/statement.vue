@@ -17,7 +17,7 @@ const range = ref('')
 const onTimeChange = (e: string[]) => {
   startTime.value = e[0]
   endTime.value = e[1]
-  console.log(e)
+  console.log(e, range.value)
 }
 const onReconciliationChange = (e: any) => {
   console.log(e.detail.value)
@@ -44,21 +44,17 @@ const end = new Date(new Date().setDate(new Date().getDate() + 45))
 
 // 注册表单数据
 const form = ref({
-  title,
-  content,
-  images: '',
+  range,
 })
 
 // 注册定义校验规则
 const rules: UniHelper.UniFormsRules = {
-  title: {
-    rules: [{ required: true, errorMessage: '请描述您的内容标题' }],
-  },
-  content: {
-    rules: [{ required: true, errorMessage: '请输入问题反馈' }],
+  range: {
+    rules: [{ required: true, errorMessage: '请选择时间范围' }],
   },
 }
-const onSave = () => {
+const onSave = async () => {
+  await formRef.value?.validate?.()
   let rStatus = ''
   if (reconciliationStatus.value === '全部') {
     rStatus = ''
@@ -83,7 +79,7 @@ const onSave = () => {
     }&shippedEndDate=${endTime.value || ''}&checking_status=${rStatus}&settle_status=${sStatus}`, //仅为示例，并非真实的资源
     success: (res) => {
       if (res.statusCode === 200) {
-        console.log('下载成功', res)
+        uni.showToast({ icon: 'success', title: '导出对账单成功' })
         var filePath = res.tempFilePath
         uni.openDocument({
           filePath: filePath,
@@ -92,6 +88,8 @@ const onSave = () => {
             console.log('打开文档成功', res1)
           },
         })
+      } else {
+        uni.showToast({ icon: 'error', title: '到处对账单失败' })
       }
     },
     // @ts-ignore
@@ -111,7 +109,7 @@ const goback = () => {
     <SolaShopHeader title="导出对账单" />
     <view class="container form-content">
       <uni-forms class="form" ref="formRef" :rules="rules" :modelValue="form">
-        <uni-forms-item class="form-item" name="title">
+        <uni-forms-item class="form-item" name="range">
           <text class="label">*按发货日期</text>
           <uni-datetime-picker
             :start="start"

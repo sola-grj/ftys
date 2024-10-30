@@ -70,7 +70,7 @@ const addNewProduct = () => {
           <view class="left-title">{{ item.goods_name }}</view>
           <view class="time">
             <view class="detail-time">{{ item.create_time }}</view>
-            <view class="status">{{ item.status === '1' ? '待处理' : '已处理' }}</view>
+            <view class="status">{{ item.status === 1 ? '待处理' : '已处理' }}</view>
           </view>
         </view>
         <view class="right" @tap="($event) => goToDetail(item)"> 详情>> </view>

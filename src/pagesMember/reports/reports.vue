@@ -196,7 +196,7 @@ const goback = () => {
         />
       </view>
       <view class="table-title table-item">
-        <text class="total">总金额：￥{{ totalPrice }}</text>
+        <text class="total">总金额：￥{{ totalPrice ? totalPrice.toFixed(2) : '' }}</text>
       </view>
       <scroll-view
         :style="{ height: `calc(100vh - ${barHeight}px - ${statusBarHeight}px - 260rpx) ` }"
@@ -217,6 +217,13 @@ const goback = () => {
           </view>
 
           <text class="amount">￥{{ item.orderPayPrice }}</text>
+        </view>
+        <view v-if="orderList.length === 0" class="bg">
+          <image
+            src="https://img.js.design/assets/img/66909fda4fc21e83fb682df4.png#52a35c0ee65bdb8ba63bcefcce2ce6e6"
+            mode="aspectFit"
+          />
+          <text>暂无内容</text>
         </view>
       </scroll-view>
     </view>
@@ -297,6 +304,19 @@ page {
 
     .list-container {
       height: 100%;
+
+      .bg {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: rgba(175, 177, 178, 1);
+
+        image {
+          height: 500rpx;
+          width: 500rpx;
+        }
+      }
     }
 
     .table-item {
