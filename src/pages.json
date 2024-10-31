@@ -441,6 +441,7 @@
 				{
 					"path": "list/list",
 					"style": {
+						"navigationStyle": "custom",
 						"navigationBarTitleText": "订单列表",
 					}
 				},

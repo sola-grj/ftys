@@ -171,6 +171,7 @@ export type OrderItem = {
   fGoodsId: string
   createTime: string
   money: string
+  revisable: string
 }
 
 // 订单列表上送参数

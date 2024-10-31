@@ -43,10 +43,16 @@ const onClickItem = (e) => {
     current.value = e.currentIndex
   }
 }
+const goback = () => {
+  uni.switchTab({
+    url: '/pages/my/my',
+  })
+}
 </script>
 
 <template>
   <view class="viewport">
+    <SolaShopHeader :define-back="goback" title="我的订单" />
     <!-- tabs -->
     <!-- <view class="tabs">
       <text @tap="($event) => (activeIndex = index)" class="item" v-for="(item, index) in orderTabs" :key="item.title">
@@ -127,6 +133,12 @@ page {
   display: flex;
   flex-direction: column;
   background-color: #fff;
+
+  .sola-header {
+    .title {
+      color: #000;
+    }
+  }
 }
 
 .status-tabs {

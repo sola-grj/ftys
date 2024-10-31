@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { getUserInfoAPI, updateUserInfoAPI, type UserInfo } from '@/services/my'
+import { getUserInfoAPI, updateUserInfoAPI, type Img, type UserInfo } from '@/services/my'
 import { getMemberProfileAPI, putMemberProfileAPI } from '@/services/profile'
 import { useMemberStore } from '@/stores'
 import type { Gender, LoginResult, ProfileDetail } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
+// 表单组件实例
+const formRef = ref<UniHelper.UniFormsInstance>()
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 // 表单更新数据
@@ -19,6 +21,25 @@ const form = ref({
   deliverLocationStr: '',
   images: [] as Img[],
 })
+
+const rules: UniHelper.UniFormsRules = {
+  mobile: {
+    rules: [
+      { required: true, errorMessage: '请输入手机号码' },
+      { pattern: /^1[3-9]\d{9}$/, errorMessage: '手机号格式不正确' },
+    ],
+  },
+  username: {
+    rules: [{ required: true, errorMessage: '请输入用户名' }],
+  },
+  company: {
+    rules: [{ required: true, errorMessage: '请输入公司名称' }],
+  },
+  shipping_addr: {
+    rules: [{ required: true, errorMessage: '请选择送货地址' }],
+  },
+}
+
 type Location = {
   address: string
   name: string
@@ -31,22 +52,18 @@ const deliverLocation = ref<Location>({
   latitude: 0,
   longitude: 0,
 })
-const imageList = ref([])
-type Img = {
-  name: string
-  extname: string
-  url: string
-  relativePath: string
-}
+const imageList = ref<Img[]>([])
 
 const getUserInfo = async () => {
   const res = await getUserInfoAPI()
-  const images = [] as Img[]
   userInfo.value = res.result
   form.value.mobile = res.result.mobile
   form.value.username = res.result.username
   form.value.company = res.result.company
   form.value.shipping_addr = res.result.shipping_addr
+  if (res.result.images.length > 0) {
+    imageList.value = [...res.result.images]
+  }
   form.value.images = res.result.images
 }
 // 选择位置
@@ -72,10 +89,11 @@ onLoad(() => {
 })
 // 点击保存
 const onSubmit = async () => {
+  await formRef.value?.validate?.()
   const images: any = []
   if (imageList.value.length > 0) {
-    imageList.value.forEach((item: any) => {
-      images.push(item.url)
+    imageList.value.forEach((item) => {
+      images.push(item.partUrl)
     })
   }
 
@@ -107,8 +125,10 @@ const onSubmit = async () => {
 }
 const onDelete = (event: any) => {
   console.log(event)
+  imageList.value.splice(event.index, 1)
+  form.value.images = imageList.value
   // @ts-ignore
-  imageList.value = [...imageList.value.filter((item) => item.uuid !== event.tempFile.uuid)]
+  // imageList.value = [...imageList.value.filter((item) => item.uuid !== event.tempFile.uuid)]
 }
 const onSelect = (event: any) => {
   uni.uploadFile({
@@ -121,11 +141,14 @@ const onSelect = (event: any) => {
       // @ts-ignore
       imageList.value.push({
         // @ts-ignore
-        url: data!.result.url,
+        partUrl: data!.result.url,
         uuid: event.tempFiles[0].uuid,
+        name: 'string',
+        extname: 'string',
+        url: data!.result.fullurl,
       })
       // @ts-ignore
-      form.value.images = data!.result.url
+      form.value.images = imageList.value
     },
   })
 }
@@ -136,7 +159,7 @@ const onSelect = (event: any) => {
     <view class="form">
       <!-- 表单内容 -->
       <view class="form-content">
-        <uni-forms>
+        <uni-forms ref="formRef" :rules="rules" :modelValue="form">
           <uni-forms-item class="form-item" name="mobile">
             <text class="label">电话</text>
             <input type="text" v-model="form.mobile" class="input" placeholder="请输入电话" />

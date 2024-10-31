@@ -557,6 +557,14 @@ export const getServiceInfoAPI = () => {
     url: '/common/getServiceInfo',
   })
 }
+export type Img = {
+  name: string
+  extname: string
+  url: string
+  path: string
+  partUrl?: string
+  uuid?: string
+}
 export type UserInfo = {
   avatar: string
   bio: string
@@ -576,7 +584,7 @@ export type UserInfo = {
   group_id: string
   h_user_id: string
   id: string
-  images: string[]
+  images: Img[]
   joinip: string
   jointime: string
   level: string

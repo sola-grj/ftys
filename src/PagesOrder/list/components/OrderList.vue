@@ -21,48 +21,67 @@ const allQueryParams = ref<OrderListReqData>({
 
 // 根据订单状态生成底部buttons
 const createButtons = (order: OrderItem) => {
+  const revisable = order.revisable
   switch (props.orderState) {
     case '0':
       if (order.status === '1') {
-        return [
-          { id: 'pay', name: '去支付' },
-          { id: 'edit', name: '编辑' },
-          { id: 'cancel', name: '取消订单' },
-        ]
+        return revisable === '1'
+          ? [
+              { id: 'pay', name: '去支付' },
+              { id: 'edit', name: '编辑' },
+              { id: 'cancel', name: '取消订单' },
+            ]
+          : [{ id: 'again', name: '再来一单' }]
       } else if (order.status === '2') {
-        return [
-          { id: 'cancel', name: '取消订单' },
-          { id: 'again', name: '再来一单' },
-        ]
+        return revisable === '1'
+          ? [
+              { id: 'cancel', name: '取消订单' },
+              { id: 'again', name: '再来一单' },
+            ]
+          : [{ id: 'again', name: '再来一单' }]
       } else if (order.status === '3') {
         return [{ id: 'again', name: '再来一单' }]
       } else if (order.status === '12') {
-        return [
-          { id: 'cancel', name: '取消订单' },
-          { id: 'edit', name: '编辑' },
-          { id: 'again', name: '再来一单' },
-        ]
+        return revisable === '1'
+          ? [
+              { id: 'cancel', name: '取消订单' },
+              { id: 'edit', name: '编辑' },
+              { id: 'again', name: '再来一单' },
+            ]
+          : [{ id: 'again', name: '再来一单' }]
       } else if (order.status === '6') {
         return [
           { id: 'finish', name: '再来一单' },
           { id: 'after-sales', name: '申请售后' },
         ]
+      } else if (order.status === '16' || order.status === '13') {
+        return [{ id: 'finish', name: '再来一单' }]
       }
       break
     case '1':
       // 待支付
-      return [
-        { id: 'pay', name: '去支付' },
-        { id: 'edit', name: '编辑' },
-        { id: 'cancel', name: '取消订单' },
-      ]
+      return revisable === '1'
+        ? [
+            { id: 'pay', name: '去支付' },
+            { id: 'edit', name: '编辑' },
+            { id: 'cancel', name: '取消订单' },
+          ]
+        : [{ id: 'again', name: '再来一单' }]
     case '2':
       // 代发货
-      return [
-        { id: 'cancel', name: '取消订单' },
-        { id: 'again', name: '再来一单' },
-      ]
+      return revisable === '1'
+        ? [
+            { id: 'cancel', name: '取消订单' },
+            { id: 'again', name: '再来一单' },
+          ]
+        : [{ id: 'again', name: '再来一单' }]
     case '3':
+      // 待收货
+      return [{ id: 'again', name: '再来一单' }]
+    case '13':
+      // 待收货
+      return [{ id: 'again', name: '再来一单' }]
+    case '16':
       // 待收货
       return [{ id: 'again', name: '再来一单' }]
     case '4':
@@ -79,11 +98,13 @@ const createButtons = (order: OrderItem) => {
       ]
     case '12':
       // 已完成
-      return [
-        { id: 'cancel', name: '取消订单' },
-        { id: 'edit', name: '编辑' },
-        { id: 'again', name: '再来一单' },
-      ]
+      return revisable === '1'
+        ? [
+            { id: 'cancel', name: '取消订单' },
+            { id: 'edit', name: '编辑' },
+            { id: 'again', name: '再来一单' },
+          ]
+        : [{ id: 'again', name: '再来一单' }]
 
     default:
       break
@@ -216,8 +237,9 @@ const copy = (orderNo: string) => {
         <view class="order-id"
           >{{ order.orderNo }} <text @tap="($event) => copy(order.orderNo)" class="copy">复制</text>
         </view>
-        <view :class="orderState === '1' ? 'wait' : 'other'"
-          ><text class="w-desc">等待付款</text> <text class="w-minuate">30分钟</text>
+        <view :class="order.status === '1' && order.revisable === '1' ? 'wait' : 'other'">
+          <text class="w-desc">等待付款</text>
+          <text class="w-minuate">30分钟</text>
         </view>
       </view>
       <view v-if="order.status !== '4'" class="mid">
