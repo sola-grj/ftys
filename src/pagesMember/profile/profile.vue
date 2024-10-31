@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { updateUserInfoAPI } from '@/services/my'
+import { getUserInfoAPI, updateUserInfoAPI, type UserInfo } from '@/services/my'
 import { getMemberProfileAPI, putMemberProfileAPI } from '@/services/profile'
 import { useMemberStore } from '@/stores'
 import type { Gender, LoginResult, ProfileDetail } from '@/types/member'
@@ -9,15 +9,15 @@ import { ref } from 'vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 // 表单更新数据
-
+const userInfo = ref<UserInfo>({} as UserInfo)
 const memberStore = useMemberStore()
 const form = ref({
-  mobile: memberStore.profile?.userinfo.mobile,
-  username: memberStore.profile?.userinfo.username,
-  company: memberStore.profile?.userinfo.company,
-  shipping_addr: memberStore.profile?.userinfo.shipping_addr,
+  mobile: userInfo.value.mobile,
+  username: userInfo.value.username,
+  company: userInfo.value.company,
+  shipping_addr: userInfo.value.shipping_addr,
   deliverLocationStr: '',
-  images: '',
+  images: [] as Img[],
 })
 type Location = {
   address: string
@@ -32,6 +32,23 @@ const deliverLocation = ref<Location>({
   longitude: 0,
 })
 const imageList = ref([])
+type Img = {
+  name: string
+  extname: string
+  url: string
+  relativePath: string
+}
+
+const getUserInfo = async () => {
+  const res = await getUserInfoAPI()
+  const images = [] as Img[]
+  userInfo.value = res.result
+  form.value.mobile = res.result.mobile
+  form.value.username = res.result.username
+  form.value.company = res.result.company
+  form.value.shipping_addr = res.result.shipping_addr
+  form.value.images = res.result.images
+}
 // 选择位置
 const chooseAddress = (type: string) => {
   uni.chooseLocation({
@@ -50,6 +67,9 @@ const chooseAddress = (type: string) => {
     },
   })
 }
+onLoad(() => {
+  getUserInfo()
+})
 // 点击保存
 const onSubmit = async () => {
   const images: any = []
@@ -142,6 +162,7 @@ const onSelect = (event: any) => {
           </uni-forms-item>
           <uni-forms-item class="form-item" name="images">
             <uni-file-picker
+              v-model="form.images"
               @delete="onDelete"
               @select="onSelect"
               class="choose-img"

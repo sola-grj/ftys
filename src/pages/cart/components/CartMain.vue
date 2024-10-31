@@ -195,7 +195,15 @@ const goToPayment = () => {
     uni.navigateTo({
       url: '/PagesOrder/create/create',
       success: (res) => {
-        uni.$emit('selectedCardList', {
+        uni.$emit('cartmaintest', {
+          test: 123,
+        })
+        // uni.$emit('selectedCardList', {
+        //   selectedCardList: selectedCardList.value,
+        //   selectedCardListMoney: selectedCardListMoney.value,
+        //   cartList: cartList.value,
+        // })
+        res.eventChannel.emit('selectedCardList', {
           selectedCardList: selectedCardList.value,
           selectedCardListMoney: selectedCardListMoney.value,
           cartList: cartList.value,

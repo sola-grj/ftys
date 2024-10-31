@@ -557,3 +557,73 @@ export const getServiceInfoAPI = () => {
     url: '/common/getServiceInfo',
   })
 }
+export type UserInfo = {
+  avatar: string
+  bio: string
+  birthday: string
+  company: string
+  company_addr: string
+  company_area: string
+  company_city: string
+  company_lat: string
+  company_lon: string
+  company_province: string
+  createtime: number
+  credit_money: string
+  driver_id: string
+  email: string
+  gender: string
+  group_id: string
+  h_user_id: string
+  id: string
+  images: string[]
+  joinip: string
+  jointime: string
+  level: string
+  loginfailure: string
+  loginip: string
+  logintime: string
+  maxsuccessions: string
+  mobile: string
+  money: string
+  nickname: string
+  openid: string
+  password: string
+  pay_pwd: string
+  pay_way: string
+  pid: string
+  prevtime: string
+  receive_way: string
+  s_user_id: string
+  sale_id: string
+  salt: string
+  score: string
+  shipping_addr: string
+  shipping_area: string
+  shipping_city: string
+  shipping_lat: string
+  shipping_lon: string
+  shipping_province: string
+  status: string
+  sub_account_level: string
+  sub_account_name: string
+  successions: string
+  third_create_time: string
+  third_update_time: string
+  token: string
+  type_id: string
+  updatetime: string
+  user_role: string
+  username: string
+  verification: string
+}
+/**
+ * 联系客服
+ * @param data 请求参数
+ */
+export const getUserInfoAPI = () => {
+  return http<UserInfo>({
+    method: 'POST',
+    url: '/user/getUserInfo',
+  })
+}
