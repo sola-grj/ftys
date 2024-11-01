@@ -81,6 +81,7 @@ const chooseAddress = (type: string) => {
         longitude: res.longitude,
       }
       form.value.deliverLocationStr = res.address
+      form.value.shipping_addr = res.address
     },
   })
 }
@@ -286,6 +287,9 @@ page {
       flex: 1;
       text-align: right;
       color: #999999;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-left: 40rpx;
     }
   }
 
