@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { bindWXAPI, checkBindWXAPI, UnbindWXAPI } from '@/services/my'
+import { bindWXAPI, checkBindWXAPI, closePaySwitchAPI, UnbindWXAPI } from '@/services/my'
 import { useMemberStore } from '@/stores'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
@@ -88,14 +88,33 @@ const resetPwd = () => {
   })
 }
 const onChangeSwitch = (e: any) => {
-  uni.showModal({
-    content: '你还没有设置支付密码，请设置后在使用此功能',
-    success: async (res) => {
-      if (res.confirm) {
-        uni.navigateTo({ url: '/pagesMember/setpaypwd/setpaypwd' })
-      }
-    },
-  })
+  if (ispayPwdSwitch.value === '0') {
+    uni.showModal({
+      content: '你还没有设置支付密码，请设置后在使用此功能',
+      success: async (res) => {
+        if (res.confirm) {
+          uni.navigateTo({ url: '/pagesMember/setpaypwd/setpaypwd' })
+        }
+      },
+    })
+  } else {
+    uni.showModal({
+      content: '是否关闭余额支付使用密码功能？',
+      success: async (res) => {
+        if (res.confirm) {
+          const res = await closePaySwitchAPI()
+          if (res.code === '1') {
+            uni.showToast({ icon: 'success', title: '关闭成功' })
+          } else {
+            uni.showToast({ icon: 'none', title: res.msg })
+          }
+          setTimeout(() => {
+            checkBindWX()
+          }, 500)
+        }
+      },
+    })
+  }
 }
 onLoad(() => {
   checkBindWX()

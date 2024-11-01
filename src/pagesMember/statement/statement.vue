@@ -89,7 +89,7 @@ const onSave = async () => {
           },
         })
       } else {
-        uni.showToast({ icon: 'error', title: '到处对账单失败' })
+        uni.showToast({ icon: 'error', title: '导出对账单失败' })
       }
     },
     // @ts-ignore

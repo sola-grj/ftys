@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { useMemberStore } from '@/stores'
 import type { TopItem } from '@/types/home'
 
 // 获取屏幕边界到安全区域的距离
 const { top, height } = uni.getMenuButtonBoundingClientRect()
 const { safeAreaInsets } = uni.getSystemInfoSync()
+const memberStore = useMemberStore()
 const goToSearch = () => {
   uni.navigateTo({ url: '/PagesOrder/search/search' })
 }
@@ -13,18 +15,19 @@ const query = defineProps<{
 const goToDetail = (data: TopItem) => {
   uni.navigateTo({ url: `/PagesOrder/goods/goods?source=${data.source}&goodsId=${data.goodsId}` })
 }
+const onChangeAccount = () => {
+  uni.navigateTo({ url: '/pagesMember/changeaccount/changeaccount' })
+}
 </script>
 
 <template>
-  <view class="navbar" :style="{ paddingTop: top + height + 'px' }">
-    <!-- logo文字 -->
-    <!-- <view class="logo">
-      <image class="logo-image" src="@/static/images/logo.png"></image>
-      <text class="logo-text">新鲜 · 亲民 · 快捷</text>
-    </view> -->
-    <!-- 搜索条 -->
-    <!-- <view class="search"> -->
-    <!-- <text @tap="goToSearch" class="icon-search">搜索商品</text> -->
+  <view class="navbar" :style="{ paddingTop: top + height - 26 + 'px' }">
+    <view class="current-user" @tap="onChangeAccount">
+      <!-- <text class="ftysIcon icon-touxiang"></text> -->
+      <text class="username">{{ memberStore.profile?.userinfo.username }}</text>
+      <text class="ftysIcon icon-qiehuanzhanghao"></text>
+      <text class="change">切换</text>
+    </view>
     <view @tap="goToSearch" class="search">
       <text class="ftysIcon icon-sousuo"></text>
       <input disabled />
@@ -53,6 +56,21 @@ const goToDetail = (data: TopItem) => {
   display: flex;
   flex-direction: column;
   padding-top: 20px;
+
+  .current-user {
+    color: #ffffff;
+    margin: 0 20rpx;
+
+    .username {
+      font-size: 40rpx;
+      margin: 0 20rpx;
+    }
+
+    .icon-qiehuanzhanghao,
+    .change {
+      font-size: 26rpx;
+    }
+  }
 
   .logo {
     display: flex;

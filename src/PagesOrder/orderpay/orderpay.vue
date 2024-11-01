@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getMyCouponListAPI } from '@/services/coupon'
+import { checkBindWXAPI } from '@/services/my'
 import {
   createOrderAPI,
   getMemberOrderPreAPI,
@@ -20,6 +21,21 @@ import { computed, ref } from 'vue'
 
 const couponpopup = ref()
 const memberStore = useMemberStore()
+
+const ispayPwdSwitch = ref('0')
+// 检查是否绑定微信
+const checkBindWX = async () => {
+  const res = await checkBindWXAPI()
+  if (res.result.payPwdSwitch === '1') {
+    ispayPwdSwitch.value = '1'
+    memberStore.profile?.userinfo
+  } else {
+    ispayPwdSwitch.value = '0'
+  }
+}
+onLoad(() => {
+  checkBindWX()
+})
 const query = defineProps<{
   orderId: string
   orderNo: string
@@ -36,7 +52,7 @@ const goToRecharge = () => {
 }
 
 const orderPay = async () => {
-  if (!balancePwd.value) {
+  if (ispayPwdSwitch.value === '1' && !balancePwd.value) {
     uni.showToast({ icon: 'error', title: '请输入密码' })
     return
   }
@@ -131,7 +147,7 @@ const submit = () => {
             />
           </view>
         </view>
-        <view class="info-item">
+        <view v-if="ispayPwdSwitch === '1'" class="info-item">
           <view class="label">余额密码</view>
           <view class="value">
             <uni-easyinput

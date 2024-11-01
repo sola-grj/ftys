@@ -635,3 +635,14 @@ export const getUserInfoAPI = () => {
     url: '/user/getUserInfo',
   })
 }
+
+/**
+ * 联系客服
+ * @param data 请求参数
+ */
+export const closePaySwitchAPI = () => {
+  return http({
+    method: 'POST',
+    url: '/user/closePaySwitch',
+  })
+}

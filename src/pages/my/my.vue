@@ -351,7 +351,7 @@ onLoad(() => {
       </view>
       <navigator class="settings" url="/pagesMember/settings/settings" hover-class="none">
         <text class="ftysIcon icon-shezhi"></text>
-        <text class="ftysIcon icon-xiaoxi1"></text>
+        <!-- <text class="ftysIcon icon-xiaoxi1"></text> -->
       </navigator>
     </view>
     <view class="container" v-if="type_id !== 2">
