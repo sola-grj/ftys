@@ -46,7 +46,9 @@ const goToDetail = (item: GetMyGoodsApplyItem) => {
   uni.navigateTo({
     url: '/pagesMember/newproductdemand/newproductdemanddetail',
     success: (res) => {
-      uni.$emit('detail', { currentInfo: item })
+      setTimeout(() => {
+        uni.$emit('detail', { currentInfo: item })
+      }, 200)
     },
   })
 }

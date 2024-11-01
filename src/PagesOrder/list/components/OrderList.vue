@@ -166,7 +166,9 @@ const againBuy = (order: OrderItem) => {
         uni.switchTab({
           url: '/pages/cart/cart?from=order',
           success: (res) => {
-            uni.$emit('againBuy', { againBuyGoodsOrder: order })
+            setTimeout(() => {
+              uni.$emit('againBuy', { againBuyGoodsOrder: order })
+            }, 200)
           },
         })
       }

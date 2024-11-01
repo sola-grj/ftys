@@ -106,6 +106,7 @@ export const getRecommendGoodsAPI = (data: { page: number; pageSize: number }) =
   return http<RecommendResult>({
     method: 'POST',
     url: '/goods/getRecommendGoods',
+    data,
   })
 }
 

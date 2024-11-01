@@ -195,9 +195,11 @@ const goToApply = () => {
   uni.navigateTo({
     url: '/PagesOrder/detail/applyaftersale',
     success: (success) => {
-      uni.$emit('applyaftersale', {
-        order: order.value,
-      })
+      setTimeout(() => {
+        uni.$emit('applyaftersale', {
+          order: order.value,
+        })
+      }, 200)
     },
   })
 }

@@ -46,9 +46,11 @@ const addSubAccount = (type: string, data?: SubAccountItem) => {
     url: `/pagesMember/subaccount/addaccount?type=${type}`,
     success: (success) => {
       if (type === 'edit') {
-        uni.$emit('editsubaccount', {
-          currentAccount: data,
-        })
+        setTimeout(() => {
+          uni.$emit('editsubaccount', {
+            currentAccount: data,
+          })
+        }, 200)
       }
     },
   })

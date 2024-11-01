@@ -14,7 +14,7 @@ import type { CartItem } from '@/types/cart'
 import type { CouponItem, MyCouponItem } from '@/types/coupon'
 import type { OrderPreResult } from '@/types/order'
 import { cal } from '@/utils/cal'
-import { onLoad, onShow, onUnload } from '@dcloudio/uni-app'
+import { onHide, onLoad, onShow, onUnload } from '@dcloudio/uni-app'
 import { computed, getCurrentInstance, onBeforeMount, onMounted, ref } from 'vue'
 
 const couponpopup = ref()
@@ -138,43 +138,24 @@ const getMemberOrderPreData = async () => {
 const selectedCardList = ref<CartItem[]>([])
 const cartList = ref<CartItem[]>([])
 const selectedCardListMoney = ref('')
-uni.$on('cartmaintest', (data) => {
-  console.log('cartmaintest====receive====data', data)
-})
-onBeforeMount(() => {
-  console.log('====enter onBeforeMount====')
-})
-onMounted(() => {
-  console.log('====enter onMounted====')
-})
+
 onUnload(() => {
   console.log('====enter unload====')
   uni.$off('selectedCardList')
 })
-onLoad(() => {
-  console.log('====enter load====')
-  const instance = getCurrentInstance().proxy
-  const eventChannel = instance.getOpenerEventChannel()
-
-  eventChannel.on('selectedCardList', function (data) {
-    console.log('====enter selectedCardList load load event====')
-    console.log('data==load==create', data)
+onHide(() => {
+  console.log('====enter onHide====')
+  uni.$off('selectedCardList')
+})
+onShow(() => {
+  console.log('====enter show====')
+  uni.$on('selectedCardList', (data) => {
     selectedCardList.value = data.selectedCardList
     selectedCardListMoney.value = data.selectedCardListMoney
     cartList.value = data.cartList
     // 获取优惠券信息
     getOwnCouponData()
   })
-})
-onShow(() => {
-  console.log('====enter show====')
-  // uni.$on('selectedCardList', (data) => {
-  //   selectedCardList.value = data.selectedCardList
-  //   selectedCardListMoney.value = data.selectedCardListMoney
-  //   cartList.value = data.cartList
-  //   // 获取优惠券信息
-  //   getOwnCouponData()
-  // })
 })
 
 const addressStore = useAddressStore()
@@ -254,11 +235,13 @@ const goToChooseCoupon = () => {
   uni.navigateTo({
     url: '/PagesOrder/coupon/coupon?from=order',
     success: (res) => {
-      uni.$emit('avalibleCouponList', {
-        avalibleCouponList: avalibleCouponList.value,
-        chooseCoupon,
-        currentChooseCoupon: currentChooseCoupon.value,
-      })
+      setTimeout(() => {
+        uni.$emit('avalibleCouponList', {
+          avalibleCouponList: avalibleCouponList.value,
+          chooseCoupon,
+          currentChooseCoupon: currentChooseCoupon.value,
+        })
+      }, 200)
     },
   })
 }

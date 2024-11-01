@@ -7,8 +7,8 @@ import {
 } from '@/services/cart'
 import { useMemberStore } from '@/stores'
 import type { CartItem } from '@/types/cart'
-import { onLoad, onShow, onUnload } from '@dcloudio/uni-app'
-import { computed, ref } from 'vue'
+import { onHide, onLoad, onShow, onUnload } from '@dcloudio/uni-app'
+import { computed, ref, onBeforeUnmount, onMounted } from 'vue'
 import { cal } from '@/utils/cal'
 import type { OrderItem } from '@/types/order'
 import type { RecommendItem } from '@/types/home'
@@ -49,12 +49,26 @@ const getMemberCartData = async () => {
 // 初始化调用
 const againBuyGoodsOrder = ref<OrderItem>({} as OrderItem)
 onUnload(() => {
+  console.log('onBeforeUnmount======')
   uni.$off('againBuy')
 })
+onBeforeUnmount(() => {
+  console.log('onBeforeUnmount======')
+
+  uni.$off('againBuy')
+})
+onHide(() => {
+  console.log('onHide======')
+  uni.$off('againBuy')
+})
+// onMounted(())
 onShow(() => {
+  console.log('=============cartmain data show========')
   getRecommendData()
   getMemberCartData()
   uni.$on('againBuy', async (data) => {
+    console.log('cartmain data========', data)
+
     // 再次购买
     againBuyGoodsOrder.value = data.againBuyGoodsOrder
     let goodsList: AddShoppingCartDataType[] = []
@@ -74,6 +88,10 @@ onShow(() => {
     })
     // 重新获取购物车数据
     await getMemberCartData()
+    recommendPageParams.page = 1
+    recommendFinish.value = false
+    recommendList.value = []
+    getRecommendData()
   })
 })
 
@@ -135,6 +153,10 @@ const onDeleteCarts = (datas: CartItem[]) => {
           // 重新获取列表
           getMemberCartData()
           isShowManage.value = false
+          recommendPageParams.page = 1
+          recommendFinish.value = false
+          recommendList.value = []
+          getRecommendData()
         }
       },
     })
@@ -198,16 +220,19 @@ const goToPayment = () => {
         uni.$emit('cartmaintest', {
           test: 123,
         })
-        // uni.$emit('selectedCardList', {
+        setTimeout(() => {
+          uni.$emit('selectedCardList', {
+            selectedCardList: selectedCardList.value,
+            selectedCardListMoney: selectedCardListMoney.value,
+            cartList: cartList.value,
+          })
+        }, 200)
+
+        // res.eventChannel.emit('selectedCardList', {
         //   selectedCardList: selectedCardList.value,
         //   selectedCardListMoney: selectedCardListMoney.value,
         //   cartList: cartList.value,
         // })
-        res.eventChannel.emit('selectedCardList', {
-          selectedCardList: selectedCardList.value,
-          selectedCardListMoney: selectedCardListMoney.value,
-          cartList: cartList.value,
-        })
       },
     })
   }
@@ -415,11 +440,7 @@ const goToDetail = (data: RecommendItem) => {
         </navigator>
       </view>
       <view class="recommand-list-container-view">
-        <scroll-view
-          scroll-y="false"
-          @scrolltolower="getRecommendData"
-          class="recommand-list-container"
-        >
+        <scroll-view scroll-y @scrolltolower="getRecommendData" class="recommand-list-container">
           <view class="recommand-title"
             ><text class="ftysIcon icon-jingxuantuijian"></text> 精选推荐</view
           >

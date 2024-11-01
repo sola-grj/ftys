@@ -13,9 +13,13 @@ const onTap = (item: BasicCategoryItem) => {
         ? '/pages/category/category'
         : `/pages/category/category?type=${item.id}`,
     success: (success) => {
-      uni.$emit('categoryInfo', {
-        categoryInfo: item,
-      })
+      setTimeout(() => {
+        console.log('settimeout==========', 200)
+
+        uni.$emit('categoryInfo', {
+          categoryInfo: item,
+        })
+      }, 200)
     },
   })
   // if (item.name === '更多') {

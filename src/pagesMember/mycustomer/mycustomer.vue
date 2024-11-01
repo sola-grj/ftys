@@ -94,7 +94,9 @@ const goToDetail = (data: MyMerchantItem) => {
   uni.navigateTo({
     url: '/pagesMember/mycustomer/customerinfo',
     success: (success) => {
-      uni.$emit('customerinfo', { customerinfo: data })
+      setTimeout(() => {
+        uni.$emit('customerinfo', { customerinfo: data })
+      }, 200)
     },
   })
 }

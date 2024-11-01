@@ -56,12 +56,7 @@ const goback = () => {
         </view>
         <view class="content">{{ item.content }}</view>
         <view class="images-container" v-if="item.images">
-          <image
-            class="images"
-            :key="img"
-            v-for="img in item.images.split(',')"
-            :src="'//img.js.design/assets/img/6690dc2515275e6eaeb2e9ab.png#65ae707b4e6dae0ff083f534f478cc2a'"
-          />
+          <image class="images" :key="img" v-for="img in item.images.split(',')" :src="img" />
         </view>
       </view>
       <view v-if="suggestList.length === 0" class="bg">
@@ -127,6 +122,8 @@ page {
         min-height: 300rpx;
         color: #999;
         margin-top: 10rpx;
+        border: 1px solid #dcdcdc;
+        border-radius: 20rpx;
       }
 
       .images-container {

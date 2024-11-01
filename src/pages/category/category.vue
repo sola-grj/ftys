@@ -8,7 +8,7 @@ import type {
   MustBuyItem,
   SearchBasicCategoryItem,
 } from '@/types/home'
-import { onLoad, onShow, onTabItemTap, onUnload } from '@dcloudio/uni-app'
+import { onHide, onLoad, onShow, onTabItemTap, onUnload } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { useMemberStore } from '@/stores'
 import { getGoodsListByIdAPI, goodsDetailPageRecommendGoodsAPI } from '@/services/goods'
@@ -118,6 +118,12 @@ const getFiveTypeFruitCategoryData = async (source: string, category: string) =>
 }
 
 const getFiveTypeDryCategoryData = async (source: string, category: string) => {
+  if (category !== currentDryCategoryId.value) {
+    currentDryCategoryId.value = category
+    fiveTypeDryCategory.value = []
+    dryPageParams.page = 1
+    dryIsFinish.value = false
+  }
   fiveTypeDryData.value = { source, category }
   // 退出判断
   if (dryIsFinish.value === true) {
@@ -140,6 +146,10 @@ const getFiveTypeDryCategoryData = async (source: string, category: string) => {
 
 // 首次初始化数据
 const getTypeListData = async (type?: string) => {
+  // fruitCategory.value = []
+  // dryCargoCategory.value = []
+  // currentFruitCategoryId.value = ''
+  // currentDryCategoryId.value = ''
   // 重置分页器
   fruitPageParams.page = 1
   fruitPageParams.pageSize = 10
@@ -181,6 +191,7 @@ const getTypeListData = async (type?: string) => {
       : []
   // @ts-ignore
   // currentFourthFruitTypeCategory.value = [{ name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, { name: 'alex' }, ...currentFourthFruitTypeCategory.value]
+  console.log('secondActiveFruitIndex====', secondActiveFruitIndex.value)
   if (!type) {
     getFiveTypeFruitCategoryData(
       fruitCategory.value[0] && fruitCategory.value[0].childlist[0].source,
@@ -196,11 +207,19 @@ const scrollLeft = ref(0)
 onUnload(() => {
   uni.$off('categoryInfo')
 })
-
+onLoad(() => {
+  console.log(' category onLoad======')
+})
+onHide(() => {
+  console.log(' category onHide======')
+  uni.$off('categoryInfo')
+})
 // 页面加载
 onShow(() => {
   uni.$on('categoryInfo', async (data) => {
     if (data.categoryInfo.name === '更多') {
+      secondActiveFruitIndex.value = 0
+      secondActiveDryIndex.value = 0
       await getTypeListData('')
     } else {
       await getTypeListData('type')

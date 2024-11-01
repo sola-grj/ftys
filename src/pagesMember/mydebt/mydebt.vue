@@ -66,9 +66,11 @@ const goToDetail = (item: CreditItem) => {
   uni.navigateTo({
     url: `/pagesMember/mydebt/mydebtdetail`,
     success: (res) => {
-      uni.$emit('debtDetail', {
-        debtDetail: item,
-      })
+      setTimeout(() => {
+        uni.$emit('debtDetail', {
+          debtDetail: item,
+        })
+      }, 200)
     },
   })
 }
