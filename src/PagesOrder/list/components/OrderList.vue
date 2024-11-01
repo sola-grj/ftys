@@ -226,9 +226,21 @@ const copy = (orderNo: string) => {
     },
   })
 }
+// 状态栏高度
+const statusBarHeight = uni.getSystemInfoSync().statusBarHeight || 0
+// 胶囊数据
+const { top, height } = wx.getMenuButtonBoundingClientRect()
+// 自定义导航栏高度 = 胶囊高度 + 胶囊的padding*2, 如果获取不到设置为38
+const barHeight = height ? height + (top - statusBarHeight) * 2 : 38
 </script>
 <template>
-  <scroll-view scroll-y class="orders" @scrolltolower="getMemberOrderData" enable-back-to-top>
+  <scroll-view
+    scroll-y
+    class="orders"
+    :style="`height: calc(100vh - 36px - ${statusBarHeight + barHeight}px)`"
+    @scrolltolower="getMemberOrderData"
+    enable-back-to-top
+  >
     <view
       class="card"
       @tap="($event) => goToOrderDetail(order)"
@@ -273,6 +285,13 @@ const copy = (orderNo: string) => {
         >
       </view>
     </view>
+    <view v-if="orderList.length === 0" class="bg">
+      <image
+        src="https://img.js.design/assets/img/66909fda4fc21e83fb682df4.png#52a35c0ee65bdb8ba63bcefcce2ce6e6"
+        mode="aspectFit"
+      />
+      <text>暂无内容</text>
+    </view>
     <!-- 底部提示文字 -->
     <view class="loading-text" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
       {{ true ? '没有更多数据~' : '正在加载...' }}
@@ -283,6 +302,19 @@ const copy = (orderNo: string) => {
 // 订单列表
 .orders {
   height: 100vh;
+
+  .bg {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: rgba(175, 177, 178, 1);
+
+    image {
+      height: 500rpx;
+      width: 500rpx;
+    }
+  }
 
   .card {
     min-height: 100rpx;

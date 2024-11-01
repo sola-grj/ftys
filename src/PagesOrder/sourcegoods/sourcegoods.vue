@@ -63,15 +63,15 @@ const goback = () => {
         src="https://img0.baidu.com/it/u=2343944877,2522314031&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1081" /> -->
       <view class="item">
         <view class="label">商品名称</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.goodsInfo.category3Name }}</view>
       </view>
       <view class="item">
         <view class="label">商品分类</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.goodsInfo.category1Name }}</view>
       </view>
       <view class="item">
         <view class="label">商品单位</view>
-        <view class="value">{{ sourceData.goodsInfo.unit }}</view>
+        <view class="value">{{ sourceData.goodsInfo.package }}</view>
       </view>
       <view class="item">
         <view class="label">商品描述</view>
@@ -97,7 +97,7 @@ const goback = () => {
       <view class="title">—溯源信息—</view>
       <view class="item">
         <view class="label">供应商</view>
-        <view class="value">xxx</view>
+        <view class="value">{{ sourceData.goodsInfo.providerName }}</view>
       </view>
     </view>
     <view class="order-info container">
@@ -116,7 +116,7 @@ const goback = () => {
       </view>
       <view class="item">
         <view class="label">归属单号</view>
-        <view class="value">{{ sourceData.orderInfo.salesReturnNum }}</view>
+        <view class="value">{{ sourceData.orderInfo.orderNo }}</view>
       </view>
       <view class="item">
         <view class="label">退货数量</view>

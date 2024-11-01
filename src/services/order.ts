@@ -586,6 +586,9 @@ export type CommondityTraceResult = {
     storage: string
     unit: string
     weight: string
+    category1Name: string
+    category2Name: string
+    category3Name: string
   }
   traceInfo: string[]
   traceNo: string

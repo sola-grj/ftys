@@ -17,6 +17,12 @@ const orderTabs = ref([
   { orderState: '4', title: '待售后' },
   { orderState: '6', title: '已完成' },
 ])
+// 状态栏高度
+const statusBarHeight = uni.getSystemInfoSync().statusBarHeight || 0
+// 胶囊数据
+const { top, height } = wx.getMenuButtonBoundingClientRect()
+// 自定义导航栏高度 = 胶囊高度 + 胶囊的padding*2, 如果获取不到设置为38
+const barHeight = height ? height + (top - statusBarHeight) * 2 : 38
 
 const tabItems = ref(['全部', '待支付', '待发货', '待收货', '待售后', '已完成'])
 // 获取页面参数
@@ -79,7 +85,7 @@ const goback = () => {
         @clickItem="onClickItem"
       />
     </view>
-    <view class="content">
+    <view class="content" :style="`height: calc(100vh - 36px - ${statusBarHeight + barHeight}px)`">
       <view v-if="current === 0">
         <OrderList :order-state="'0'" />
       </view>

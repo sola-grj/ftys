@@ -206,7 +206,7 @@ const wxLogin = () => {
       </view>
       <view v-if="activeIndex === 1" class="login-item">
         <text class="login-label">验证码</text>
-        <input v-model="verifyCode" class="input" type="text" password placeholder="请输入验证码" />
+        <input v-model="verifyCode" class="input" type="text" placeholder="请输入验证码" />
         <view @tap="onGetSmsTap" class="getcode-btn" :class="checked ? 'checked' : ''">{{
           checked ? `获取中(${countDown})` : '获取验证码'
         }}</view>
