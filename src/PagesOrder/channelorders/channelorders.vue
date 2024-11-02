@@ -157,6 +157,13 @@ const goToOrderDetail = (orderId: string) => {
             </view>
           </view>
         </view>
+        <view v-if="channelOrderList.length === 0" class="bg">
+          <image
+            src="https://img.js.design/assets/img/66909fda4fc21e83fb682df4.png#52a35c0ee65bdb8ba63bcefcce2ce6e6"
+            mode="aspectFit"
+          />
+          <text>暂无内容</text>
+        </view>
       </view>
     </scroll-view>
     <uni-popup ref="typepopup" background-color="#fff">
@@ -221,6 +228,19 @@ page {
 .viewport {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
+
+  .bg {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: rgba(175, 177, 178, 1);
+
+    image {
+      height: 500rpx;
+      width: 500rpx;
+    }
+  }
 
   .container {
     height: calc(100vh - 130rpx);

@@ -28,13 +28,13 @@ const isFinish = ref(false)
 const today = formatDate(new Date())
 
 // 近七天
-const sevenDay = formatDate(new Date(new Date().setDate(new Date().getDate() + 7)))
+const sevenDay = formatDate(new Date(new Date().setDate(new Date().getDate() - 7)))
 
 // 近十五天
-const fifteenDay = formatDate(new Date(new Date().setDate(new Date().getDate() + 15)))
+const fifteenDay = formatDate(new Date(new Date().setDate(new Date().getDate() - 15)))
 
 // 近三十天
-const thirteenDay = formatDate(new Date(new Date().setDate(new Date().getDate() + 30)))
+const thirteenDay = formatDate(new Date(new Date().setDate(new Date().getDate() - 30)))
 
 // 获取下单情况数据
 const orderList = ref<OrderStatusItem[]>([])
@@ -120,13 +120,12 @@ const makePhoneCall = (phoneNumber: string) => {
           </view>
         </view>
         <view class="show-time">
-          <text class="start-time">{{ today }}</text
-          >&nbsp;~
           <text v-if="activeIndex === 'today'" class="end-time">{{ today }}</text>
           <text v-if="activeIndex === '7'" class="end-time">{{ sevenDay }}</text>
           <text v-if="activeIndex === '15'" class="end-time">{{ fifteenDay }}</text>
           <text v-if="activeIndex === '30'" class="end-time">{{ thirteenDay }}</text>
-          &nbsp;
+          &nbsp;~
+          <text class="start-time">{{ today }}</text>
           <text class="ftysIcon icon-riqi" />
         </view>
       </view>
@@ -139,6 +138,13 @@ const makePhoneCall = (phoneNumber: string) => {
         <text class="name">{{ item.username }}</text>
         <text class="time">{{ item.orderTime }}</text>
         <text @tap="($event) => makePhoneCall(item.mobile)" class="ftysIcon icon-dianhua"></text>
+      </view>
+      <view v-if="orderList.length === 0" class="bg">
+        <image
+          src="https://img.js.design/assets/img/66909fda4fc21e83fb682df4.png#52a35c0ee65bdb8ba63bcefcce2ce6e6"
+          mode="aspectFit"
+        />
+        <text>暂无内容</text>
       </view>
     </view>
   </scroll-view>
@@ -161,6 +167,19 @@ page {
     border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;
     padding: 30rpx;
+
+    .bg {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: rgba(175, 177, 178, 1);
+
+      image {
+        height: 500rpx;
+        width: 500rpx;
+      }
+    }
 
     .login-container {
       position: relative;

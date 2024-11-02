@@ -36,11 +36,11 @@ const getCompleteOrderDetail = async (orderId: string) => {
     orderId,
   })
   completeOrderDetail.value = res.result
-  if (res.result.orderInfo.status === '2') {
-    deliveryStage.value = '发货'
+  if (res.result.orderInfo.status === '2' || res.result.orderInfo.status === '12') {
+    deliveryStage.value = '待发货订单'
   }
   if (res.result.orderInfo.status === '3') {
-    deliveryStage.value = '签收'
+    deliveryStage.value = '待签收订单'
   }
 }
 
@@ -84,9 +84,13 @@ const onChangeGoodsStatus = (data: ShipedOrderDetailItem, status: string) => {
 //
 // 发货 ？签收
 const onSave = async () => {
+  if (imageList.value.length === 0) {
+    uni.showToast({ icon: 'error', title: '请上传证迹图片' })
+    return
+  }
   const status = completeOrderDetail.value.orderInfo.status
 
-  if (status === '2') {
+  if (status === '2' || status === '12') {
     // 订单发货
     const orderDetail: ShipOrderItem[] = []
     if (confirmCompleteOrderDetail.value.orderDetail.length === 0) {
@@ -100,9 +104,13 @@ const onSave = async () => {
         unitPrice: item.unitPrice,
       })
     })
+    if (orderDetail.length === 0) {
+      uni.showToast({ icon: 'error', title: ' 请选择待发货的商品' })
+    }
     const res = await shipOrderAPI({
       orderId: props.orderId,
       orderDetail,
+      shipImages: imageList.value.join(','),
     })
     if (res.code === '1') {
       uni.showToast({ icon: 'success', title: '发货成功！' })
@@ -133,10 +141,7 @@ const onSave = async () => {
 
 <template>
   <scroll-view class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
-      <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">发货</text>
-    </view>
+    <SolaShopHeader :title="deliveryStage" />
     <view class="container">
       <view class="orderno"
         >订单号：{{ completeOrderDetail.orderInfo && completeOrderDetail.orderInfo.orderNo }}
@@ -162,13 +167,17 @@ const onSave = async () => {
             <view class="infotitle">{{ item.goodsName }}</view>
             <view class="xiadan">下单：￥{{ item.num }}{{ item.units }}</view>
             <view class="fahuo">发货：￥{{ item.actNum }}{{ item.units }}</view>
-            <view class="btn" @tap="($event) => onChangeGoodsStatus(item, 'confirm')"
-              >手动发货</view
+            <view
+              v-if="deliveryStage === '待发货订单'"
+              class="btn"
+              @tap="($event) => onChangeGoodsStatus(item, 'confirm')"
+            >
+              手动发货</view
             >
           </view>
         </view>
       </view>
-      <view class="list-container">
+      <view class="list-container" v-if="deliveryStage === '待发货订单'">
         <view>
           <text>订单发货</text>
         </view>
@@ -198,7 +207,7 @@ const onSave = async () => {
                     </picker> -->
         </view>
         <uni-file-picker
-          v-if="completeOrderDetail.orderInfo && completeOrderDetail.orderInfo.status === '3'"
+          v-if="completeOrderDetail.orderInfo"
           @delete="onDelete"
           @select="onSelect"
           class="choose-img"
@@ -223,40 +232,6 @@ page {
 .viewport {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
-
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 130rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-
-    .add-feedback {
-      width: 160rpx;
-      font-size: 28rpx;
-      height: 40rpx;
-      text-align: center;
-      line-height: 40rpx;
-      position: absolute;
-      right: 20rpx;
-      bottom: 20rpx;
-      border-radius: 20rpx;
-      background: linear-gradient(90deg, rgba(255, 112, 77, 1) 0%, rgba(255, 95, 77, 1) 100%);
-    }
-  }
 
   .container {
     height: 100%;

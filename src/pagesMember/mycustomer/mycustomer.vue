@@ -174,6 +174,13 @@ watch(
           </view>
         </view>
       </view>
+      <view v-if="myMerchant.length === 0" class="bg">
+        <image
+          src="https://img.js.design/assets/img/66909fda4fc21e83fb682df4.png#52a35c0ee65bdb8ba63bcefcce2ce6e6"
+          mode="aspectFit"
+        />
+        <text>暂无内容</text>
+      </view>
     </scroll-view>
     <uni-popup ref="typepopup" background-color="#fff">
       <view class="customer-popup-content">
@@ -244,6 +251,19 @@ page {
     border-radius: 30rpx 30rpx 0 0;
     overflow: scroll;
     padding: 30rpx;
+
+    .bg {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: rgba(175, 177, 178, 1);
+
+      image {
+        height: 500rpx;
+        width: 500rpx;
+      }
+    }
 
     .total {
       display: flex;

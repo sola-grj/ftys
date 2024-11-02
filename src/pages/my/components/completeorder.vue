@@ -74,7 +74,7 @@ watch(
           <view class="customer-name">
             <view class="text">{{ item.orderNo }}</view>
           </view>
-          <view class="more">去发货</view>
+          <view class="more">查看详情</view>
         </view>
         <view class="bottom">
           <view class="b-item">
@@ -105,10 +105,9 @@ watch(
   // overflow: hidden;
 
   .container {
-    height: 100%;
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
-    // overflow: scroll;
+    overflow-y: scroll;
     padding: 20rpx;
 
     .item {

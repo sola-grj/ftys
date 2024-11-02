@@ -64,7 +64,7 @@ watch(
     unShipCustomerList.value = []
     getUnShipListData()
   },
-  { immediate: true, deep: true },
+  { immediate: false, deep: true },
 )
 </script>
 
@@ -109,10 +109,9 @@ watch(
   // overflow: hidden;
 
   .container {
-    height: 100%;
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
-    // overflow: scroll;
+    overflow-y: scroll;
     padding: 20rpx;
 
     .item {

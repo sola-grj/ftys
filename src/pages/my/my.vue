@@ -320,10 +320,12 @@ onLoad(() => {
             :src="memberStore.profile.userinfo.avatar"
           ></image>
         </navigator>
-        <view class="meta" @tap="onChangeAccount">
+        <view class="meta">
           <view class="nickname">
-            {{ memberStore.profile.userinfo.username }}
-            <text class="ftysIcon icon-qiehuanzhanghao">切换账号</text>
+            <text class="username">{{ memberStore.profile.userinfo.username }}</text>
+            <text v-if="type_id !== 2" @tap="onChangeAccount" class="ftysIcon icon-qiehuanzhanghao"
+              >切换账号</text
+            >
           </view>
           <navigator class="extra" hover-class="none">
             <text class="update">{{ memberStore.profile.userinfo.mobile }}</text>
@@ -532,7 +534,6 @@ page {
 }
 
 .driver-container {
-  height: 100%;
   background: #fff;
   border-radius: 30rpx 30rpx 0 0;
 
@@ -573,10 +574,12 @@ page {
   }
 
   .comp-container {
-    height: 100%;
+    height: calc(100vh - 420rpx);
   }
 
   .search {
+    height: 80rpx;
+
     .uni-easyinput {
       width: 90%;
       margin: auto;
@@ -636,10 +639,16 @@ page {
   .nickname {
     margin-bottom: 16rpx;
     font-size: 36rpx;
+    display: flex;
+    align-items: center;
 
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    .username {
+      max-width: 280rpx;
+      margin-right: 5rpx;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     .icon-qiehuanzhanghao {
       font-size: 26rpx;

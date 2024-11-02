@@ -72,7 +72,7 @@ console.log('memberStore.profile?.userinfo.user_id', memberStore.profile?.userin
     <SolaShopHeader title="切换账户" />
     <scroll-view
       class="container form-content"
-      @scrolltolower="getCutAccountListAPI"
+      @scrolltolower="getCutAccountListData"
       scroll-y
       enable-back-to-top
     >

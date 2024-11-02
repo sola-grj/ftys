@@ -63,7 +63,7 @@ const goback = () => {
         src="https://img0.baidu.com/it/u=2343944877,2522314031&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1081" /> -->
       <view class="item">
         <view class="label">商品名称</view>
-        <view class="value">{{ sourceData.goodsInfo.category3Name }}</view>
+        <view class="value">{{ sourceData.goodsInfo.goodsName }}</view>
       </view>
       <view class="item">
         <view class="label">商品分类</view>

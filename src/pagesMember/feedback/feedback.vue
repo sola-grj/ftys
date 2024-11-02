@@ -56,7 +56,7 @@ const goback = () => {
         </view>
         <view class="content">{{ item.content }}</view>
         <view class="images-container" v-if="item.images">
-          <image class="images" :key="img" v-for="img in item.images.split(',')" :src="img" />
+          <image class="images" :key="img" v-for="img in item.images" :src="img" />
         </view>
       </view>
       <view v-if="suggestList.length === 0" class="bg">

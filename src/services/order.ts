@@ -589,6 +589,7 @@ export type CommondityTraceResult = {
     category1Name: string
     category2Name: string
     category3Name: string
+    goodsName: string
   }
   traceInfo: string[]
   traceNo: string
