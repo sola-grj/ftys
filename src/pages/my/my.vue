@@ -323,7 +323,10 @@ onLoad(() => {
         <view class="meta">
           <view class="nickname">
             <text class="username">{{ memberStore.profile.userinfo.username }}</text>
-            <text v-if="type_id !== 2" @tap="onChangeAccount" class="ftysIcon icon-qiehuanzhanghao"
+            <text
+              v-if="type_id !== 2 && user_role?.toString() === '1'"
+              @tap="onChangeAccount"
+              class="ftysIcon icon-qiehuanzhanghao"
               >切换账号</text
             >
           </view>

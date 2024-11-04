@@ -465,6 +465,7 @@ export type UnShipOrderListItem = {
   createTime: string
   username: string
   mobile: string
+  status: string
 }
 
 /**
@@ -537,7 +538,11 @@ export type ShipOrderItem = {
  *  订单发货
  * @param data 请求参数
  */
-export const shipOrderAPI = (data: { orderId: string; orderDetail: ShipOrderItem[] }) => {
+export const shipOrderAPI = (data: {
+  orderId: string
+  orderDetail: ShipOrderItem[]
+  shipImages: string
+}) => {
   return http<ShipedOrderDetailResult>({
     method: 'POST',
     url: '/driver/shipOrder',

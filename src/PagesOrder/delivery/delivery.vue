@@ -100,7 +100,7 @@ const onSave = async () => {
     confirmCompleteOrderDetail.value.orderDetail.forEach((item) => {
       orderDetail.push({
         detailId: item.detailId,
-        actNum: item.actNum,
+        actNum: item.num.toString(),
         unitPrice: item.unitPrice,
       })
     })
@@ -165,8 +165,8 @@ const onSave = async () => {
           <image :src="item.goodsImages[0]" mode="scaleToFill" />
           <view class="info">
             <view class="infotitle">{{ item.goodsName }}</view>
-            <view class="xiadan">下单：￥{{ item.num }}{{ item.units }}</view>
-            <view class="fahuo">发货：￥{{ item.actNum }}{{ item.units }}</view>
+            <view class="xiadan">订单数量：{{ item.num }}{{ item.units }}</view>
+            <!-- <view class="fahuo">发货：￥{{ item.actNum }}{{ item.units }}</view> -->
             <view
               v-if="deliveryStage === '待发货订单'"
               class="btn"
@@ -189,8 +189,8 @@ const onSave = async () => {
           <image :src="item.goodsImages[0]" mode="scaleToFill" />
           <view class="info">
             <view class="infotitle">{{ item.goodsName }}</view>
-            <view class="xiadan">下单：￥{{ item.num }}{{ item.units }}</view>
-            <view class="fahuo">发货：￥{{ item.actNum }}{{ item.units }}</view>
+            <!-- <view class="xiadan">下单：￥{{ item.num }}{{ item.units }}</view> -->
+            <view class="fahuo">发货数量：{{ item.num }}{{ item.units }}</view>
             <view class="btn cancel" @tap="($event) => onChangeGoodsStatus(item, 'cancel')"
               >取消发货</view
             >

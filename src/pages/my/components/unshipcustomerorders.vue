@@ -37,7 +37,9 @@ const goToDeliver = (orderId: string) => {
           <view class="customer-name">
             <view class="text">{{ item.orderNo }}</view>
           </view>
-          <view class="more" @tap="($event) => goToDeliver(item.orderId)">去发货></view>
+          <view class="more" @tap="($event) => goToDeliver(item.orderId)"
+            >{{ item.status === '3' || item.status === '13' ? '去签收' : '去发货' }}></view
+          >
         </view>
         <view class="bottom">
           <view class="b-item">

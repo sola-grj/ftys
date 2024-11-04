@@ -55,14 +55,18 @@ const getUnShipListData = async () => {
 onMounted(() => {
   getUnShipListData()
 })
+let timer: any = null
 watch(
   () => props.keyword,
   (newValue, oldValue) => {
-    console.log('workOrder变化了', newValue, oldValue)
-    unShipCustomerPageParams.page = 1
-    isUnShipCustomerFinish.value = false
-    unShipCustomerList.value = []
-    getUnShipListData()
+    timer && clearTimeout(timer)
+    timer = setTimeout(() => {
+      console.log('workOrder变化了', newValue, oldValue)
+      unShipCustomerPageParams.page = 1
+      isUnShipCustomerFinish.value = false
+      unShipCustomerList.value = []
+      getUnShipListData()
+    }, 500)
   },
   { immediate: false, deep: true },
 )
@@ -80,7 +84,7 @@ watch(
         <view class="top">
           <view class="customer-name">
             <view class="text">{{ item.username }}</view>
-            <view class="num">{{ 3 }}</view>
+            <view class="num">{{ item.orderCount }}</view>
           </view>
           <view class="more">查看更多</view>
         </view>

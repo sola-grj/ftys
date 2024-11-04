@@ -46,7 +46,11 @@ const activeIndex = ref(
 )
 const onClickItem = (e) => {
   if (current.value !== e.currentIndex) {
-    current.value = e.currentIndex
+    if (e.currentIndex === 5) {
+      current.value = 6
+    } else {
+      current.value = e.currentIndex
+    }
   }
 }
 const goback = () => {
@@ -101,8 +105,8 @@ const goback = () => {
       <view v-if="current === 4">
         <OrderList :order-state="'4'" />
       </view>
-      <view v-if="current === 5">
-        <OrderList :order-state="'5'" />
+      <view v-if="current === 6">
+        <OrderList :order-state="'6'" />
       </view>
     </view>
     <!-- <view v-else class="content">
