@@ -202,18 +202,43 @@ const wxLogin = () => {
     <view class="login">
       <view class="login-item">
         <text class="login-label">手机号码</text>
-        <input type="tel" v-model="phone" class="input" placeholder="请输入用户名/手机号码" />
+        <!-- <input type="tel" v-model="phone" class="input" placeholder="请输入用户名/手机号码" /> -->
+        <uni-easyinput
+          class="input"
+          v-model="phone"
+          :inputBorder="false"
+          type="text"
+          :clearable="false"
+          placeholder="请输入手机号码"
+        ></uni-easyinput>
       </view>
       <view v-if="activeIndex === 1" class="login-item">
         <text class="login-label">验证码</text>
-        <input v-model="verifyCode" class="input" type="text" placeholder="请输入验证码" />
+        <!-- <input v-model="verifyCode" class="input" type="text" placeholder="请输入验证码" /> -->
+        <uni-easyinput
+          class="input"
+          v-model="verifyCode"
+          :inputBorder="false"
+          type="text"
+          :clearable="false"
+          placeholder="请输入验证码"
+        ></uni-easyinput>
         <view @tap="onGetSmsTap" class="getcode-btn" :class="checked ? 'checked' : ''">{{
           checked ? `获取中(${countDown})` : '获取验证码'
         }}</view>
       </view>
       <view v-if="activeIndex === 0" class="login-item">
         <text class="login-label">密码</text>
-        <input v-model="pwd" class="input" type="text" password placeholder="请输入密码" />
+        <!-- <input v-model="pwd" class="input" type="text" password placeholder="请输入密码" /> -->
+        <uni-easyinput
+          class="input"
+          ref="password"
+          :inputBorder="false"
+          type="password"
+          v-model="pwd"
+          :clearable="false"
+          placeholder="请输入密码"
+        ></uni-easyinput>
       </view>
       <view>
         <button
@@ -312,6 +337,16 @@ page {
     align-items: center;
     border-bottom: 1px solid #ddd;
 
+    .uni-easyinput {
+      text-align: right;
+
+      .uni-easyinput__content {
+        input {
+          padding-right: 0 !important;
+        }
+      }
+    }
+
     .login-label {
       width: 200rpx;
     }
@@ -320,7 +355,7 @@ page {
       line-height: 50rpx;
       text-align: center;
       color: #fff;
-      width: 300rpx;
+      width: 160rpx;
       height: 50rpx;
       font-size: 25rpx;
       border-radius: 10rpx;

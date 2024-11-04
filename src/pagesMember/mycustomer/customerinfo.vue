@@ -17,6 +17,21 @@ import type { PageParams } from '@/types/global'
 import type { MySuggestItem } from '@/types/my'
 import { onLoad, onUnload } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
+
+const items = [
+  {
+    value: 'unreviewed',
+    name: '未审核',
+  },
+  {
+    value: 'normal',
+    name: '正常',
+  },
+  {
+    value: 'disable',
+    name: '被禁用',
+  },
+]
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const activeIndex = ref(0)
@@ -89,6 +104,14 @@ const process = () => {
     },
   })
 }
+const showStatus = (status: string) => {
+  if (status) {
+    const data = items.find((i) => i.value === status)
+    console.log(data?.name)
+    return data?.name
+  }
+  return null
+}
 </script>
 
 <template>
@@ -134,7 +157,7 @@ const process = () => {
         </view>
         <view class="info-item">
           <view class="label">状态</view>
-          <view class="value">{{ customerinfo?.status }}</view>
+          <view class="value">{{ showStatus(customerinfo?.status as string) }}</view>
         </view>
         <view class="info-item">
           <view class="label">所属集团</view>

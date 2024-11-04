@@ -119,11 +119,8 @@ page {
       }
 
       .content {
-        min-height: 300rpx;
         color: #999;
         margin-top: 10rpx;
-        border: 1px solid #dcdcdc;
-        border-radius: 20rpx;
       }
 
       .images-container {

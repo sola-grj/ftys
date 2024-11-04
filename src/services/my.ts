@@ -221,6 +221,7 @@ export const setpaypwdAPI = (data: { paypwd: string; code: string; mobile: strin
 export type CustomerItem = {
   userId: string
   username: string
+  status: string
 }
 export type CustomerResult = {
   page: number

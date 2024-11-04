@@ -44,6 +44,15 @@ onLoad(() => {
   getCutAccountListData()
 })
 const onChangeCustomer = async (data: CustomerItem) => {
+  if (data.status !== 'normal') {
+    uni.showModal({
+      content: '当前子账号未审核或已被禁用，请联系管理员',
+      success: async (res) => {
+        return
+      },
+    })
+    return
+  }
   const res = await cutAccountAPI({ userId: data.userId })
   memberStore.setProfile(res!.result)
   uni.showToast({ icon: 'success', title: '账号切换成功' })
