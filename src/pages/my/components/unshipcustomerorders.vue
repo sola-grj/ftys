@@ -17,7 +17,7 @@ const getUnShipOrderList = async (data: UnShipCustomerItem) => {
   const res = await getUnShipOrderListAPI({
     userId: data.userId,
   })
-  unShipOrderList.value = res.result
+  unShipOrderList.value = res.result.list
 }
 onMounted(async () => {
   await getUnShipOrderList(props.currentUnshipCustomer)
@@ -68,10 +68,9 @@ const goToDeliver = (orderId: string) => {
   // overflow: hidden;
 
   .container {
-    height: 100%;
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
-    // overflow: scroll;
+    overflow-y: scroll;
     padding: 20rpx;
 
     .item {

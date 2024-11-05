@@ -33,13 +33,13 @@ const getCompleteOrderDetail = async (orderId: string) => {
     orderId,
   })
   completeOrderDetail.value = res.result
-  list2[0].desc = res.result.orderInfo.signInTime || '20199999999'
+  list2[0].desc = res.result.orderInfo.createTime || '20199999999'
   list2[1].desc = res.result.orderInfo.payTime || '20199999999'
-  list2[2].desc = res.result.orderInfo.createTime || '20199999999'
+  list2[2].desc = res.result.orderInfo.signInTime || '20199999999'
   if (res.result.orderInfo.status === '3') {
     active.value = 1
   }
-  if (res.result.orderInfo.status === '6') {
+  if (res.result.orderInfo.status === '6' || res.result.orderInfo.status === '4') {
     active.value = 2
   }
   if (res.result.orderInfo.status === '2') {

@@ -59,22 +59,23 @@ const currentTypeId = ref('1')
 
 // 注册表单数据
 const form = ref({
-  title,
-  content,
-  images: '',
+  currentType,
+  currentReason,
 })
 
 // 注册定义校验规则
 const rules: UniHelper.UniFormsRules = {
-  title: {
-    rules: [{ required: true, errorMessage: '请描述您的内容标题' }],
+  currentType: {
+    rules: [{ required: true, errorMessage: '请输入售后类型' }],
   },
-  content: {
-    rules: [{ required: true, errorMessage: '请输入问题反馈' }],
+  currentReason: {
+    rules: [{ required: true, errorMessage: '请输入售后原因' }],
   },
 }
 const onSave = async () => {
+  await formRef.value?.validate?.()
   let goodsList: AfterSaleReqItem[] = []
+  const images: string[] = []
   order.value.orderDetail.forEach((item) => {
     goodsList.push({
       goodsId: item.goodsId,
@@ -84,15 +85,25 @@ const onSave = async () => {
       remark: item.remark,
     })
   })
+  imageList.value.forEach((item) => {
+    // @ts-ignore
+    images.push(item.url)
+  })
   const res = await createAfterSalesAPI({
     orderId: order.value.orderId,
     afterSalesType: currentTypeId.value,
     afterSalesReason: currentReason.value,
     remark: order.value.remark,
     goodsList,
+    images: images.join(','),
   })
   if (res.code === '1') {
-    uni.navigateTo({ url: '/PagesOrder/list/list' })
+    uni.showToast({ icon: 'success', title: '提交成功' })
+    setTimeout(() => {
+      uni.navigateTo({ url: '/PagesOrder/list/list' })
+    }, 500)
+  } else {
+    uni.showToast({ icon: 'none', title: res.msg })
   }
 }
 const onSelect = (event: any) => {
@@ -102,6 +113,14 @@ const onSelect = (event: any) => {
     name: 'file',
     success: (res) => {
       uni.showToast({ icon: 'success', title: '上传成功' })
+      let { data } = res
+      data = JSON.parse(data)
+      // @ts-ignore
+      imageList.value.push({
+        // @ts-ignore
+        url: data!.result.url,
+        uuid: event.tempFiles[0].uuid,
+      })
     },
   })
 }
@@ -148,13 +167,10 @@ const goback = () => {
 
 <template>
   <scroll-view class="viewport" scroll-y enable-back-to-top>
-    <view class="title" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
-      <text @tap="goback" class="ftysIcon icon-xiangzuojiantou"></text>
-      <text class="text">申请售后</text>
-    </view>
+    <SolaShopHeader title="申请售后" />
     <view class="container form-content">
       <uni-forms class="form" ref="formRef" :rules="rules" :modelValue="form">
-        <uni-forms-item class="form-item" name="title">
+        <uni-forms-item class="form-item" name="currentType">
           <text class="label">*售后类型</text>
           <view class="value">
             <picker
@@ -166,7 +182,7 @@ const goback = () => {
             </picker>
           </view>
         </uni-forms-item>
-        <uni-forms-item class="form-item" name="content">
+        <uni-forms-item class="form-item" name="currentReason">
           <text class="label">*售后原因</text>
           <view class="value">
             <picker
@@ -246,27 +262,6 @@ page {
 .viewport {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
-
-  .title {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    width: 100%;
-    height: 130rpx;
-
-    .text {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 20rpx;
-    }
-
-    .icon-xiangzuojiantou {
-      position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
-    }
-  }
 
   .container {
     height: 100%;
