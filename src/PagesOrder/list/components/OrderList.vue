@@ -54,10 +54,9 @@ const createButtons = (order: OrderItem) => {
           { id: 'finish', name: '再来一单' },
           { id: 'after-sales', name: '申请售后' },
         ]
-      } else if (order.status === '16' || order.status === '13') {
+      } else {
         return [{ id: 'finish', name: '再来一单' }]
       }
-      break
     case '1':
       // 待支付
       return revisable === '1'
@@ -257,7 +256,9 @@ const barHeight = height ? height + (top - statusBarHeight) * 2 : 38
         </view>
       </view>
       <view v-if="order.status !== '4'" class="mid">
-        <image class="image" :src="order.detail[0].goodsImage[0]" />
+        <view class="image-container">
+          <image class="image" :src="order.detail[0].goodsImage[0]" />
+        </view>
         <view class="name">{{ order.detail[0].goodsName }}</view>
         <view class="info">
           <view class="price">￥{{ order.detail[0].unitPrice }}</view>
@@ -265,7 +266,10 @@ const barHeight = height ? height + (top - statusBarHeight) * 2 : 38
         </view>
       </view>
       <view v-else class="mid">
-        <image class="image" :src="order.afterSalesDetail[0].goodsImage[0]" />
+        <view class="image-container">
+          <image class="image" :src="order.afterSalesDetail[0].goodsImage[0]" />
+        </view>
+
         <view class="name">{{ order.afterSalesDetail[0].goodsName }}</view>
         <view class="info">
           <view class="price">￥{{ order.afterSalesDetail[0].unitPrice }}</view>
@@ -374,10 +378,17 @@ const barHeight = height ? height + (top - statusBarHeight) * 2 : 38
       justify-content: space-between;
       height: 200rpx;
       align-items: center;
+      margin-top: 20rpx;
+
+      .image-container {
+        width: 200rpx;
+        height: 200rpx;
+      }
 
       .image {
         width: 200rpx;
         height: 200rpx;
+        border-radius: 20rpx;
       }
 
       .name {
