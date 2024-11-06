@@ -52,6 +52,11 @@ const goToRecharge = () => {
 }
 
 const orderPay = async () => {
+  if (Number(query.money) < Number(query.orderPayPrice)) {
+    uni.showToast({ icon: 'error', title: '余额不足，请充值' })
+    return
+  }
+
   if (ispayPwdSwitch.value === '1' && !balancePwd.value) {
     uni.showToast({ icon: 'error', title: '请输入密码' })
     return
@@ -105,6 +110,11 @@ const submit = () => {
   } else {
     orderPay()
   }
+}
+const goToOrder = () => {
+  uni.redirectTo({
+    url: '/PagesOrder/list/list',
+  })
 }
 </script>
 
@@ -160,9 +170,12 @@ const submit = () => {
           </view>
         </view>
       </view>
-      <view>
-        <button style="background-color: #ff5040; color: #fff; width: 70%" @tap="submit">
+      <view class="bottom-btns">
+        <button style="background-color: #ff5040; color: #fff; width: 40%" @tap="submit">
           提交订单
+        </button>
+        <button style="background-color: #ff5040; color: #fff; width: 40%" @tap="goToOrder">
+          查看订单
         </button>
       </view>
     </view>
@@ -198,6 +211,11 @@ page {
   height: 100%;
   display: inline-block;
   width: 100%;
+
+  .bottom-btns {
+    margin-top: 50rpx;
+    display: flex;
+  }
 
   .address {
     overflow: hidden;

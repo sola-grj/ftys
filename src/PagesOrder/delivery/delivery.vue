@@ -84,7 +84,7 @@ const onChangeGoodsStatus = (data: ShipedOrderDetailItem, status: string) => {
 //
 // 发货 ？签收
 const onSave = async () => {
-  if (imageList.value.length === 0) {
+  if (imageList.value.length === 0 && completeOrderDetail.value.orderInfo.status === '3') {
     uni.showToast({ icon: 'error', title: '请上传证迹图片' })
     return
   }
@@ -107,10 +107,10 @@ const onSave = async () => {
     if (orderDetail.length === 0) {
       uni.showToast({ icon: 'error', title: ' 请选择待发货的商品' })
     }
+    console.log('orderDetail==============', orderDetail)
     const res = await shipOrderAPI({
       orderId: props.orderId,
       orderDetail,
-      shipImages: imageList.value.join(','),
     })
     if (res.code === '1') {
       uni.showToast({ icon: 'success', title: '发货成功！' })
@@ -165,7 +165,14 @@ const onSave = async () => {
           <image :src="item.goodsImages[0]" mode="scaleToFill" />
           <view class="info">
             <view class="infotitle">{{ item.goodsName }}</view>
-            <view class="xiadan">订单数量：{{ item.num }}{{ item.units }}</view>
+            <view class="xiadan"
+              >订单数量：{{
+                completeOrderDetail.orderInfo.status === '3' ||
+                completeOrderDetail.orderInfo.status === '3'
+                  ? item.actNum
+                  : item.num
+              }}{{ item.units }}</view
+            >
             <!-- <view class="fahuo">发货：￥{{ item.actNum }}{{ item.units }}</view> -->
             <view
               v-if="deliveryStage === '待发货订单'"
@@ -190,7 +197,12 @@ const onSave = async () => {
           <view class="info">
             <view class="infotitle">{{ item.goodsName }}</view>
             <!-- <view class="xiadan">下单：￥{{ item.num }}{{ item.units }}</view> -->
-            <view class="fahuo">发货数量：{{ item.num }}{{ item.units }}</view>
+            <view class="fahuo"
+              >发货数量：<uni-number-box class="number-box" :min="1" v-model="item.num" />{{
+                item.units
+              }}
+            </view>
+
             <view class="btn cancel" @tap="($event) => onChangeGoodsStatus(item, 'cancel')"
               >取消发货</view
             >
@@ -207,7 +219,7 @@ const onSave = async () => {
                     </picker> -->
         </view>
         <uni-file-picker
-          v-if="completeOrderDetail.orderInfo"
+          v-if="completeOrderDetail.orderInfo && completeOrderDetail.orderInfo.status === '3'"
           @delete="onDelete"
           @select="onSelect"
           class="choose-img"
@@ -285,7 +297,7 @@ page {
           flex-direction: column;
           width: 90%;
           padding-left: 20rpx;
-          justify-content: space-between;
+          // justify-content: space-between;
 
           .infotitle {
             font-weight: bold;
@@ -296,11 +308,16 @@ page {
           .xiadan {
             font-size: 26rpx;
             color: rgba(102, 102, 102, 1);
+            margin-top: 20rpx;
           }
 
           .fahuo {
+            height: 60rpx;
+            display: flex;
+            align-items: center;
             font-size: 26rpx;
             color: rgba(255, 80, 64, 1);
+            margin-top: 20rpx;
           }
 
           .btn {

@@ -386,6 +386,7 @@ export type AfterSaleReqData = {
   afterSalesReason: string
   remark: string
   goodsList: AfterSaleReqItem[]
+  images: string
 }
 /**
  * 获取售后类型和原因
@@ -468,10 +469,10 @@ export type UnShipOrderListItem = {
   status: string
 }
 
-export type UnShipOrderList = {
+export type UnShipOrder = {
   total: number
-  page: number
   list: UnShipOrderListItem[]
+  page: number
 }
 /**
  *  待发货客户订单列表
@@ -484,7 +485,7 @@ export const getUnShipOrderListAPI = (data: {
   page: number
   pageSize: number
 }) => {
-  return http<UnShipOrderList>({
+  return http<UnShipOrder>({
     method: 'POST',
     url: '/driver/getUnShipOrderList',
     data,
@@ -545,11 +546,7 @@ export type ShipOrderItem = {
  *  订单发货
  * @param data 请求参数
  */
-export const shipOrderAPI = (data: {
-  orderId: string
-  orderDetail: ShipOrderItem[]
-  shipImages: string
-}) => {
+export const shipOrderAPI = (data: { orderId: string; orderDetail: ShipOrderItem[] }) => {
   return http<ShipedOrderDetailResult>({
     method: 'POST',
     url: '/driver/shipOrder',
