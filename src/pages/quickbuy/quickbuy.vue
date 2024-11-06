@@ -8,7 +8,7 @@ import {
 import { getGoodsCollectsAPI, getRecentlyOrderAPI } from '@/services/order'
 import type { PageParams } from '@/types/global'
 import type { QuickOrderCategoryItem, QuickOrderListItem } from '@/types/order'
-import { onShow } from '@dcloudio/uni-app'
+import { onHide, onShow } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
 const typepopup = ref<UniHelper.UniPopupInstance>()
@@ -32,6 +32,19 @@ const recentlyCategoryIndex = ref(0)
 // 常用清单
 const commonlyUsedList = ref<QuickOrderListItem[]>([])
 const commonlyUsedCategoryList = ref<QuickOrderCategoryItem[]>([])
+onHide(() => {
+  activeIndex.value = 0
+  currentCommonlyType.value = {} as QuickOrderCategoryItem
+  currentRecentlyType.value = {} as QuickOrderCategoryItem
+  CommonlyUsedPageParams.page = 1
+  RecentlyBuyPageParams.page = 1
+  commonlyCategoryIndex.value = 0
+  recentlyCategoryIndex.value = 0
+  commonlyUsedList.value = []
+  commonlyUsedCategoryList.value = []
+  commonlyUsedIsFinish.value = false
+  recentlyBuyIsFinish.value = false
+})
 const geCommonlyUsedData = async () => {
   // 退出判断
   if (commonlyUsedIsFinish.value === true) {
@@ -234,6 +247,7 @@ const addShoppingCart = async (data: QuickOrderListItem, num: number, type: stri
 const onChangeIndex = (index: number) => {
   activeIndex.value = index
 }
+
 onShow(() => {
   geCommonlyUsedData()
   geRencentlyBuyData()

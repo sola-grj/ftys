@@ -4,6 +4,7 @@ import {
   type UnShipCustomerItem,
   type UnShipOrderListItem,
 } from '@/services/order'
+import type { PageParams } from '@/types/global'
 import { onMounted, ref } from 'vue'
 
 const props = defineProps<{
@@ -12,12 +13,27 @@ const props = defineProps<{
 }>()
 
 const unShipOrderList = ref<UnShipOrderListItem[]>([])
-
+const unShipOrdersPageParams: Required<PageParams> = {
+  page: 1,
+  pageSize: 10,
+}
+const unShipOrdersFinish = ref(false)
 const getUnShipOrderList = async (data: UnShipCustomerItem) => {
+  // 退出判断
+  if (unShipOrdersFinish.value === true) {
+    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
+  }
   const res = await getUnShipOrderListAPI({
     userId: data.userId,
+    ...unShipOrdersPageParams,
   })
-  unShipOrderList.value = res.result
+  unShipOrderList.value.push(...res.result.list)
+  if (unShipOrdersPageParams.page < Math.ceil(res.result.total / 10)) {
+    // 页码累加
+    unShipOrdersPageParams.page++
+  } else {
+    unShipOrdersFinish.value = true
+  }
 }
 onMounted(async () => {
   await getUnShipOrderList(props.currentUnshipCustomer)
@@ -30,7 +46,12 @@ const goToDeliver = (orderId: string) => {
 </script>
 
 <template>
-  <scroll-view class="viewport" scroll-y enable-back-to-top>
+  <scroll-view
+    class="viewport"
+    scroll-y
+    enable-back-to-top
+    @scrolltolower="() => getUnShipOrderList(props.currentUnshipCustomer)"
+  >
     <view class="container">
       <view v-for="item in unShipOrderList" :key="item.orderId" class="item">
         <view class="top">
@@ -68,10 +89,9 @@ const goToDeliver = (orderId: string) => {
   // overflow: hidden;
 
   .container {
-    height: 100%;
     background: #fff;
     border-radius: 30rpx 30rpx 0 0;
-    // overflow: scroll;
+    overflow-y: scroll;
     padding: 20rpx;
 
     .item {

@@ -468,6 +468,11 @@ export type UnShipOrderListItem = {
   status: string
 }
 
+export type UnShipOrderList = {
+  total: number
+  page: number
+  list: UnShipOrderListItem[]
+}
 /**
  *  待发货客户订单列表
  * @param data 请求参数
@@ -476,8 +481,10 @@ export const getUnShipOrderListAPI = (data: {
   userId: string
   username?: string
   mobile?: string
+  page: number
+  pageSize: number
 }) => {
-  return http<UnShipOrderListItem[]>({
+  return http<UnShipOrderList>({
     method: 'POST',
     url: '/driver/getUnShipOrderList',
     data,

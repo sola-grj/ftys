@@ -7,7 +7,27 @@ import type { MySuggestItem, OrderStatusItem } from '@/types/my'
 import type { OrderItem } from '@/types/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
+const addZero = (num: number) => {
+  return num < 10 ? '0' + num : num
+}
+const formatDate = (date: Date) => {
+  var year = date.getFullYear()
+  var month = addZero(date.getMonth() + 1)
+  var day = addZero(date.getDate())
+  return year + '-' + month + '-' + day
+}
 
+// 今天的日期
+const today = formatDate(new Date())
+
+// 近七天
+const sevenDay = formatDate(new Date(new Date().setDate(new Date().getDate() - 7)))
+
+// 近十五天
+const fifteenDay = formatDate(new Date(new Date().setDate(new Date().getDate() - 15)))
+
+// 近三十天
+const thirteenDay = formatDate(new Date(new Date().setDate(new Date().getDate() - 30)))
 // 获取昨日数据
 const getYestDayOrNextDay = () => {
   // 获取当前日期
@@ -29,12 +49,12 @@ const { top, height } = wx.getMenuButtonBoundingClientRect()
 const barHeight = height ? height + (top - statusBarHeight) * 2 : 38
 console.log('report==========', statusBarHeight, barHeight)
 
-const formatDate = (date: Date) => {
-  var year = date.getFullYear()
-  var month = addZero(date.getMonth() + 1)
-  var day = addZero(date.getDate())
-  return year + '-' + month + '-' + day
-}
+// const formatDate = (date: Date) => {
+//   var year = date.getFullYear()
+//   var month = addZero(date.getMonth() + 1)
+//   var day = addZero(date.getDate())
+//   return year + '-' + month + '-' + day
+// }
 // 获取本周首尾数据
 const getThisWeek = () => {
   let today = new Date()
@@ -72,10 +92,6 @@ const getLastMonth = () => {
     startDate: startDate.toLocaleDateString().replaceAll('/', '-'), // 2023/7/1
     endDate: endDate.toLocaleDateString().replaceAll('/', '-'), // 2023/7/31
   }
-}
-
-const addZero = (num: number) => {
-  return num < 10 ? '0' + num : num
 }
 const range = ref([yesterday, yesterday])
 const startTime = ref(yesterday)
@@ -137,6 +153,13 @@ const single = ref('')
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const onChangeIndex = (index: string) => {
+  if (index === 'yesterday') {
+    range.value = [yesterday, yesterday]
+  } else if (index === 'week') {
+    range.value = [sevenDay, yesterday]
+  } else {
+    range.value = [thirteenDay, yesterday]
+  }
   startTime.value = ''
   endTime.value = ''
   orderList.value = []
