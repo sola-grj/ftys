@@ -746,6 +746,7 @@ page {
 ::v-deep .uni-numbox {
   .uni-numbox-btns {
     padding: 0 4px;
+    width: 60rpx;
     // background-color: #e1d7d7 !important;
   }
 

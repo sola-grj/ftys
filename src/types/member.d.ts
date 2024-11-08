@@ -35,6 +35,7 @@ export type LoginResult = {
     id: string
     user_id: string
     openid: string
+    isCut: string
   }
 }
 /** 个人信息 用户详情信息 */

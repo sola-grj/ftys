@@ -60,19 +60,31 @@ const createButtons = (order: OrderItem) => {
     case '1':
       // 待支付
       return revisable === '1'
-        ? [
-            { id: 'pay', name: '去支付' },
-            { id: 'edit', name: '编辑' },
-            { id: 'cancel', name: '取消订单' },
-          ]
+        ? order.status === '12'
+          ? [
+              { id: 'cancel', name: '取消订单' },
+              { id: 'edit', name: '编辑' },
+              { id: 'again', name: '再来一单' },
+            ]
+          : [
+              { id: 'pay', name: '去支付' },
+              { id: 'edit', name: '编辑' },
+              { id: 'cancel', name: '取消订单' },
+            ]
         : [{ id: 'again', name: '再来一单' }]
     case '2':
       // 代发货
       return revisable === '1'
-        ? [
-            { id: 'cancel', name: '取消订单' },
-            { id: 'again', name: '再来一单' },
-          ]
+        ? order.status === '12'
+          ? [
+              { id: 'cancel', name: '取消订单' },
+              { id: 'edit', name: '编辑' },
+              { id: 'again', name: '再来一单' },
+            ]
+          : [
+              { id: 'cancel', name: '取消订单' },
+              { id: 'again', name: '再来一单' },
+            ]
         : [{ id: 'again', name: '再来一单' }]
     case '3':
       // 待收货

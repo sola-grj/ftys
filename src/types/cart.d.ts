@@ -20,4 +20,5 @@ export type CartItem = {
   fGoodsId: string
   images: string[]
   check: Boolean
+  priceHide: string
 }

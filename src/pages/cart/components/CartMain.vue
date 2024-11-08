@@ -15,6 +15,7 @@ import type { RecommendItem } from '@/types/home'
 import { getRecommendGoodsAPI } from '@/services/home'
 import type { PageParams } from '@/types/global'
 
+const priceHide = ref('0')
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const { top, height } = uni.getMenuButtonBoundingClientRect()
@@ -29,6 +30,11 @@ const getMemberCartData = async () => {
   cartList.value = res.result.map((item) => {
     //@ts-ignore
     item.check = false
+    if (item.priceHide === '1') {
+      priceHide.value = '1'
+    } else {
+      priceHide.value = '0'
+    }
     return item
   })
   if (res.result.length > 0) {
@@ -225,6 +231,7 @@ const goToPayment = () => {
             selectedCardList: selectedCardList.value,
             selectedCardListMoney: selectedCardListMoney.value,
             cartList: cartList.value,
+            priceHide: priceHide.value,
           })
         }, 200)
 
@@ -401,7 +408,7 @@ const goToDetail = (data: RecommendItem) => {
                 ></text>
               </view>
               <navigator
-                :url="`/PagesOrder/goods/goods?id=${item.id}`"
+                :url="`/PagesOrder/goods/goods?source=${item.source}&goodsId=${item.goodsId}`"
                 hover-class="none"
                 class="navigator"
               >
@@ -409,7 +416,9 @@ const goToDetail = (data: RecommendItem) => {
                 <view class="meta">
                   <view class="name ellipsis">{{ item.name }}</view>
                   <!-- <view class="attrsText ellipsis">{{ item.attrsText }}</view> -->
-                  <view class="price">{{ item.unit_price }}/{{ item.units }}</view>
+                  <view class="price"
+                    >{{ item.priceHide === '1' ? '-' : item.unit_price }}/{{ item.units }}</view
+                  >
                 </view>
               </navigator>
               <!-- 商品数量 -->
@@ -484,7 +493,9 @@ const goToDetail = (data: RecommendItem) => {
         </view>
 
         <text class="text">合计:</text>
-        <text class="amount">{{ selectedCardListMoney }}</text>
+        <text class="amount">{{
+          isNaN(selectedCardListMoney) || priceHide === '1' ? '0.00' : selectedCardListMoney
+        }}</text>
         <view class="button-grounp">
           <view
             @tap="goToPayment"
@@ -776,6 +787,8 @@ const goToDetail = (data: RecommendItem) => {
 .recommand-list-container {
   position: relative;
   height: 100%;
+  display: flex;
+  flex-wrap: wrap;
 
   .recommand-title {
     text-align: center;
@@ -790,8 +803,11 @@ const goToDetail = (data: RecommendItem) => {
       margin: 10rpx;
       padding: 10rpx;
       border-radius: 10rpx;
-      min-height: 400rpx;
+      min-height: 480rpx;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
 
       .name {
         overflow: hidden;

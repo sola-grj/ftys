@@ -1,3 +1,13 @@
+function debounce(func: any, wait = 500) {
+  // 定义定时器变量
+  let timeout = null
+  // 清除定时器
+  if (timeout !== null) clearTimeout(timeout)
+  //设置定时器
+  timeout = setTimeout(() => {
+    typeof func === 'function' && func()
+  }, wait)
+}
 /**
  * 添加拦截器
  *  拦截request请求
@@ -80,6 +90,21 @@ export const http = <T>(options: UniApp.RequestOptions) => {
           // 2.1 提取核心数据 res.data
           resolve(res.data as Data<T>)
         } else if (res.statusCode === 401) {
+          debounce(
+            uni.showModal({
+              content: res.data.msg,
+              success: (res) => {
+                console.log('^^^^^^^^^^^^^^^^^^^^', res)
+
+                // 3.2 401错误 清理用户信息，跳转到登路页面
+                const memberStore = useMemberStore()
+                memberStore.clearProfile()
+                uni.reLaunch({ url: '/PagesOrder/login/login' })
+                reject(res)
+              },
+            }),
+          )
+
           uni.showModal({
             content: res.data.msg,
             success: (res) => {

@@ -17,7 +17,9 @@ import { onLoad, onReady } from '@dcloudio/uni-app'
 import PageSkeleton from './components/PageSkeleton.vue'
 import { ref } from 'vue'
 import { cal } from '@/utils/cal'
+import { useMemberStore } from '@/stores'
 
+const memberStore = useMemberStore()
 // 获取页面参数
 const query = defineProps<{
   orderId: string
@@ -299,6 +301,12 @@ const goToSource = (data: DetailItem) => {
           </view>
         </view>
         <view class="detail-container">
+          <view class="detail-item">
+            <text class="label">下单人</text>
+            <text class="value">
+              {{ order.subUserName ? order.subUserName : memberStore.profile?.userinfo.username }}
+            </text>
+          </view>
           <view class="detail-item">
             <text class="label">订单编号</text>
             <text class="value"

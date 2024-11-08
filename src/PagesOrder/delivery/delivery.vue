@@ -39,7 +39,7 @@ const getCompleteOrderDetail = async (orderId: string) => {
   if (res.result.orderInfo.status === '2' || res.result.orderInfo.status === '12') {
     deliveryStage.value = '待发货订单'
   }
-  if (res.result.orderInfo.status === '3') {
+  if (res.result.orderInfo.status === '3' || res.result.orderInfo.status === '13') {
     deliveryStage.value = '待签收订单'
   }
 }
@@ -84,7 +84,11 @@ const onChangeGoodsStatus = (data: ShipedOrderDetailItem, status: string) => {
 //
 // 发货 ？签收
 const onSave = async () => {
-  if (imageList.value.length === 0 && completeOrderDetail.value.orderInfo.status === '3') {
+  if (
+    imageList.value.length === 0 &&
+    (completeOrderDetail.value.orderInfo.status === '3' ||
+      completeOrderDetail.value.orderInfo.status === '13')
+  ) {
     uni.showToast({ icon: 'error', title: '请上传证迹图片' })
     return
   }
@@ -119,7 +123,7 @@ const onSave = async () => {
       }, 500)
     }
   }
-  if (status === '3') {
+  if (status === '3' || status === '13') {
     console.log('imageList.value', imageList.value)
     if (imageList.value.length === 0) {
       uni.showToast({ icon: 'none', title: '请上传签收照片' })
@@ -219,7 +223,11 @@ const onSave = async () => {
                     </picker> -->
         </view>
         <uni-file-picker
-          v-if="completeOrderDetail.orderInfo && completeOrderDetail.orderInfo.status === '3'"
+          v-if="
+            completeOrderDetail.orderInfo &&
+            (completeOrderDetail.orderInfo.status === '3' ||
+              completeOrderDetail.orderInfo.status === '13')
+          "
           @delete="onDelete"
           @select="onSelect"
           class="choose-img"

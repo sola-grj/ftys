@@ -85,9 +85,9 @@ const deleteSubAccount = async (userId: string) => {
     <view class="container">
       <view class="item" v-for="item in subaccountList" :key="item.userId">
         <view class="left">
-          <view class="top">{{ item.sub_account_name || '联系人' }}</view>
+          <view class="top">{{ item.username || '联系人' }}</view>
           <view class="bottom">
-            <text class="contact">{{ item.username }}</text>
+            <text class="contact">{{ item.sub_account_name }}</text>
             <text>{{ item.mobile }}</text>
           </view>
         </view>

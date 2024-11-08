@@ -301,6 +301,8 @@ export type OrderDetailResult = {
   userCouponId: string
   orderId: string
   remark: string
+  subUserName: string
+  subUserId: string
 }
 
 /**

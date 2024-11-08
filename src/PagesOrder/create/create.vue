@@ -18,6 +18,7 @@ import { onHide, onLoad, onShow, onUnload } from '@dcloudio/uni-app'
 import { computed, getCurrentInstance, onBeforeMount, onMounted, ref } from 'vue'
 
 const couponpopup = ref()
+const priceHide = ref('0')
 const memberStore = useMemberStore()
 const pay_way = memberStore.profile?.userinfo.pay_way
 const remark = ref('')
@@ -153,6 +154,7 @@ onShow(() => {
     selectedCardList.value = data.selectedCardList
     selectedCardListMoney.value = data.selectedCardListMoney
     cartList.value = data.cartList
+    priceHide.value = data.priceHide
     // 获取优惠券信息
     getOwnCouponData()
   })
@@ -294,7 +296,9 @@ const showValue = () => {
           <view class="info">
             <view class="title">{{ item.name }}</view>
             <view class="right">
-              <view class="price">￥{{ item.unit_price }}/{{ item.units }}</view>
+              <view class="price"
+                >￥{{ item.priceHide === '1' ? '-' : item.unit_price }}/{{ item.units }}</view
+              >
               <view class="num"> X{{ item.num }}</view>
             </view>
             <uni-easyinput
@@ -318,7 +322,11 @@ const showValue = () => {
       <view class="settlement">
         <view class="item">
           <text class="text">商品金额: </text>
-          <text class="number symbol">{{ selectedCardListMoney }}</text>
+          <text class="number symbol">{{
+            isNaN(Number(selectedCardListMoney)) || priceHide === '1'
+              ? '0.00'
+              : selectedCardListMoney
+          }}</text>
         </view>
         <view class="item">
           <text class="text">运费: </text>
@@ -335,7 +343,11 @@ const showValue = () => {
         </view>
         <view class="total">
           <text class="text">合计: </text>
-          <text class="total-num">{{ selectedCardListMoney }}</text>
+          <text class="total-num">{{
+            isNaN(Number(selectedCardListMoney)) || priceHide === '1'
+              ? '0.00'
+              : selectedCardListMoney
+          }}</text>
         </view>
       </view>
       <uni-popup ref="couponpopup" background-color="#fff">
@@ -366,7 +378,11 @@ const showValue = () => {
   <!-- 吸底工具栏 -->
   <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
     <view class="total-pay symbol">
-      <text class="number">￥{{ selectedCardListMoney }}</text>
+      <text class="number"
+        >￥{{
+          isNaN(Number(selectedCardListMoney)) || priceHide === '1' ? '0.00' : selectedCardListMoney
+        }}</text
+      >
       <text class="trans-fee">含运费：￥0.00</text>
     </view>
     <view class="button" @tap="onOrderSubmit"> 提交订单 </view>

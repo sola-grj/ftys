@@ -49,6 +49,7 @@ let user_role = memberStore.profile?.userinfo.user_role
     type_id 3 4 5 && user_role === 2  客户 客户才有主账号 子账号
  */
 const type_id = memberStore.profile?.userinfo.type_id
+const isCut = memberStore.profile?.userinfo.isCut
 
 // 子账号是否展示欠款信息 1 0
 let credit_price = memberStore.profile?.userinfo.credit_price
@@ -324,7 +325,7 @@ onLoad(() => {
           <view class="nickname">
             <text class="username">{{ memberStore.profile.userinfo.username }}</text>
             <text
-              v-if="type_id !== 2 && user_role?.toString() === '1'"
+              v-if="!(type_id === 2 && (user_role!.toString() === '2' && !isCut))"
               @tap="onChangeAccount"
               class="ftysIcon icon-qiehuanzhanghao"
               >切换账号</text

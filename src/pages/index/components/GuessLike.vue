@@ -268,6 +268,8 @@ page {
 
 .list-container {
   margin: 20rpx 20rpx 0;
+  display: flex;
+  flex-wrap: wrap;
 
   .item {
     width: 50%;
@@ -278,8 +280,11 @@ page {
       margin: 10rpx;
       padding: 10rpx;
       border-radius: 10rpx;
-      min-height: 400rpx;
+      min-height: 480rpx;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
 
       .name {
         overflow: hidden;
