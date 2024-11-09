@@ -10,7 +10,7 @@ const orderLeftTime = (createTime: string) => {
     const date1 = createTime //开始时间
     const date2 = new Date() //结束时间
     const date3 = date2.getTime() - new Date(date1).getTime() //时间差的毫秒数
-    const subMinutes = Math.floor((30 * 60 * 1000 - date3) / (60 * 1000)) //获取总共的分钟差
+    const subMinutes = Math.floor((31 * 60 * 1000 - date3) / (60 * 1000)) //获取总共的分钟差
     console.log(
       '=====var subMinutes = Math.floor( date3/(60*1000) ) //获取总共的分钟差',
       subMinutes,

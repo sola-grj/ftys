@@ -41,6 +41,7 @@ const query = defineProps<{
   orderNo: string
   money: string
   orderPayPrice: string
+  priceHide: string
 }>()
 const balancePwd = ref('')
 const payType = ref('wx')
@@ -132,7 +133,13 @@ const goToOrder = () => {
         </view>
         <view class="info-item">
           <view class="label">订单金额</view>
-          <view class="value money">{{ orderPayPrice && Number(orderPayPrice).toFixed(2) }}￥</view>
+          <view class="value money"
+            >{{
+              (orderPayPrice && isNaN(Number(orderPayPrice))) || priceHide === '1'
+                ? '-'
+                : Number(orderPayPrice).toFixed(2)
+            }}￥</view
+          >
         </view>
       </view>
       <!-- 支付方式 -->

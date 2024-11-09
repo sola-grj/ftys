@@ -214,7 +214,7 @@ const onOrderSubmit = async () => {
       uni.redirectTo({ url: `/PagesOrder/list/list` })
     } else {
       uni.navigateTo({
-        url: `/PagesOrder/orderpay/orderpay?orderId=${res.result.order_id}&orderNo=${res.result.orderNo}&money=${res.result.money}&orderPayPrice=${res.result.orderPayPrice}`,
+        url: `/PagesOrder/orderpay/orderpay?orderId=${res.result.order_id}&orderNo=${res.result.orderNo}&money=${res.result.money}&orderPayPrice=${res.result.orderPayPrice}&priceHide=${priceHide.value}`,
       })
     }
   }, 500)

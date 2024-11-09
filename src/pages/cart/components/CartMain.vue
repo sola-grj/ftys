@@ -70,6 +70,8 @@ onHide(() => {
 // onMounted(())
 onShow(() => {
   console.log('=============cartmain data show========')
+  recommendPageParams.page = 1
+  recommendFinish.value = false
   getRecommendData()
   getMemberCartData()
   uni.$on('againBuy', async (data) => {
