@@ -133,7 +133,13 @@ watch(
       </view>
       <view class="total">
         <text>用户下单总和</text>
-        <text>￥{{ totalOrderMoney }}</text>
+        <text
+          >￥{{
+            totalOrderMoney && isNaN(Number(totalOrderMoney))
+              ? '-'
+              : Number(totalOrderMoney).toFixed(2)
+          }}</text
+        >
       </view>
       <view
         v-for="item in myMerchant"
@@ -150,7 +156,7 @@ watch(
         <view class="bottom">
           <view class="b-item">
             <view class="label">发货金额</view>
-            <view class="value">{{ item.orderMoney }}</view>
+            <view class="value">{{ Number(item.orderMoney).toFixed(2) }}</view>
           </view>
           <view class="b-item">
             <view class="label">区域</view>
