@@ -27,6 +27,17 @@ import { getShoppingCartAPI } from '@/services/cart'
 // 选中Index
 const activeIndex = ref(0)
 const onActiveChange = (index: number) => {
+  if (index === 0) {
+    recommendList.value = []
+    recommendFinish.value = false
+    recommendPageParams.page = 1
+    getRecommendData()
+  } else {
+    historyList.value = []
+    historyFinish.value = false
+    historyPageParams.page = 1
+    getHistoryData()
+  }
   activeIndex.value = index
 }
 // 推荐分页参数

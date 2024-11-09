@@ -48,6 +48,7 @@ const httpInterceptor = {
     const memberStore = useMemberStore()
     const token = memberStore.profile?.userinfo ? memberStore.profile.userinfo.token : null
     if (token) {
+      uni.setStorageSync('token_expired', false)
       options.header.token = token
     }
     uni.hideLoading()
@@ -90,7 +91,9 @@ export const http = <T>(options: UniApp.RequestOptions) => {
           // 2.1 提取核心数据 res.data
           resolve(res.data as Data<T>)
         } else if (res.statusCode === 401) {
-          debounce(
+          const exists = uni.getStorageSync('token_expired') || false
+          if (!exists) {
+            uni.setStorageSync('token_expired', true)
             uni.showModal({
               content: res.data.msg,
               success: (res) => {
@@ -102,21 +105,8 @@ export const http = <T>(options: UniApp.RequestOptions) => {
                 uni.reLaunch({ url: '/PagesOrder/login/login' })
                 reject(res)
               },
-            }),
-          )
-
-          uni.showModal({
-            content: res.data.msg,
-            success: (res) => {
-              console.log('^^^^^^^^^^^^^^^^^^^^', res)
-
-              // 3.2 401错误 清理用户信息，跳转到登路页面
-              const memberStore = useMemberStore()
-              memberStore.clearProfile()
-              uni.reLaunch({ url: '/PagesOrder/login/login' })
-              reject(res)
-            },
-          })
+            })
+          }
         } else {
           // 3.3 其他错误 根据后端错误提示轻提示
           uni.showToast({

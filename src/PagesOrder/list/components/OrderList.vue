@@ -5,6 +5,20 @@ import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 import type { OrderItem, OrderListParams, OrderListReqData } from '@/types/order'
 import { onMounted, ref } from 'vue'
 
+const orderLeftTime = (createTime: string) => {
+  if (createTime) {
+    const date1 = createTime //开始时间
+    const date2 = new Date() //结束时间
+    const date3 = date2.getTime() - new Date(date1).getTime() //时间差的毫秒数
+    const subMinutes = Math.floor((30 * 60 * 1000 - date3) / (60 * 1000)) //获取总共的分钟差
+    console.log(
+      '=====var subMinutes = Math.floor( date3/(60*1000) ) //获取总共的分钟差',
+      subMinutes,
+    )
+
+    return subMinutes
+  }
+}
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 // 定义props
@@ -264,7 +278,12 @@ const barHeight = height ? height + (top - statusBarHeight) * 2 : 38
         </view>
         <view :class="order.status === '1' && order.revisable === '1' ? 'wait' : 'other'">
           <text class="w-desc">等待付款</text>
-          <text class="w-minuate">30分钟</text>
+          <!-- <text class="w-minuate">30分钟</text> -->
+          <uni-countdown
+            :show-day="false"
+            :show-hour="false"
+            :minute="orderLeftTime(order.createTime)"
+          />
         </view>
       </view>
       <view v-if="order.status !== '4'" class="mid">
@@ -354,12 +373,13 @@ const barHeight = height ? height + (top - statusBarHeight) * 2 : 38
 
       .wait {
         display: flex;
-        width: 200rpx;
+        width: 240rpx;
         height: 40rpx;
         background-color: rgba(255, 231, 228, 1);
         border-radius: 20rpx;
         font-size: 22rpx;
         align-items: center;
+        justify-content: space-around;
 
         .w-desc {
           width: 50%;

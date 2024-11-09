@@ -6,6 +6,15 @@ import type { TopItem } from '@/types/home'
 const { top, height } = uni.getMenuButtonBoundingClientRect()
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const memberStore = useMemberStore()
+let user_role = memberStore.profile?.userinfo.user_role
+// 用户type_id
+/**  1:业务员 2:司机 3:生鲜 4:干货 5:生鲜&干货
+ *  type_id 1 最高权限
+    type_id 2 只展示 我的 页面
+    type_id 3 4 5 && user_role === 2  客户 客户才有主账号 子账号
+ */
+const type_id = memberStore.profile?.userinfo.type_id
+const isCut = memberStore.profile?.userinfo.isCut
 const goToSearch = () => {
   uni.navigateTo({ url: '/PagesOrder/search/search' })
 }
@@ -22,11 +31,14 @@ const onChangeAccount = () => {
 
 <template>
   <view class="navbar" :style="{ paddingTop: top + height - 26 + 'px' }">
-    <view class="current-user" @tap="onChangeAccount">
+    <view class="current-user">
       <!-- <text class="ftysIcon icon-touxiang"></text> -->
       <text class="username">{{ memberStore.profile?.userinfo.username }}</text>
-      <text class="ftysIcon icon-qiehuanzhanghao"></text>
-      <text class="change">切换</text>
+      <text
+        v-if="!(type_id !== 2 && user_role!.toString() === '2' && !isCut)"
+        @tap="onChangeAccount"
+        ><text class="ftysIcon icon-qiehuanzhanghao"></text> <text class="change">切换</text></text
+      >
     </view>
     <view @tap="goToSearch" class="search">
       <text class="ftysIcon icon-sousuo"></text>

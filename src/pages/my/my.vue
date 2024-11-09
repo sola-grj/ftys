@@ -305,6 +305,10 @@ const getMoney = async () => {
 onLoad(() => {
   getCouponNum()
   getFullPerformanceData(currentMonth.value)
+  console.log(
+    `!(type_id !== 2 && user_role!.toString() === '2' && !isCut)`,
+    !(type_id !== 2 && user_role!.toString() === '2' && !isCut),
+  )
 })
 </script>
 
@@ -325,7 +329,7 @@ onLoad(() => {
           <view class="nickname">
             <text class="username">{{ memberStore.profile.userinfo.username }}</text>
             <text
-              v-if="!(type_id === 2 && (user_role!.toString() === '2' && !isCut))"
+              v-if="!(type_id !== 2 && user_role!.toString() === '2' && !isCut)"
               @tap="onChangeAccount"
               class="ftysIcon icon-qiehuanzhanghao"
               >切换账号</text
