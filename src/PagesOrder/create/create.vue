@@ -268,7 +268,7 @@ const showValue = () => {
     <view class="container">
       <!-- 收货地址 -->
       <view class="address">
-        <view class="add-title">收获方式</view>
+        <view class="add-title">收货方式</view>
         <view class="add-psz">配送至</view>
         <view class="add-detail">{{ memberStore.profile?.userinfo.shipping_addr }}</view>
         <view class="add-person">

@@ -172,7 +172,7 @@ const onSave = async () => {
             <view class="xiadan"
               >订单数量：{{
                 completeOrderDetail.orderInfo.status === '3' ||
-                completeOrderDetail.orderInfo.status === '3'
+                completeOrderDetail.orderInfo.status === '13'
                   ? item.actNum
                   : item.num
               }}{{ item.units }}</view
