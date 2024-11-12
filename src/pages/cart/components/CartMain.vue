@@ -431,6 +431,14 @@ const goToDetail = (data: RecommendItem) => {
                 @change="($event) => addShoppingCart(item, $event, '')"
               />
             </view>
+            <view class="remark-input">
+              <uni-easyinput
+                style="width: 80%"
+                class="remark-input"
+                placeholder="请输入商品备注"
+                v-model="item.remark"
+              ></uni-easyinput>
+            </view>
             <!-- 右侧删除按钮 -->
             <template #right>
               <view class="cart-swipe-right">
@@ -529,6 +537,10 @@ const goToDetail = (data: RecommendItem) => {
   flex-direction: column;
   overflow: hidden;
   background-color: #f7f7f8;
+}
+
+.remark-input {
+  margin: 10rpx 20rpx;
 }
 
 // 滚动容器

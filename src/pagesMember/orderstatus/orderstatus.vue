@@ -13,7 +13,31 @@ const formatDate = (date: Date) => {
   var day = addZero(date.getDate())
   return year + '-' + month + '-' + day
 }
+// 获取昨日数据
+const getYestDayOrNextDay = () => {
+  // 获取当前日期
+  const today = new Date()
+  // 计算前一天的日期
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate())
 
+  return yesterday.toLocaleDateString().replaceAll('/', '-')
+}
+// 昨天的日期
+const yesterday = getYestDayOrNextDay()
+const queryTimeType = ref('today')
+const range = ref([yesterday, yesterday])
+const startTime = ref(yesterday)
+const endTime = ref(yesterday)
+const onTimeChange = (e: string[]) => {
+  queryTimeType.value = 'custom'
+  startTime.value = e[0]
+  endTime.value = e[1]
+  orderList.value = []
+  pageParams.page = 1
+  isFinish.value = false
+  getOrderPerformanceData()
+}
 const addZero = (num: number) => {
   return num < 10 ? '0' + num : num
 }
@@ -38,13 +62,16 @@ const thirteenDay = formatDate(new Date(new Date().setDate(new Date().getDate() 
 
 // 获取下单情况数据
 const orderList = ref<OrderStatusItem[]>([])
-const getOrderPerformanceData = async (dateFilter: string) => {
+const getOrderPerformanceData = async () => {
   // 退出判断
   if (isFinish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
   }
   const res = await getOrderPerformanceAPI({
-    dateFilter,
+    dateFilter: queryTimeType.value,
+    startDate: startTime.value,
+    endDate: endTime.value,
+    ...pageParams,
   })
   orderList.value.push(...res.result.list)
 
@@ -61,15 +88,27 @@ const single = ref('')
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const activeIndex = ref('today')
 const onChangeIndex = (index: string) => {
+  if (index === 'today') {
+    range.value = [yesterday, yesterday]
+  } else if (index === '7') {
+    range.value = [sevenDay, yesterday]
+  } else if (index === '15') {
+    range.value = [fifteenDay, yesterday]
+  } else {
+    range.value = [thirteenDay, yesterday]
+  }
+  startTime.value = ''
+  endTime.value = ''
   isFinish.value = false
   pageParams.page = 1
   orderList.value = []
   activeIndex.value = index
-  getOrderPerformanceData(index)
+  queryTimeType.value = index
+  getOrderPerformanceData()
 }
 
 onLoad(() => {
-  getOrderPerformanceData('today')
+  getOrderPerformanceData()
 })
 const goback = () => {
   uni.navigateBack()
@@ -120,13 +159,21 @@ const makePhoneCall = (phoneNumber: string) => {
           </view>
         </view>
         <view class="show-time">
-          <text v-if="activeIndex === 'today'" class="end-time">{{ today }}</text>
+          <uni-datetime-picker
+            :border="false"
+            :clear-icon="false"
+            v-model="range"
+            rangeSeparator="~"
+            type="daterange"
+            @change="onTimeChange"
+          />
+          <!-- <text v-if="activeIndex === 'today'" class="end-time">{{ today }}</text>
           <text v-if="activeIndex === '7'" class="end-time">{{ sevenDay }}</text>
           <text v-if="activeIndex === '15'" class="end-time">{{ fifteenDay }}</text>
           <text v-if="activeIndex === '30'" class="end-time">{{ thirteenDay }}</text>
           &nbsp;~
           <text class="start-time">{{ today }}</text>
-          <text class="ftysIcon icon-riqi" />
+          <text class="ftysIcon icon-riqi" /> -->
         </view>
       </view>
       <view class="table-title table-item">
@@ -188,12 +235,12 @@ page {
       .login-type {
         display: flex;
         height: 80rpx;
-        width: 500rpx;
+        // width: 500rpx;
         background: #f2f4f7;
         border-radius: 50rpx;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+        // position: absolute;
+        // left: 50%;
+        // transform: translateX(-50%);
         margin-top: 10rpx;
 
         .pwd-btn,
@@ -211,14 +258,23 @@ page {
       }
 
       .show-time {
-        height: 60rpx;
-        white-space: nowrap;
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        border-bottom: 1px solid #afb0b2;
-        color: #666666;
+        margin-top: 10rpx;
+        display: flex;
+        justify-content: center;
+
+        .uni-date {
+          width: 70% !important;
+          flex: none !important;
+        }
+
+        // height: 60rpx;
+        // white-space: nowrap;
+        // position: absolute;
+        // bottom: 0;
+        // left: 50%;
+        // transform: translateX(-50%);
+        // border-bottom: 1px solid #afb0b2;
+        // color: #666666;
       }
     }
 
@@ -230,6 +286,13 @@ page {
       margin-top: 30rpx;
       border-bottom: 1px dashed #afb0b2;
       font-size: 28rpx;
+
+      .name {
+        width: 120rpx;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
 
     .table-title {

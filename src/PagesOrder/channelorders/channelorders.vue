@@ -10,6 +10,30 @@ import type { PageParams } from '@/types/global'
 import type { OrderItem } from '@/types/order'
 import { onLoad, onUnload } from '@dcloudio/uni-app'
 import { ref, watch } from 'vue'
+
+// 获取昨日数据
+const getYestDayOrNextDay = () => {
+  // 获取当前日期
+  const today = new Date()
+  // 计算前一天的日期
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1)
+
+  return yesterday.toLocaleDateString().replaceAll('/', '-')
+}
+// 昨天的日期
+const yesterday = getYestDayOrNextDay()
+const range = ref([yesterday, yesterday])
+const startTime = ref(yesterday)
+const endTime = ref(yesterday)
+const onTimeChange = (e: string[]) => {
+  startTime.value = e[0]
+  endTime.value = e[1]
+  channelOrderList.value = []
+  pageParams.page = 1
+  isFinish.value = false
+  getChannelOrderListData()
+}
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const activeIndex = ref(0)
@@ -69,7 +93,8 @@ const getChannelOrderListData = async () => {
   }
   const res = await getChannelOrderListAPI({
     status: status.value,
-    shippedTime: shippedTime.value,
+    startTime: startTime.value,
+    endTime: endTime.value,
     ...pageParams,
   })
   channelOrderList.value.push(...res.result.list)
@@ -123,7 +148,15 @@ const goToOrderDetail = (orderId: string) => {
       <view class="condition">
         <view class="date">
           <text class="label">发货日期：</text>
-          <uni-datetime-picker clear-icon :border="false" type="date" v-model="shippedTime" />
+          <!-- <uni-datetime-picker clear-icon :border="false" type="date" v-model="shippedTime" /> -->
+          <uni-datetime-picker
+            :border="false"
+            :clear-icon="false"
+            v-model="range"
+            rangeSeparator="~"
+            type="daterange"
+            @change="onTimeChange"
+          />
         </view>
         <view class="status" @tap="typepopup?.open?.('top')"
           ><text class="label">订单状态：</text><text>{{ currentStatus }}</text>
@@ -153,7 +186,7 @@ const goToOrderDetail = (orderId: string) => {
             </view>
             <view class="b-item">
               <view class="label">发货金额</view>
-              <view class="value">{{ item.orderPrice }}</view>
+              <view class="value">{{ Number(item.orderPrice).toFixed(2) }}</view>
             </view>
           </view>
         </view>
@@ -251,9 +284,10 @@ page {
 
     .condition {
       display: flex;
+      flex-direction: column;
       height: 100rpx;
-      align-items: center;
-      justify-content: space-around;
+      // align-items: center;
+      // justify-content: space-around;
       font-size: 28rpx;
 
       .label {

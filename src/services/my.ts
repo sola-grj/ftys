@@ -54,7 +54,11 @@ export const getFullPerformanceAPI = (data: { month: string }) => {
  * 下单情况
  * @param data 请求参数
  */
-export const getOrderPerformanceAPI = (data: { dateFilter: string }) => {
+export const getOrderPerformanceAPI = (data: {
+  dateFilter: string
+  startDate: string
+  endDate: string
+}) => {
   return http<OrderStatusResult>({
     method: 'POST',
     url: '/sales/getOrderPerformance',
@@ -395,7 +399,8 @@ export const getChannelOrderListAPI = (data: {
   page: number
   pageSize: number
   status: string
-  shippedTime: string
+  startTime: string
+  endTime: string
 }) => {
   return http<ChannelOrderResult>({
     method: 'POST',

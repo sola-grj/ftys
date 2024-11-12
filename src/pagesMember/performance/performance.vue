@@ -142,6 +142,28 @@ const lineData = {
 const goback = () => {
   uni.navigateBack()
 }
+const filterTime = ref('')
+const getDate = (type: string) => {
+  const date = new Date()
+  let year = date.getFullYear()
+  let month = date.getMonth() + 1
+  let day = date.getDate()
+
+  if (type === 'start') {
+    year = year - 60
+  } else if (type === 'end') {
+    year = year + 2
+  }
+  month = month > 9 ? month : '0' + month
+  day = day > 9 ? day : '0' + day
+  return `${year}-${month}-${day}`
+}
+const startDate = getDate('start')
+const endDate = getDate('end')
+const bindDateChange = (e) => {
+  filterTime.value = e.detail.value
+  console.log('============', filterTime.value)
+}
 </script>
 
 <template>
@@ -191,8 +213,18 @@ const goback = () => {
       <view class="month-data">
         <view class="month-title">
           <view>{{ currentMonth }}业绩</view>
-          <picker mode="multiSelector" :range="range" @change="onPickerChange">
+          <!-- <picker mode="multiSelector" :range="range" @change="onPickerChange">
             <view class="change"> 更换 </view>
+          </picker> -->
+          <picker
+            mode="date"
+            fields="month"
+            :start="startDate"
+            :end="endDate"
+            :value="filterTime"
+            @change="bindDateChange"
+          >
+            <view class="uni-input">更换</view>
           </picker>
         </view>
         <view class="item">
