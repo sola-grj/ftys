@@ -215,16 +215,17 @@ const opts = {
   },
 }
 
-const getFullPerformanceData = async (month: string) => {
+const getFullPerformanceData = async (date: string) => {
   profitLineData.value.categories = []
   profitLineData.value.series[0].data = []
   const res = await getFullPerformanceAPI({
-    month: monthData.value.filter((item) => item.text === month)[0].value.toString(),
+    filterDate: date,
   })
   res.result.picData.profit.forEach((item) => {
     profitLineData.value.categories.push(item.date)
     profitLineData.value.series[0].data.push(parseInt(item.value))
   })
+  console.log('profitLineData==========', profitLineData)
 }
 
 // 跳转
@@ -303,8 +304,12 @@ const getMoney = async () => {
   CouponTypes.value[2].data = res.result.money || '0.00'
 }
 onLoad(() => {
+  const now = new Date()
+  var year = now.getFullYear().toString()
+  const month = (now.getMonth() + 1).toString().padStart(2, '0')
+  const currentDate = year + '-' + month
   getCouponNum()
-  getFullPerformanceData(currentMonth.value)
+  getFullPerformanceData(currentDate)
   console.log(
     `!(type_id !== 2 && user_role!.toString() === '2' && !isCut)`,
     !(type_id !== 2 && user_role!.toString() === '2' && !isCut),

@@ -42,7 +42,7 @@ export const addSuggestAPI = (data: AddSuggestType) => {
  * 业绩查看
  * @param data 请求参数
  */
-export const getFullPerformanceAPI = (data: { month: string }) => {
+export const getFullPerformanceAPI = (data: { filterDate: string }) => {
   return http<MyPerformanceResult>({
     method: 'POST',
     url: '/sales/getFullPerformance',
@@ -501,13 +501,6 @@ export const getRechargeB2BPayAPI = (data: { rechargeMoney: string; code: string
  * 获取支付参数
  * @param data 请求参数
  */
-0
-1
-;('-581.80')
-;('840.70')
-12
-0
-21
 export const getUserMoneyAPI = () => {
   return http<{
     money: string

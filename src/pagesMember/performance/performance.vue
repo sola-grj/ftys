@@ -7,10 +7,13 @@ import type { DeliverItem, MyPerformanceResult, MySuggestItem, ProfitItem } from
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 
+const filterTime = ref('')
 const currentMonth = ref('')
 const now = new Date()
+var year = now.getFullYear().toString()
 const month = (now.getMonth() + 1).toString().padStart(2, '0')
 currentMonth.value = month + '月'
+filterTime.value = year + '-' + month
 const activeIndex = ref('1') // 0 是密码登录 1是短信
 const onChangeIndex = (index: string) => {
   activeIndex.value = index
@@ -57,13 +60,13 @@ const deliverLineData = ref({
     },
   ],
 })
-const getFullPerformanceData = async (month: string) => {
+const getFullPerformanceData = async () => {
   profitLineData.value.categories = []
   profitLineData.value.series[0].data = []
   deliverLineData.value.categories = []
   deliverLineData.value.series[0].data = []
   const res = await getFullPerformanceAPI({
-    month: monthData.value.filter((item) => item.text === month)[0].value.toString(),
+    filterDate: filterTime.value,
   })
   performance.value = res.result
   res.result.picData.profit.forEach((item) => {
@@ -80,15 +83,15 @@ const range = ref([
   ['01月', '02月', '03月', '04月', '05月', '06月', '07月', '08月', '09月', '10月', '11月', '12月'],
 ])
 
-const onPickerChange = (event: any) => {
-  const values = event.detail.value
-  const month = range.value[0][values[0]]
-  currentMonth.value = month
-  getFullPerformanceData(month)
-}
+// const onPickerChange = (event: any) => {
+//   const values = event.detail.value
+//   const month = range.value[0][values[0]]
+//   currentMonth.value = month
+//   getFullPerformanceData(month)
+// }
 
 onLoad(() => {
-  getFullPerformanceData(currentMonth.value)
+  getFullPerformanceData()
 })
 
 // 图表相关
@@ -142,7 +145,7 @@ const lineData = {
 const goback = () => {
   uni.navigateBack()
 }
-const filterTime = ref('')
+
 const getDate = (type: string) => {
   const date = new Date()
   let year = date.getFullYear()
@@ -162,6 +165,7 @@ const startDate = getDate('start')
 const endDate = getDate('end')
 const bindDateChange = (e) => {
   filterTime.value = e.detail.value
+  getFullPerformanceData()
   console.log('============', filterTime.value)
 }
 </script>
@@ -179,11 +183,20 @@ const bindDateChange = (e) => {
           </view>
           <view class="item">
             <view class="label">订单金额：</view>
-            <view class="text">￥{{ performance?.todayOrderAmount }}</view>
+            <view class="text"
+              >￥{{
+                performance?.todayOrderAmount && Number(performance?.todayOrderAmount).toFixed(2)
+              }}
+            </view>
           </view>
           <view class="item">
             <view class="label">结算金额：</view>
-            <view class="text">￥{{ performance?.todayDeliveryAmount }}</view>
+            <view class="text"
+              >￥{{
+                performance?.todayDeliveryAmount &&
+                Number(performance?.todayDeliveryAmount).toFixed(2)
+              }}</view
+            >
           </view>
           <view class="item">
             <view class="label">新增已下单：</view>
@@ -198,11 +211,20 @@ const bindDateChange = (e) => {
           </view>
           <view class="item">
             <view class="label">订单金额：</view>
-            <view class="text">￥{{ performance?.weekOrderAmount }}</view>
+            <view class="text"
+              >￥{{
+                performance?.weekOrderAmount && Number(performance?.weekOrderAmount).toFixed(2)
+              }}
+            </view>
           </view>
           <view class="item">
             <view class="label">结算金额：</view>
-            <view class="text">￥{{ performance?.weekDeliveryAmount }}</view>
+            <view class="text"
+              >￥{{
+                performance?.weekDeliveryAmount &&
+                Number(performance?.weekDeliveryAmount).toFixed(2)
+              }}</view
+            >
           </view>
           <view class="item">
             <view class="label">新增已下单：</view>
@@ -212,7 +234,7 @@ const bindDateChange = (e) => {
       </view>
       <view class="month-data">
         <view class="month-title">
-          <view>{{ currentMonth }}业绩</view>
+          <view>{{ filterTime }}业绩</view>
           <!-- <picker mode="multiSelector" :range="range" @change="onPickerChange">
             <view class="change"> 更换 </view>
           </picker> -->
@@ -229,7 +251,9 @@ const bindDateChange = (e) => {
         </view>
         <view class="item">
           <view class="label">新增客户已下单：</view>
-          <view class="text">￥{{ performance?.monthOrderPrice }}</view>
+          <view class="text"
+            >￥{{ performance?.monthOrderPrice && Number(performance?.monthOrderPrice).toFixed(2) }}
+          </view>
         </view>
         <view class="item">
           <view class="label">新增客户：</view>
@@ -237,11 +261,17 @@ const bindDateChange = (e) => {
         </view>
         <view class="item">
           <view class="label">发货金额：</view>
-          <view class="text">￥{{ performance?.monthOrderCost }}</view>
+          <view class="text"
+            >￥{{ performance?.monthOrderCost && Number(performance?.todayOrderAmount).toFixed(2) }}
+          </view>
         </view>
         <view class="item">
           <view class="label">结算金额：</view>
-          <view class="text">￥{{ performance?.monthDeliverAmount }}</view>
+          <view class="text"
+            >￥{{
+              performance?.monthDeliverAmount && Number(performance?.todayOrderAmount).toFixed(2)
+            }}
+          </view>
         </view>
         <view class="item">
           <view class="label">订单数：</view>
