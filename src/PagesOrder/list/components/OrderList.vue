@@ -65,11 +65,11 @@ const createButtons = (order: OrderItem) => {
           : [{ id: 'again', name: '再来一单' }]
       } else if (order.status === '6') {
         return [
-          { id: 'finish', name: '再来一单' },
+          { id: 'again', name: '再来一单' },
           { id: 'after-sales', name: '申请售后' },
         ]
       } else {
-        return [{ id: 'finish', name: '再来一单' }]
+        return [{ id: 'again', name: '再来一单' }]
       }
     case '1':
       // 待支付
@@ -118,7 +118,7 @@ const createButtons = (order: OrderItem) => {
     case '6':
       // 已完成
       return [
-        { id: 'finish', name: '再来一单' },
+        { id: 'again', name: '再来一单' },
         { id: 'after-sales', name: '申请售后' },
       ]
     case '12':
