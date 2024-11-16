@@ -154,15 +154,28 @@ const getDate = (type: string) => {
 
   if (type === 'start') {
     year = year - 60
-  } else if (type === 'end') {
-    year = year + 2
   }
   month = month > 9 ? month : '0' + month
-  day = day > 9 ? day : '0' + day
-  return `${year}-${month}-${day}`
+  return `${year}-${month}`
 }
+const years = ref<number[]>([])
+const months = ref<number[]>([])
+for (let i = 1990; i <= new Date().getFullYear(); i++) {
+  years.value.push(i)
+}
+for (let i = 1; i <= 12; i++) {
+  months.value.push(i)
+}
+const dateValue = ref([9999, new Date().getMonth() + 1 - 1, new Date().getDate() - 1])
+const dateVisible = ref(false)
 const startDate = getDate('start')
 const endDate = getDate('end')
+const bindChange = (e) => {
+  const val = e.detail.value
+  console.log('9999', val)
+}
+console.log('000000000000000', startDate, endDate)
+
 const bindDateChange = (e) => {
   filterTime.value = e.detail.value
   getFullPerformanceData()
@@ -246,7 +259,7 @@ const bindDateChange = (e) => {
             :value="filterTime"
             @change="bindDateChange"
           >
-            <view class="uni-input">更换</view>
+            <view class="uni-input change" @tap="dateVisible = true">更换</view>
           </picker>
         </view>
         <view class="item">
@@ -307,6 +320,15 @@ const bindDateChange = (e) => {
       </view>
     </view>
   </scroll-view>
+  <!-- <picker-view class="picker-view" v-if="dateVisible" indicator-style="height:50px" :value="dateValue"
+    @change="bindChange">
+    <picker-view-column>
+      <view class="item" v-for="(item, index) in years" :key="index">{{ item }}年</view>
+    </picker-view-column>
+    <picker-view-column>
+      <view class="item" v-for="(item, index) in months" :key="index">{{ item }}月</view>
+    </picker-view-column>
+  </picker-view> -->
 </template>
 
 <style lang="scss">
@@ -316,9 +338,19 @@ page {
   background-color: #f7f7f8;
 }
 
+.picker-view {
+  width: 750rpx;
+  height: 600rpx;
+}
+
 .viewport {
   height: 100%;
   background: linear-gradient(90deg, rgba(255, 112, 64, 1) 0%, rgba(255, 80, 64, 1) 100%);
+
+  .my-picker-view {
+    width: 100%;
+    height: 400rpx;
+  }
 
   .container {
     height: 100%;

@@ -50,6 +50,12 @@ const getCompleteOrderDetail = async (orderId: string) => {
 onMounted(() => {
   getCompleteOrderDetail(props.currentCompleteOrder.orderId)
 })
+const imgTap = (url: string) => {
+  uni.previewImage({
+    current: url,
+    urls: completeOrderDetail.value.orderInfo.signInImages,
+  })
+}
 </script>
 
 <template>
@@ -97,6 +103,7 @@ onMounted(() => {
             :key="item"
             :src="item"
             class="img"
+            @tap="() => imgTap(item)"
           />
         </view>
       </view>
