@@ -281,22 +281,33 @@ const addShoppingCart = async (data: CartItem & RecommendItem, num: number, type
     }
   } else {
     if (num === 0) {
-      const res = await removeShoppingCart(currentCartId.value || data.cartId)
-      if (res.code === '1') {
-        data.cartGoodsNum = 0
-        if (res.result.shoppingCartNum !== 0) {
-          uni.setTabBarBadge({
-            //显示数字
-            index: 3, //tabbar下标
-            text: `${res.result.shoppingCartNum}`, //数字
-          })
-        } else {
-          uni.removeTabBarBadge({
-            //显示数字
-            index: 3, //tabbar下标
-          })
-        }
-      }
+      uni.showModal({
+        content: '是否删除',
+        success: async (res) => {
+          if (res.confirm) {
+            // 后端删除单品
+            const res = await removeShoppingCart(currentCartId.value || data.id || data.cartId)
+            getMemberCartData()
+            recommendPageParams.page = 1
+            recommendFinish.value = false
+            recommendList.value = []
+            getRecommendData()
+            if (res.result.shoppingCartNum !== 0) {
+              uni.setTabBarBadge({
+                //显示数字
+                index: 3, //tabbar下标
+                text: `${res.result.shoppingCartNum}`, //数字
+              })
+            } else {
+              uni.removeTabBarBadge({
+                //显示数字
+                index: 3, //tabbar下标
+              })
+            }
+          }
+        },
+      })
+      return
     } else {
       const res = await useUpdateShoppingCart(
         {
@@ -397,9 +408,9 @@ const goToDetail = (data: RecommendItem) => {
           <view class="text">免运费</view>
         </view>
         <!-- 滑动操作分区 -->
-        <uni-swipe-action>
+        <view>
           <!-- 滑动操作项 -->
-          <uni-swipe-action-item v-for="item in cartList" :key="item.id" class="cart-swipe">
+          <view v-for="item in cartList" :key="item.id" class="cart-swipe">
             <!-- 商品信息 -->
             <view class="goods">
               <!-- 选中状态 -->
@@ -416,7 +427,11 @@ const goToDetail = (data: RecommendItem) => {
               >
                 <image mode="aspectFill" class="picture" :src="item.images[0]"></image>
                 <view class="meta">
-                  <view class="name ellipsis">{{ item.name }}</view>
+                  <view class="top">
+                    <view class="name ellipsis">{{ item.name }}</view>
+                    <view class="delete" @tap.stop="($event) => onDeleteCart(item.id)">删除</view>
+                  </view>
+
                   <!-- <view class="attrsText ellipsis">{{ item.attrsText }}</view> -->
                   <view class="price"
                     >{{ item.priceHide === '1' ? '-' : item.unit_price }}/{{ item.units }}</view
@@ -426,7 +441,7 @@ const goToDetail = (data: RecommendItem) => {
               <!-- 商品数量 -->
               <uni-number-box
                 class="number-box"
-                :min="1"
+                :min="0"
                 :value="item.num"
                 @change="($event) => addShoppingCart(item, $event, '')"
               />
@@ -440,15 +455,15 @@ const goToDetail = (data: RecommendItem) => {
               ></uni-easyinput>
             </view>
             <!-- 右侧删除按钮 -->
-            <template #right>
+            <!-- <template #right>
               <view class="cart-swipe-right">
                 <button @tap="($event) => onDeleteCart(item.id)" class="button delete-button">
                   删除
                 </button>
               </view>
-            </template>
-          </uni-swipe-action-item>
-        </uni-swipe-action>
+            </template> -->
+          </view>
+        </view>
       </view>
       <!-- 购物车空状态 -->
       <view class="cart-blank" v-else>
@@ -706,6 +721,21 @@ const goToDetail = (data: RecommendItem) => {
       display: flex;
       flex-direction: column;
       margin-left: 20rpx;
+
+      .top {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+
+        .name {
+          width: 300rpx;
+        }
+
+        .delete {
+          font-size: 26rpx;
+          color: #ff5040;
+        }
+      }
     }
 
     .name {

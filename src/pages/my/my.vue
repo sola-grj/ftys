@@ -608,8 +608,8 @@ page {
 
 /* 用户信息 */
 .profile {
-  height: 200rpx;
-  margin-top: 20rpx;
+  // height: 200rpx;
+  margin: 20rpx 0;
   position: relative;
   display: flex;
   align-items: center;
