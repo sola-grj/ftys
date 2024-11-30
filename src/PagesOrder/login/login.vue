@@ -6,15 +6,34 @@ import {
   userLoginAPI,
   verifyCodeLoginAPI,
 } from '@/services/login'
-import { wxLoginAPI } from '@/services/my'
+import { preLoginAPI, wxLoginAPI } from '@/services/my'
 import { useMemberStore } from '@/stores'
 import type { LoginResult } from '@/types/member'
+import type { PreLoginRes } from '@/types/my'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref, computed } from 'vue'
 
+// 弹出层组件
+const typepopup = ref<UniHelper.UniPopupInstance>()
+const typeMap = {
+  1: '业务员',
+  2: '司机',
+  3: '生鲜',
+  4: '干货',
+  5: '生鲜&干货',
+}
+const currentUserType = ref<number>()
+const current = ref(0)
 const phone = ref('')
 const pwd = ref('')
 const verifyCode = ref('')
+const userTypes = ref<
+  {
+    typeId: number
+    userId: number
+    username: string
+  }[]
+>([])
 
 // 获取验证码按钮的点击状态
 const countDown = ref(60)
@@ -84,7 +103,18 @@ const loginSuccess = (profile: LoginResult) => {
     uni.navigateBack()
   }, 500)
 }
-
+const radioChange = (evt) => {
+  currentUserType.value = evt.detail.value
+}
+const chooseUserRole = () => {
+  if (currentLoginIsWx.value) {
+    wxLogin()
+  } else {
+    goToLogin()
+  }
+  //  @ts-ignore
+  typepopup!.value?.close()
+}
 const goToLogin = async () => {
   if (phone.value.length !== 11) {
     uni.showToast({ icon: 'error', title: '手机号有误！' })
@@ -92,9 +122,17 @@ const goToLogin = async () => {
   }
   let res
   if (activeIndex.value === 0) {
-    res = await userLoginAPI({ account: phone.value, password: pwd.value })
+    res = await userLoginAPI({
+      account: phone.value,
+      password: pwd.value,
+      typeId: currentUserType.value as number,
+    })
   } else if (activeIndex.value === 1) {
-    res = await verifyCodeLoginAPI({ mobile: phone.value, captcha: verifyCode.value })
+    res = await verifyCodeLoginAPI({
+      mobile: phone.value,
+      captcha: verifyCode.value,
+      typeId: currentUserType.value as number,
+    })
   }
   // 保存会员信息
   const memberStore = useMemberStore()
@@ -118,6 +156,58 @@ const goToLogin = async () => {
     }, 500)
   } else {
     uni.showToast({ icon: 'error', title: res?.msg })
+  }
+}
+const currentLoginIsWx = ref(false)
+const preLogin = async (type?: string) => {
+  if (type === 'wx') {
+    currentLoginIsWx.value = true
+    uni.login({
+      provider: 'weixin', //使用微信登录
+      success: async function (loginRes) {
+        const preRes = await preLoginAPI({
+          loginType: 'wx',
+          mobile: phone.value,
+          code: loginRes.code,
+        })
+        if (preRes.result.userList.length === 0) {
+          wxLogin()
+        } else {
+          userTypes.value = preRes.result.userList
+          typepopup.value!.open?.('top')
+          currentUserType.value = userTypes.value[0].typeId
+        }
+      },
+      fail: function (e) {
+        console.log('e===', e)
+      },
+    })
+  } else {
+    if (activeIndex.value === 0) {
+      const preRes = await preLoginAPI({
+        loginType: 'password',
+        mobile: phone.value,
+      })
+      if (preRes.result.userList.length === 0) {
+        goToLogin()
+      } else {
+        userTypes.value = preRes.result.userList
+        typepopup.value!.open?.('top')
+        currentUserType.value = userTypes.value[0].typeId
+      }
+    } else if (activeIndex.value === 1) {
+      const preRes = await preLoginAPI({
+        loginType: 'mobile',
+        mobile: phone.value,
+      })
+      if (preRes.result.userList.length === 0) {
+        goToLogin()
+      } else {
+        userTypes.value = preRes.result.userList
+        typepopup.value!.open?.('top')
+        currentUserType.value = userTypes.value[0].typeId
+      }
+    }
   }
 }
 const goToRegister = () => {
@@ -150,7 +240,7 @@ const wxLogin = () => {
   uni.login({
     provider: 'weixin', //使用微信登录
     success: async function (loginRes) {
-      const res = await wxLoginAPI({ code: loginRes.code })
+      const res = await wxLoginAPI({ code: loginRes.code, typeId: currentUserType.value })
       if (res.code === '0') {
         uni.showToast({ icon: 'none', title: res.msg })
       } else {
@@ -243,7 +333,7 @@ const wxLogin = () => {
       <view>
         <button
           :disabled="!disabled"
-          @tap="goToLogin"
+          @tap="preLogin"
           class="button phone"
           :class="!disabled ? 'disabled' : ''"
         >
@@ -261,16 +351,74 @@ const wxLogin = () => {
         </view>
         <view class="options">
           <!-- 通用模拟登录 -->
-          <view class="wechat-login" @tap="wxLogin" />
+          <view class="wechat-login" @tap="() => preLogin('wx')" />
         </view>
       </view>
     </view>
   </view>
+  <uni-popup ref="typepopup" background-color="#fff">
+    <view class="customer-popup-content">
+      <view class="title">请选择要登录的用户角色</view>
+      <radio-group @change="radioChange">
+        <label
+          class="uni-list-cell uni-list-cell-pd"
+          v-for="(item, index) in userTypes"
+          :key="item.typeId"
+        >
+          <view>{{ typeMap[item.typeId] }}</view>
+          <view>
+            <radio :value="item.typeId" :checked="index === current" />
+          </view>
+        </label>
+      </radio-group>
+      <button class="confirm" @tap="chooseUserRole">确定</button>
+    </view>
+  </uni-popup>
 </template>
 
 <style lang="scss">
 page {
   height: 100%;
+}
+
+.customer-popup-content {
+  min-height: 500rpx;
+  padding: 30rpx;
+  display: flex;
+  flex-direction: column;
+
+  .title {
+    text-align: center;
+  }
+
+  radio-group {
+    // height: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+
+    .uni-list-cell {
+      display: flex;
+      height: 100rpx;
+      align-items: center;
+      padding: 0 20rpx;
+
+      view:first-child {
+        margin-right: 40rpx;
+      }
+    }
+
+    .checked {
+      background-color: #f2f4f7;
+    }
+  }
+
+  .confirm {
+    width: 60%;
+    background-color: #ff5040;
+    color: #fff;
+  }
 }
 
 .viewport {

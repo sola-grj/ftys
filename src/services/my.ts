@@ -5,6 +5,7 @@ import type {
   MySuggestItem,
   MySuggestResult,
   OrderStatusResult,
+  PreLoginRes,
 } from '@/types/my'
 import { http } from '@/utils/http'
 
@@ -413,7 +414,7 @@ export const getChannelOrderListAPI = (data: {
  * 微信登录
  * @param data 请求参数
  */
-export const wxLoginAPI = (data: { code: string }) => {
+export const wxLoginAPI = (data: { code: string; typeId?: number }) => {
   return http<LoginResult>({
     method: 'POST',
     url: '/user/wxLogin',
@@ -643,5 +644,17 @@ export const closePaySwitchAPI = () => {
   return http({
     method: 'POST',
     url: '/user/closePaySwitch',
+  })
+}
+
+/**
+ * 预登陆
+ * @param data 请求参数
+ */
+export const preLoginAPI = (data: { loginType: string; mobile: string; code?: string }) => {
+  return http<PreLoginRes>({
+    method: 'POST',
+    url: '/user/loginPre',
+    data,
   })
 }

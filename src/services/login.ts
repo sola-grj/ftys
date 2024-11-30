@@ -13,12 +13,14 @@ type LoginParams = {
 type UserLoginParams = {
   account: string
   password: string
+  typeId?: number
 }
 
 // 短信验证码登录
 type verigyCodeLoginParams = {
   mobile: string
   captcha: string
+  typeId?: number
 }
 
 // 短信验证码参数

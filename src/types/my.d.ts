@@ -74,3 +74,11 @@ export type CustomerBillResult = {
   page: string
   list: CustomerBillItem[]
 }
+
+export type PreLoginRes = {
+  userList: {
+    typeId: number
+    userId: number
+    username: string
+  }[]
+}
