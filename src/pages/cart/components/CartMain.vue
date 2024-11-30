@@ -304,6 +304,8 @@ const addShoppingCart = async (data: CartItem & RecommendItem, num: number, type
                 index: 3, //tabbar下标
               })
             }
+          } else if (res.cancel) {
+            data.num = 1
           }
         },
       })
@@ -442,7 +444,7 @@ const goToDetail = (data: RecommendItem) => {
               <uni-number-box
                 class="number-box"
                 :min="0"
-                :value="item.num"
+                v-model="item.num"
                 @change="($event) => addShoppingCart(item, $event, '')"
               />
             </view>
