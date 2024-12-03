@@ -134,7 +134,7 @@ const SalesmanToolTypes = [
 let showToolTypes: any = []
 if (type_id?.toString() === '3' || type_id?.toString() === '4' || type_id?.toString() === '5') {
   showToolTypes = CustomerToolTypes
-} else if (type_id?.toString() === '1') {
+} else if (type_id?.toString() === '1' || type_id?.toString() === '99') {
   showToolTypes = SalesmanToolTypes
 } else {
   showToolTypes = []
@@ -460,7 +460,7 @@ onLoad(() => {
         </view>
       </view>
       <!-- 业务员图表 -->
-      <view v-if="type_id?.toString() === '1'" class="charts-box">
+      <view v-if="type_id?.toString() === '1' || type_id?.toString() === '99'" class="charts-box">
         <view class="title" @tap="($event) => onJump({ name: '业绩查看' })">
           <text class="left">30天业绩变化（发货）</text>
           <text class="right">更多</text>
@@ -906,7 +906,7 @@ page {
 }
 
 .charts-box {
-  height: 300px;
+  min-height: 300px;
   position: relative;
   z-index: 99;
   padding: 30rpx;

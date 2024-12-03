@@ -111,7 +111,7 @@ export const http = <T>(options: UniApp.RequestOptions) => {
           // 3.3 其他错误 根据后端错误提示轻提示
           uni.showToast({
             icon: 'none',
-            title: (res.data as Data<T>).msg || '请求错误',
+            title: (res.data as Data<T>).msg || res.data || '请求错误',
           })
           reject(res)
         }

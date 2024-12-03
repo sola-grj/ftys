@@ -21,6 +21,7 @@ const typeMap = {
   3: '生鲜',
   4: '干货',
   5: '生鲜&干货',
+  99: '集团',
 }
 const currentUserType = ref<number>()
 const current = ref(0)
