@@ -28,13 +28,20 @@ const onSettlementChange = (e: any) => {
   // @ts-ignore
   settlementStatus.value = settlement.value[0][e.detail.value[0]]
 }
+
+const onCustomTypeChange = (e: any) => {
+  // @ts-ignore
+  customType.value = customTypes.value[0][e.detail.value[0]]
+}
 const startTime = ref('')
 const endTime = ref('')
 const reconciliationStatus = ref('全部')
 const settlementStatus = ref('全部')
+const customType = ref('全部')
 
 const reconciliation = ref([['全部', '未对账', '已对账']])
 const settlement = ref([['全部', '未结算', '已结算']])
+const customTypes = ref([['生鲜', '干货']])
 const start = new Date(new Date().setDate(new Date().getDate() - 45))
   .toLocaleDateString()
   .replaceAll('/', '-')
@@ -73,10 +80,21 @@ const onSave = async () => {
     sStatus = '1'
   }
 
+  let type = ''
+  if (customType.value === '全部') {
+    type = ''
+  } else if (customType.value === '生鲜') {
+    type = 'S'
+  } else {
+    type = 'H'
+  }
+
   uni.downloadFile({
     url: `https://ksshop.snooowball.cn/api/capital_export/exportBill?shippedStartDate=${
       startTime.value || ''
-    }&shippedEndDate=${endTime.value || ''}&checking_status=${rStatus}&settle_status=${sStatus}`, //仅为示例，并非真实的资源
+    }&shippedEndDate=${
+      endTime.value || ''
+    }&checking_status=${rStatus}&settle_status=${sStatus}&source=${type}`, //仅为示例，并非真实的资源
     success: (res) => {
       if (res.statusCode === 200) {
         uni.showToast({ icon: 'success', title: '导出对账单成功' })
@@ -132,6 +150,14 @@ const goback = () => {
           <view class="value">
             <picker mode="multiSelector" :range="settlement" @change="onSettlementChange">{{
               settlementStatus
+            }}</picker>
+          </view>
+        </uni-forms-item>
+        <uni-forms-item class="form-item" name="content">
+          <text class="label">*类型</text>
+          <view class="value">
+            <picker mode="multiSelector" :range="customTypes" @change="onCustomTypeChange">{{
+              customType
             }}</picker>
           </view>
         </uni-forms-item>
